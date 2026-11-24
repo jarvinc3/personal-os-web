@@ -14,7 +14,12 @@ import {
   groupHelpTerms,
   hasHelpSearch,
 } from "@/src/modules/help/lib/help-search"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import {
   Empty,
@@ -67,15 +72,21 @@ export function GlossaryScreen() {
   return (
     <HelpPage>
       <div className="sticky top-0 z-10 flex flex-col gap-2 bg-background/95 py-2 backdrop-blur">
-        <FormTextField
-          icon={SearchIcon}
-          type="search"
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar"
-          ariaLabel="Buscar en el glosario"
-          autoComplete="off"
-        />
+        <Field className="gap-0.5">
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar"
+              aria-label="Buscar en el glosario"
+              autoComplete="off"
+            />
+          </InputGroup>
+        </Field>
         <p className="px-1 text-xs text-muted-foreground" aria-live="polite">
           {searching
             ? `${termCountLabel(filteredTerms.length)} para «${search.trim()}»`

@@ -11,7 +11,12 @@ import {
   transferRateLabel,
 } from "@/src/modules/finance/transactions/lib/transfer-fx"
 import type { TransferFormValues } from "@/src/modules/finance/transactions/lib/transfer-form"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { ArrowUpDownIcon } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
 
@@ -44,22 +49,40 @@ export function TransferFxSection({
         control={control}
         name="exchangeRate"
         render={({ field }) => (
-          <FormTextField
-            icon={ArrowUpDownIcon}
-            label="Tasa aplicada"
-            value={field.value}
-            onChange={(next) => {
-              onRateChange()
-              field.onChange(sanitizeAmountInput(next))
-            }}
-            onBlur={field.onBlur}
-            error={errors.exchangeRate?.message}
-            placeholder={
-              marketRate === null
-                ? "Tasa del día"
-                : formatTransferRateInput(marketRate)
-            }
-          />
+          <Field
+            data-invalid={errors.exchangeRate ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor="transfer-rate"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Tasa aplicada
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <ArrowUpDownIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="transfer-rate"
+                value={field.value}
+                onChange={(event) => {
+                  onRateChange()
+                  field.onChange(sanitizeAmountInput(event.target.value))
+                }}
+                onBlur={field.onBlur}
+                placeholder={
+                  marketRate === null
+                    ? "Tasa del día"
+                    : formatTransferRateInput(marketRate)
+                }
+                aria-invalid={errors.exchangeRate ? true : undefined}
+              />
+            </InputGroup>
+            {errors.exchangeRate?.message ? (
+              <FieldError>{errors.exchangeRate.message}</FieldError>
+            ) : null}
+          </Field>
         )}
       />
       <Controller

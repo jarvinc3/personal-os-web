@@ -23,12 +23,16 @@ import {
 } from "@/src/modules/intelligence/review-labels"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
@@ -232,20 +236,46 @@ function ReviewFiltersSheetForm({
         </SummarySection>
 
         <SummarySection title="Correo" icon={MailIcon}>
-          <FormTextField
-            label="Remitente"
-            icon={MailIcon}
-            autoComplete="off"
-            value={draft.sender}
-            onChange={(sender) => patchDraft({ sender })}
-          />
-          <FormTextField
-            label="Asunto"
-            icon={MailIcon}
-            autoComplete="off"
-            value={draft.subject}
-            onChange={(subject) => patchDraft({ subject })}
-          />
+          <Field className="gap-0.5">
+            <FieldLabel
+              htmlFor="review-sender"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Remitente
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <MailIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="review-sender"
+                autoComplete="off"
+                value={draft.sender}
+                onChange={(event) => patchDraft({ sender: event.target.value })}
+              />
+            </InputGroup>
+          </Field>
+          <Field className="gap-0.5">
+            <FieldLabel
+              htmlFor="review-subject"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Asunto
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <MailIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="review-subject"
+                autoComplete="off"
+                value={draft.subject}
+                onChange={(event) =>
+                  patchDraft({ subject: event.target.value })
+                }
+              />
+            </InputGroup>
+          </Field>
         </SummarySection>
 
         <SummarySection title="Fecha del correo" icon={CalendarDaysIcon}>
@@ -285,28 +315,64 @@ function ReviewFiltersSheetForm({
             options={ROUTE_OPTIONS}
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            <FormTextField
-              label="Confianza mínima (%)"
-              icon={SlidersHorizontalIcon}
-              type="number"
-              min={0}
-              max={100}
-              step={0.1}
-              value={confidenceMin}
-              onChange={setConfidenceMin}
-              error={confidenceError ?? undefined}
-            />
-            <FormTextField
-              label="Confianza máxima (%)"
-              icon={SlidersHorizontalIcon}
-              type="number"
-              min={0}
-              max={100}
-              step={0.1}
-              value={confidenceMax}
-              onChange={setConfidenceMax}
-              error={confidenceError ?? undefined}
-            />
+            <Field
+              data-invalid={confidenceError ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="review-confidence-min"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Confianza mínima (%)
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <SlidersHorizontalIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="review-confidence-min"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={confidenceMin}
+                  onChange={(event) => setConfidenceMin(event.target.value)}
+                  aria-invalid={confidenceError ? true : undefined}
+                />
+              </InputGroup>
+              {confidenceError ? (
+                <FieldError>{confidenceError}</FieldError>
+              ) : null}
+            </Field>
+            <Field
+              data-invalid={confidenceError ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="review-confidence-max"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Confianza máxima (%)
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <SlidersHorizontalIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="review-confidence-max"
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.1}
+                  value={confidenceMax}
+                  onChange={(event) => setConfidenceMax(event.target.value)}
+                  aria-invalid={confidenceError ? true : undefined}
+                />
+              </InputGroup>
+              {confidenceError ? (
+                <FieldError>{confidenceError}</FieldError>
+              ) : null}
+            </Field>
           </div>
           <SwitchFieldRow
             label="Solo inciertos"

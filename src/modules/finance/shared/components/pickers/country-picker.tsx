@@ -12,7 +12,12 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon, ChevronDownIcon, GlobeIcon, SearchIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -85,16 +90,21 @@ export function CountryPickerSheet({
   return (
     <BottomSheet open={open} onOpenChange={onOpenChange} title="País">
       <div className="sticky top-0 z-10 shrink-0 bg-background">
-        <FormTextField
-          icon={SearchIcon}
-          type="search"
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar país"
-          ariaLabel="Buscar país"
-          autoComplete="off"
-          className="min-h-10"
-        />
+        <Field className="gap-0.5">
+          <InputGroup className="h-10 min-h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar país"
+              aria-label="Buscar país"
+              autoComplete="off"
+            />
+          </InputGroup>
+        </Field>
       </div>
       {visible.length === 0 ? (
         <Empty className={EMPTY_COMPACT_CLASS_NAME}>

@@ -38,7 +38,17 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -245,18 +255,38 @@ function GmailConnectSheetForm({
         </SummarySection>
 
         <SummarySection title="Remitente" icon={GlobeIcon}>
-          <FormTextField
-            label="Solo este dominio"
-            value={sender}
-            onChange={setSender}
-            onBlur={() => setSenderTouched(true)}
-            disabled={pending}
-            maxLength={SENDER_FILTER_MAX_LENGTH}
-            error={senderError}
-            placeholder="bhd.com.do"
-            description="Limita la importación a ese dominio y sus subdominios. Déjalo vacío para importar de todos."
-            icon={GlobeIcon}
-          />
+          <Field
+            data-invalid={senderError ? true : undefined}
+            data-disabled={pending ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor="gmail-sender-domain"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Solo este dominio
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <GlobeIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="gmail-sender-domain"
+                value={sender}
+                onChange={(event) => setSender(event.target.value)}
+                onBlur={() => setSenderTouched(true)}
+                disabled={pending}
+                maxLength={SENDER_FILTER_MAX_LENGTH}
+                placeholder="bhd.com.do"
+                aria-invalid={senderError ? true : undefined}
+              />
+            </InputGroup>
+            <FieldDescription>
+              Limita la importación a ese dominio y sus subdominios. Déjalo
+              vacío para importar de todos.
+            </FieldDescription>
+            {senderError ? <FieldError>{senderError}</FieldError> : null}
+          </Field>
         </SummarySection>
       </BottomSheet>
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>

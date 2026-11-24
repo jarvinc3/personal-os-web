@@ -39,7 +39,12 @@ import {
 } from "@/src/modules/finance/transactions"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   CalendarIcon,
@@ -221,24 +226,64 @@ export function CardStatementSheet({
           <div className="flex flex-col gap-5">
             {editing ? (
               <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3">
-                <FormTextField
-                  label="Mínimo"
-                  icon={CoinsIcon}
-                  value={minimumPayment}
-                  onChange={setMinimumPayment}
-                />
-                <FormTextField
-                  label="Balance al corte"
-                  icon={WalletIcon}
-                  value={closingBalance}
-                  onChange={setClosingBalance}
-                />
-                <FormTextField
-                  label="Vence (AAAA-MM-DD)"
-                  icon={CalendarIcon}
-                  value={dueDate}
-                  onChange={setDueDate}
-                />
+                <Field className="gap-0.5">
+                  <FieldLabel
+                    htmlFor="statement-minimum"
+                    className="pl-2 text-sm text-muted-foreground"
+                  >
+                    Mínimo
+                  </FieldLabel>
+                  <InputGroup className="h-10 overflow-hidden px-1">
+                    <InputGroupAddon align="inline-start">
+                      <CoinsIcon className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="statement-minimum"
+                      value={minimumPayment}
+                      onChange={(event) =>
+                        setMinimumPayment(event.target.value)
+                      }
+                    />
+                  </InputGroup>
+                </Field>
+                <Field className="gap-0.5">
+                  <FieldLabel
+                    htmlFor="statement-closing-balance"
+                    className="pl-2 text-sm text-muted-foreground"
+                  >
+                    Balance al corte
+                  </FieldLabel>
+                  <InputGroup className="h-10 overflow-hidden px-1">
+                    <InputGroupAddon align="inline-start">
+                      <WalletIcon className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="statement-closing-balance"
+                      value={closingBalance}
+                      onChange={(event) =>
+                        setClosingBalance(event.target.value)
+                      }
+                    />
+                  </InputGroup>
+                </Field>
+                <Field className="gap-0.5">
+                  <FieldLabel
+                    htmlFor="statement-due-date"
+                    className="pl-2 text-sm text-muted-foreground"
+                  >
+                    Vence (AAAA-MM-DD)
+                  </FieldLabel>
+                  <InputGroup className="h-10 overflow-hidden px-1">
+                    <InputGroupAddon align="inline-start">
+                      <CalendarIcon className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="statement-due-date"
+                      value={dueDate}
+                      onChange={(event) => setDueDate(event.target.value)}
+                    />
+                  </InputGroup>
+                </Field>
                 <div className="flex gap-2">
                   <Button
                     type="button"

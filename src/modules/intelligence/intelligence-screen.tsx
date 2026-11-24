@@ -51,7 +51,12 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { SelectField } from "@/src/shared/components/forms/select-field"
 import {
   ALL_MESSAGE_STATUSES,
@@ -719,14 +724,22 @@ function IntelligenceScreenBody() {
                       ? null
                       : ` · ${reviewRequiredCount} en revisión`}
                   </p>
-                  <FormTextField
-                    value={messageQuery}
-                    onChange={setMessageQuery}
-                    placeholder="Buscar por asunto o remitente"
-                    ariaLabel="Buscar correos"
-                    icon={Search}
-                    maxLength={120}
-                  />
+                  <Field className="gap-0.5">
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <Search className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        value={messageQuery}
+                        onChange={(event) =>
+                          setMessageQuery(event.target.value)
+                        }
+                        placeholder="Buscar por asunto o remitente"
+                        aria-label="Buscar correos"
+                        maxLength={120}
+                      />
+                    </InputGroup>
+                  </Field>
                   <SelectField
                     label="Estado del correo"
                     value={messageStatus}

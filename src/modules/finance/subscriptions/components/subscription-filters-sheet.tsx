@@ -2,6 +2,11 @@
 
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
+import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
@@ -29,7 +34,6 @@ import { SubscriptionSortSheet } from "@/src/modules/finance/subscriptions/compo
 import type { FinanceSubscriptionStatus } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   SettingsRow,
   SettingsSection,
@@ -141,14 +145,28 @@ export function SubscriptionFiltersSheet({
           ),
         }}
       >
-        <FormTextField
-          label="Buscar"
-          icon={SearchIcon}
-          type="search"
-          value={filters.q}
-          onChange={(value) => onChange({ ...filters, q: value })}
-          placeholder="Buscar suscripción"
-        />
+        <Field className="gap-0.5">
+          <FieldLabel
+            htmlFor="subscription-search"
+            className="pl-2 text-sm text-muted-foreground"
+          >
+            Buscar
+          </FieldLabel>
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="subscription-search"
+              type="search"
+              value={filters.q}
+              onChange={(event) =>
+                onChange({ ...filters, q: event.target.value })
+              }
+              placeholder="Buscar suscripción"
+            />
+          </InputGroup>
+        </Field>
         <Field className="gap-1">
           <FieldLabel>Estado</FieldLabel>
           <ToggleGroup

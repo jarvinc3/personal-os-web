@@ -6,11 +6,16 @@ import { useUploadStatementImport } from "@/src/modules/finance/shared/hooks/use
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Button } from "@/src/shared/components/ui/button"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { ArrowRightIcon, FileUpIcon } from "lucide-react"
+import { ArrowRightIcon, FileUpIcon, KeyRound } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRef, useState } from "react"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
@@ -121,13 +126,26 @@ export function StatementImportButton({
           ),
         }}
       >
-        <FormTextField
-          label="Clave del PDF"
-          type="password"
-          value={password}
-          onChange={setPassword}
-          autoComplete="off"
-        />
+        <Field className="gap-0.5">
+          <FieldLabel
+            htmlFor="statement-pdf-password"
+            className="pl-2 text-sm text-muted-foreground"
+          >
+            Clave del PDF
+          </FieldLabel>
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <KeyRound className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="statement-pdf-password"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="off"
+            />
+          </InputGroup>
+        </Field>
       </BottomSheet>
     </>
   )

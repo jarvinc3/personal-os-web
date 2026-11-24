@@ -11,8 +11,13 @@ import {
 import type { UpdateProfilePayload } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -119,15 +124,29 @@ export function EditAccountSheet({
           control={control}
           name="fullName"
           render={({ field }) => (
-            <FormTextField
-              icon={UserIcon}
-              autoComplete="name"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              disabled={updateProfileMutation.isPending}
-              error={errors.fullName?.message}
-            />
+            <Field
+              data-invalid={errors.fullName ? true : undefined}
+              data-disabled={updateProfileMutation.isPending ? true : undefined}
+              className="gap-0.5"
+            >
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <UserIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  autoComplete="name"
+                  aria-label="Nombre completo"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  disabled={updateProfileMutation.isPending}
+                  aria-invalid={errors.fullName ? true : undefined}
+                />
+              </InputGroup>
+              {errors.fullName?.message ? (
+                <FieldError>{errors.fullName.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
         <div className="rounded-2xl bg-muted px-4 py-3">

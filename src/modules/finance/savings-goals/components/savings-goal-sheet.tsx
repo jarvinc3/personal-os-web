@@ -35,9 +35,13 @@ import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/enti
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -216,15 +220,33 @@ export function SavingsGoalSheet({
             control={control}
             name="name"
             render={({ field }) => (
-              <FormTextField
-                icon={TargetIcon}
-                label="Nombre"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-                placeholder=""
-              />
+              <Field
+                data-invalid={errors.name ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="goal-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <TargetIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="goal-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder=""
+                    aria-invalid={errors.name ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.name?.message ? (
+                  <FieldError>{errors.name.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
@@ -329,14 +351,32 @@ export function SavingsGoalSheet({
             control={control}
             name="description"
             render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Descripción"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.description?.message}
-              />
+              <Field
+                data-invalid={errors.description ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="goal-description"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Descripción
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <NotebookPenIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="goal-description"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.description ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.description?.message ? (
+                  <FieldError>{errors.description.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>

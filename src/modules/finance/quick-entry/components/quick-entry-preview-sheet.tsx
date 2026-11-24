@@ -5,7 +5,6 @@ import { Spinner } from "@/src/shared/components/ui/spinner"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { useRouter } from "next/navigation"
@@ -13,6 +12,11 @@ import { useState } from "react"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -215,18 +219,30 @@ export function QuickEntryPreviewSheet({
 
           <FinanceDateField label="Fecha" value={date} onChange={setDate} />
 
-          <FormTextField
-            value={merchant}
-            onChange={setMerchant}
-            ariaLabel="Comercio"
-            icon={StoreIcon}
-          />
-          <FormTextField
-            value={description}
-            onChange={setDescription}
-            ariaLabel="Descripción"
-            icon={AlignLeftIcon}
-          />
+          <Field className="gap-0.5">
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <StoreIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={merchant}
+                onChange={(event) => setMerchant(event.target.value)}
+                aria-label="Comercio"
+              />
+            </InputGroup>
+          </Field>
+          <Field className="gap-0.5">
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <AlignLeftIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                aria-label="Descripción"
+              />
+            </InputGroup>
+          </Field>
 
           {canSave ? (
             <Button

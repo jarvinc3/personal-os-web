@@ -59,9 +59,13 @@ import type { FinanceSubscription } from "@/src/modules/finance/shared/types/ent
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -230,14 +234,32 @@ export function SubscriptionSheet({
             control={control}
             name="name"
             render={({ field }) => (
-              <FormTextField
-                label="Nombre"
-                icon={TagIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-              />
+              <Field
+                data-invalid={errors.name ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="subscription-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <TagIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="subscription-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.name ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.name?.message ? (
+                  <FieldError>{errors.name.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
@@ -293,13 +315,31 @@ export function SubscriptionSheet({
             control={control}
             name="billingInterval"
             render={({ field }) => (
-              <FormTextField
-                label="Cada cuántos ciclos"
-                icon={RepeatIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.billingInterval?.message}
-              />
+              <Field
+                data-invalid={errors.billingInterval ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="subscription-interval"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Cada cuántos ciclos
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <RepeatIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="subscription-interval"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    aria-invalid={errors.billingInterval ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.billingInterval?.message ? (
+                  <FieldError>{errors.billingInterval.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
@@ -364,26 +404,62 @@ export function SubscriptionSheet({
             control={control}
             name="manageUrl"
             render={({ field }) => (
-              <FormTextField
-                label="Enlace de gestión"
-                icon={LinkIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.manageUrl?.message}
-              />
+              <Field
+                data-invalid={errors.manageUrl ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="subscription-manage-url"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Enlace de gestión
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <LinkIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="subscription-manage-url"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    aria-invalid={errors.manageUrl ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.manageUrl?.message ? (
+                  <FieldError>{errors.manageUrl.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
             control={control}
             name="notes"
             render={({ field }) => (
-              <FormTextField
-                label="Notas"
-                icon={StickyNoteIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.notes?.message}
-              />
+              <Field
+                data-invalid={errors.notes ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="subscription-notes"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Notas
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <StickyNoteIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="subscription-notes"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    aria-invalid={errors.notes ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.notes?.message ? (
+                  <FieldError>{errors.notes.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>

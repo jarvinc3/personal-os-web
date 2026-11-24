@@ -15,10 +15,16 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { KeyRound, ShieldCheck, Trash2, XIcon } from "lucide-react"
+import { useId } from "react"
 
 type WipeDataConfirmDialogProps = {
   open: boolean
@@ -56,6 +62,8 @@ export function WipeDataConfirmDialog({
   password,
   onConfirm,
 }: WipeDataConfirmDialogProps) {
+  const passwordId = useId()
+
   return (
     <AlertDialog
       open={open}
@@ -89,17 +97,37 @@ export function WipeDataConfirmDialog({
           ))}
         </ul>
         <SummarySection title="Confirma tu contraseña" icon={KeyRound}>
-          <FormTextField
-            icon={KeyRound}
-            label="Contraseña"
-            type="password"
-            autoComplete="current-password"
-            value={password.password}
-            onChange={password.changePassword}
-            disabled={pending || password.isVerifying}
-            error={password.passwordError}
-            invalid={Boolean(password.passwordError)}
-          />
+          <Field
+            data-invalid={password.passwordError ? true : undefined}
+            data-disabled={pending || password.isVerifying ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor={passwordId}
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Contraseña
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <KeyRound className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id={passwordId}
+                type="password"
+                autoComplete="current-password"
+                value={password.password}
+                onChange={(event) =>
+                  password.changePassword(event.target.value)
+                }
+                disabled={pending || password.isVerifying}
+                aria-invalid={password.passwordError ? true : undefined}
+              />
+            </InputGroup>
+            {password.passwordError ? (
+              <FieldError>{password.passwordError}</FieldError>
+            ) : null}
+          </Field>
           <Button
             type="button"
             variant="outline"

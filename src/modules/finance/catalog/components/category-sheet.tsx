@@ -31,7 +31,11 @@ import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -321,16 +325,37 @@ export function CategorySheet({
                   control={control}
                   name="name"
                   render={({ field }) => (
-                    <FormTextField
-                      label="Nombre"
-                      icon={ContactRoundIcon}
-                      value={field.value}
-                      onChange={field.onChange}
-                      onBlur={field.onBlur}
-                      error={errors.name?.message}
-                      placeholder="Supermercado"
-                      disabled={isSystem}
-                    />
+                    <Field
+                      data-invalid={errors.name ? true : undefined}
+                      data-disabled={isSystem ? true : undefined}
+                      className="gap-0.5"
+                    >
+                      <FieldLabel
+                        htmlFor="category-name"
+                        className="pl-2 text-sm text-muted-foreground"
+                      >
+                        Nombre
+                      </FieldLabel>
+                      <InputGroup className="h-10 overflow-hidden px-1">
+                        <InputGroupAddon align="inline-start">
+                          <ContactRoundIcon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="category-name"
+                          value={field.value}
+                          onChange={(event) =>
+                            field.onChange(event.target.value)
+                          }
+                          onBlur={field.onBlur}
+                          placeholder="Supermercado"
+                          disabled={isSystem}
+                          aria-invalid={errors.name ? true : undefined}
+                        />
+                      </InputGroup>
+                      {errors.name?.message ? (
+                        <FieldError>{errors.name.message}</FieldError>
+                      ) : null}
+                    </Field>
                   )}
                 />
               </div>

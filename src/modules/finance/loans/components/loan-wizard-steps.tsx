@@ -49,7 +49,11 @@ import {
   type LoanWizardValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
 import type { LoanPlan } from "@/src/modules/finance/loans/lib/loan-wizard"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
 import {
@@ -162,15 +166,33 @@ export function LoanWizardWhoStep({
           control={control}
           name="lenderName"
           render={({ field }) => (
-            <FormTextField
-              icon={UserIcon}
-              label="Prestamista"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.lenderName?.message}
-              placeholder="Juan Pérez"
-            />
+            <Field
+              data-invalid={errors.lenderName ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-lender"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Prestamista
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <UserIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-lender"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder="Juan Pérez"
+                  aria-invalid={errors.lenderName ? true : undefined}
+                />
+              </InputGroup>
+              {errors.lenderName?.message ? (
+                <FieldError>{errors.lenderName.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
       ) : null}
@@ -346,15 +368,33 @@ export function LoanWizardDetailsStep({
             control={control}
             name="ratePercent"
             render={({ field }) => (
-              <FormTextField
-                icon={PercentIcon}
-                label="Tasa anual (%)"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.ratePercent?.message}
-                placeholder="14.5"
-              />
+              <Field
+                data-invalid={errors.ratePercent ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="wizard-rate"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Tasa anual (%)
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <PercentIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="wizard-rate"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="14.5"
+                    aria-invalid={errors.ratePercent ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.ratePercent?.message ? (
+                  <FieldError>{errors.ratePercent.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         ) : (
@@ -385,15 +425,33 @@ export function LoanWizardDetailsStep({
           control={control}
           name="name"
           render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Nombre (opcional)"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Carro"
-            />
+            <Field
+              data-invalid={errors.name ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-name"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Nombre (opcional)
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <NotebookPenIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-name"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder="Carro"
+                  aria-invalid={errors.name ? true : undefined}
+                />
+              </InputGroup>
+              {errors.name?.message ? (
+                <FieldError>{errors.name.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
         <Controller
@@ -601,14 +659,32 @@ export function LoanWizardReviewStep({
           control={control}
           name="notes"
           render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Notas"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.notes?.message}
-            />
+            <Field
+              data-invalid={errors.notes ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-notes"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Notas
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <NotebookPenIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-notes"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  aria-invalid={errors.notes ? true : undefined}
+                />
+              </InputGroup>
+              {errors.notes?.message ? (
+                <FieldError>{errors.notes.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
       </SummarySection>

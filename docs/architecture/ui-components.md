@@ -201,7 +201,7 @@ Viven en `src/modules/finance/shared/components/forms/`. No copiarlos a otros m�
 - Cuenta o tarjeta: `DestinationTrigger` + `DestinationPickerSheet`; institución: `InstitutionTrigger` + `InstitutionPickerSheet`; categoría: `CategoryTrigger` + `CategoryPickerSheet`; país: `CountryTrigger` + `CountryPickerSheet`. No se elige un catálogo largo en un `Select` inline.
 - Cerrar un formulario con cambios sin guardar: `useDiscardChanges` (`src/modules/finance/shared/hooks/use-discard-changes.tsx`).
 - `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`) → etiqueta y error en cualquier control con etiqueta, no solo en un formulario que envía
-- Campos de texto y select, en cualquier vista: icono líder del tipo de dato (`FormTextField` `icon`, `SelectField` `icon`). Placeholder solo como ejemplo o formato. Un catálogo largo abre hoja, no un `Select` inline. Estado binario en una fila: icono + `aria-label`, no la etiqueta cruda.
+- Campos de texto y select, en cualquier vista: icono líder del tipo de dato (`Field` + `InputGroup` con `InputGroupAddon`, `SelectField` `icon`). Placeholder solo como ejemplo o formato. Un catálogo largo abre hoja, no un `Select` inline. Estado binario en una fila: icono + `aria-label`, no la etiqueta cruda.
 
 ### Botón de registrar o guardar
 

@@ -16,7 +16,12 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import { CheckIcon, SearchIcon } from "lucide-react"
@@ -139,16 +144,21 @@ export function CurrencyPickerSheet({
     <BottomSheet open={open} onOpenChange={onOpenChange} title={title}>
       {searchable ? (
         <div className="sticky top-0 z-10 shrink-0 bg-background">
-          <FormTextField
-            icon={SearchIcon}
-            type="search"
-            value={search}
-            onChange={setSearch}
-            placeholder="Buscar por código o nombre"
-            ariaLabel="Buscar moneda"
-            autoComplete="off"
-            className="min-h-10"
-          />
+          <Field className="gap-0.5">
+            <InputGroup className="h-10 min-h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <SearchIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por código o nombre"
+                aria-label="Buscar moneda"
+                autoComplete="off"
+              />
+            </InputGroup>
+          </Field>
         </div>
       ) : null}
       {!restricted && currenciesQuery.isPending && listed.length === 0 ? (

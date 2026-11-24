@@ -50,7 +50,12 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -394,13 +399,25 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
           </div>
         ) : null}
 
-        <FormTextField
-          label="Buscar"
-          icon={SearchIcon}
-          value={mergeSearch}
-          onChange={setMergeSearch}
-          placeholder="Netflix, Uber…"
-        />
+        <Field className="gap-0.5">
+          <FieldLabel
+            htmlFor="merchant-merge-search"
+            className="pl-2 text-sm text-muted-foreground"
+          >
+            Buscar
+          </FieldLabel>
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <SearchIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              id="merchant-merge-search"
+              value={mergeSearch}
+              onChange={(event) => setMergeSearch(event.target.value)}
+              placeholder="Netflix, Uber…"
+            />
+          </InputGroup>
+        </Field>
         <div className="rounded-2xl border border-border bg-card">
           {candidates.map((candidate) => (
             <MerchantCard

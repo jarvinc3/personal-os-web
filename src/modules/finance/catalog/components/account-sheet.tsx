@@ -38,10 +38,19 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -413,15 +422,33 @@ export function AccountSheet({
             control={control}
             name="name"
             render={({ field }) => (
-              <FormTextField
-                icon={LandmarkIcon}
-                label="Nombre"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-                placeholder="Cuenta nómina"
-              />
+              <Field
+                data-invalid={errors.name ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="account-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <LandmarkIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="account-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="Cuenta nómina"
+                    aria-invalid={errors.name ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.name?.message ? (
+                  <FieldError>{errors.name.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           {!lockType ? (
@@ -480,24 +507,43 @@ export function AccountSheet({
                 control={control}
                 name="accountNumber"
                 render={({ field }) => (
-                  <FormTextField
-                    icon={HashIcon}
-                    label="Número de cuenta"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={errors.accountNumber?.message}
-                    placeholder={
-                      isEdit && account?.accountNumberLast4
-                        ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
-                        : "0123456789"
-                    }
-                    description={
-                      lastFourOnly && !isEdit
-                        ? "Basta con los últimos 4 dígitos; el número completo es opcional."
-                        : undefined
-                    }
-                  />
+                  <Field
+                    data-invalid={errors.accountNumber ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="account-number"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Número de cuenta
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <HashIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="account-number"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        placeholder={
+                          isEdit && account?.accountNumberLast4
+                            ? `Deja vacío para conservar •••• ${account.accountNumberLast4}`
+                            : "0123456789"
+                        }
+                        aria-invalid={errors.accountNumber ? true : undefined}
+                      />
+                    </InputGroup>
+                    {lastFourOnly && !isEdit ? (
+                      <FieldDescription>
+                        Basta con los últimos 4 dígitos; el número completo es
+                        opcional.
+                      </FieldDescription>
+                    ) : null}
+                    {errors.accountNumber?.message ? (
+                      <FieldError>{errors.accountNumber.message}</FieldError>
+                    ) : null}
+                  </Field>
                 )}
               />
               <Controller

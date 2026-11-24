@@ -9,7 +9,6 @@ import {
   XIcon,
 } from "lucide-react"
 
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import {
   Attachment,
@@ -69,52 +68,6 @@ import type {
 
 const DENSITIES = ["Cómoda", "Compacta", "Amplia"]
 const LABELS = ["Casa", "Trabajo", "Viaje"]
-
-function FormTextFieldDemo() {
-  const [name, setName] = useState("Comercio Ejemplo")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("clave-de-ejemplo")
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <FormTextField
-        label="Nombre"
-        value={name}
-        onChange={setName}
-        icon={StoreIcon}
-      />
-      <FormTextField
-        label="Correo"
-        value={email}
-        onChange={setEmail}
-        icon={MailIcon}
-        type="email"
-        placeholder="nombre@ejemplo.com"
-      />
-      <FormTextField
-        label="Comercio"
-        value=""
-        onChange={() => {}}
-        icon={StoreIcon}
-        error="Escribe el nombre del comercio"
-      />
-      <FormTextField
-        label="Contraseña"
-        value={password}
-        onChange={setPassword}
-        type="password"
-        revealable
-      />
-      <FormTextField
-        label="Correo verificado"
-        value="cuenta@ejemplo.com"
-        onChange={() => {}}
-        icon={MailIcon}
-        disabled
-      />
-    </div>
-  )
-}
 
 function SwitchFieldRowDemo() {
   const [notify, setNotify] = useState(true)
@@ -447,54 +400,39 @@ const [digest, setDigest] = useState(false)
         </InputGroup>
       ),
     },
-  ],
-  "form-text-field": [
     {
-      label: "Normal, error, contraseña y deshabilitado",
+      label: "Campo de dato con etiqueta y error",
       code: `
-const [name, setName] = useState("Comercio Ejemplo")
-const [email, setEmail] = useState("")
-const [password, setPassword] = useState("clave-de-ejemplo")
-
-<div className="flex w-full flex-col gap-3">
-  <FormTextField
-    label="Nombre"
-    value={name}
-    onChange={setName}
-    icon={StoreIcon}
-  />
-  <FormTextField
-    label="Correo"
-    value={email}
-    onChange={setEmail}
-    icon={MailIcon}
-    type="email"
-    placeholder="nombre@ejemplo.com"
-  />
-  <FormTextField
-    label="Comercio"
-    value=""
-    onChange={() => {}}
-    icon={StoreIcon}
-    error="Escribe el nombre del comercio"
-  />
-  <FormTextField
-    label="Contraseña"
-    value={password}
-    onChange={setPassword}
-    type="password"
-    revealable
-  />
-  <FormTextField
-    label="Correo verificado"
-    value="cuenta@ejemplo.com"
-    onChange={() => {}}
-    icon={MailIcon}
-    disabled
-  />
-</div>
+<Field data-invalid className="w-full max-w-sm gap-0.5">
+  <FieldLabel htmlFor="nombre" className="pl-2 text-sm text-muted-foreground">
+    Nombre
+  </FieldLabel>
+  <InputGroup className="h-10 overflow-hidden px-1">
+    <InputGroupAddon align="inline-start">
+      <StoreIcon className="text-muted-foreground" />
+    </InputGroupAddon>
+    <InputGroupInput id="nombre" aria-invalid />
+  </InputGroup>
+  <FieldError>Escribe el nombre del comercio</FieldError>
+</Field>
 `,
-      node: <FormTextFieldDemo />,
+      node: (
+        <Field data-invalid className="w-full max-w-sm gap-0.5">
+          <FieldLabel
+            htmlFor="gallery-input-group-field"
+            className="pl-2 text-sm text-muted-foreground"
+          >
+            Nombre
+          </FieldLabel>
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <StoreIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput id="gallery-input-group-field" aria-invalid />
+          </InputGroup>
+          <FieldError>Escribe el nombre del comercio</FieldError>
+        </Field>
+      ),
     },
   ],
   select: [
@@ -1227,105 +1165,6 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
-        ),
-      },
-    ],
-  },
-  "form-text-field": {
-    states: [
-      {
-        label: "normal",
-        node: (
-          <FormTextField
-            label="Nombre"
-            value="Comercio Ejemplo"
-            onChange={() => {}}
-            icon={StoreIcon}
-          />
-        ),
-      },
-      {
-        label: "invalid",
-        node: (
-          <FormTextField
-            label="Comercio"
-            value=""
-            onChange={() => {}}
-            icon={StoreIcon}
-            error="Escribe el nombre del comercio"
-          />
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <FormTextField
-            label="Correo verificado"
-            value="cuenta@ejemplo.com"
-            onChange={() => {}}
-            icon={MailIcon}
-            disabled
-          />
-        ),
-      },
-      {
-        label: "revealable",
-        node: (
-          <FormTextField
-            label="Contraseña"
-            value="clave-de-ejemplo"
-            onChange={() => {}}
-            type="password"
-            revealable
-          />
-        ),
-      },
-    ],
-    type: [
-      {
-        label: "text",
-        node: (
-          <FormTextField
-            label="Nombre"
-            value="Comercio Ejemplo"
-            onChange={() => {}}
-            type="text"
-          />
-        ),
-      },
-      {
-        label: "email",
-        node: (
-          <FormTextField
-            label="Correo"
-            value=""
-            onChange={() => {}}
-            type="email"
-            placeholder="nombre@ejemplo.com"
-          />
-        ),
-      },
-      {
-        label: "password",
-        node: (
-          <FormTextField
-            label="Contraseña"
-            value="clave-de-ejemplo"
-            onChange={() => {}}
-            type="password"
-          />
-        ),
-      },
-      {
-        label: "search",
-        node: (
-          <FormTextField
-            label="Buscar"
-            value=""
-            onChange={() => {}}
-            type="search"
-            placeholder="Buscar etiqueta"
-          />
         ),
       },
     ],

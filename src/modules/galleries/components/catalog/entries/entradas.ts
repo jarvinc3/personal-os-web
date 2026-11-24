@@ -327,7 +327,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description:
       "Envuelve un campo con iconos, texto o botones dentro del mismo control.",
     whenToUse:
-      "Un campo que necesita un icono líder, un sufijo o una acción pegada.",
+      "Un campo de dato: `Field` + `FieldLabel` + `InputGroup` con el icono líder, y `FieldError` debajo. También un campo que necesita un sufijo o una acción pegada.",
     whenNotToUse: "Un campo simple sin adornos: Input directo dentro de Field.",
     importPath: "@/src/shared/components/ui/input-group",
     snippet: `import {
@@ -382,55 +382,6 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "size (InputGroupButton)",
         type: '"xs" | "sm" | "icon-xs" | "icon-sm"',
         description: "Alto del botón que vive dentro del grupo.",
-      },
-    ],
-  },
-  {
-    id: "form-text-field",
-    name: "FormTextField",
-    category: "entradas",
-    kind: "domain",
-    description:
-      "Campo de texto de Finanzas con etiqueta, icono, error y revelar contraseña.",
-    whenToUse:
-      "Hoy, un campo de texto dentro de un formulario existente de Finanzas.",
-    whenNotToUse:
-      "En código nuevo: la Ola 1 lo reemplaza por Field + InputGroup. No agregues usos.",
-    importPath: "@/src/shared/components/forms/form-text-field",
-    snippet: `import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-
-<FormTextField
-  label="Nombre"
-  value={name}
-  onChange={setName}
-  icon={StoreIcon}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "FormTextField" }],
-    variants: [
-      { name: "states", values: "normal, invalid, disabled, revealable" },
-      { name: "type", values: "text, email, password, search" },
-    ],
-    props: [
-      {
-        name: "label",
-        type: "string",
-        description: "Etiqueta arriba del campo.",
-      },
-      {
-        name: "value / onChange",
-        type: "string / (value: string) => void",
-        description: "Valor controlado y su cambio.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono líder del tipo de dato.",
-      },
-      {
-        name: "error",
-        type: "string",
-        description: "Error pegado al campo.",
       },
     ],
   },

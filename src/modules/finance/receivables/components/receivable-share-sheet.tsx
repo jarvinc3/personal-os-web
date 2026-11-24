@@ -33,7 +33,12 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -195,14 +200,34 @@ export function ReceivableShareSheet({
             control={control}
             name="debtorName"
             render={({ field }) => (
-              <FormTextField
-                icon={UserIcon}
-                label="Nombre del deudor"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={formState.errors.debtorName?.message}
-              />
+              <Field
+                data-invalid={formState.errors.debtorName ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="share-debtor-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre del deudor
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <UserIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="share-debtor-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={
+                      formState.errors.debtorName ? true : undefined
+                    }
+                  />
+                </InputGroup>
+                {formState.errors.debtorName?.message ? (
+                  <FieldError>{formState.errors.debtorName.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>

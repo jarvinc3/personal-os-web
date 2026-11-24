@@ -32,7 +32,6 @@ import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/mercha
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,
@@ -42,6 +41,11 @@ import { Badge } from "@/src/shared/components/ui/badge"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -357,14 +361,32 @@ export function MerchantEditSheet({
             control={control}
             name="name"
             render={({ field }) => (
-              <FormTextField
-                label="Nombre"
-                icon={StoreIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-              />
+              <Field
+                data-invalid={errors.name ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="merchant-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <StoreIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="merchant-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.name ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.name?.message ? (
+                  <FieldError>{errors.name.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
 
@@ -440,14 +462,26 @@ export function MerchantEditSheet({
               ))}
             </div>
           )}
-          <FormTextField
-            icon={TagsIcon}
-            label="Nuevo nombre"
-            value={aliasDraft}
-            onChange={setAliasDraft}
-            onBlur={() => undefined}
-            placeholder="Como aparece en el banco"
-          />
+          <Field className="gap-0.5">
+            <FieldLabel
+              htmlFor="merchant-alias"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Nuevo nombre
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <TagsIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="merchant-alias"
+                value={aliasDraft}
+                onChange={(event) => setAliasDraft(event.target.value)}
+                onBlur={() => undefined}
+                placeholder="Como aparece en el banco"
+              />
+            </InputGroup>
+          </Field>
           <Button
             type="button"
             variant="outline"

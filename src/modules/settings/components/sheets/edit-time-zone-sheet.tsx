@@ -9,7 +9,12 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
 import { CheckIcon, GlobeIcon, SearchIcon } from "lucide-react"
@@ -60,13 +65,19 @@ export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
       title="Zona horaria"
       description="Las fechas y horas de Finanzas se muestran en esta zona."
     >
-      <FormTextField
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar una zona"
-        icon={SearchIcon}
-        ariaLabel="Buscar una zona horaria"
-      />
+      <Field className="gap-0.5">
+        <InputGroup className="h-10 overflow-hidden px-1">
+          <InputGroupAddon align="inline-start">
+            <SearchIcon className="text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupInput
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar una zona"
+            aria-label="Buscar una zona horaria"
+          />
+        </InputGroup>
+      </Field>
       <ul className="flex max-h-80 flex-col overflow-y-auto">
         {visible.map((zone) => {
           const isCurrent = zone === current

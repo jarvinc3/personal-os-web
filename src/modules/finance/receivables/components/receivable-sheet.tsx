@@ -1,6 +1,11 @@
 "use client"
 
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import {
   ToggleGroup,
   ToggleGroupItem,
@@ -28,7 +33,6 @@ import {
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -175,14 +179,32 @@ export function ReceivableSheet({
             control={control}
             name="debtorName"
             render={({ field }) => (
-              <FormTextField
-                icon={UserIcon}
-                label="Deudor"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.debtorName?.message}
-              />
+              <Field
+                data-invalid={errors.debtorName ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="receivable-debtor"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Deudor
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <UserIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="receivable-debtor"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.debtorName ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.debtorName?.message ? (
+                  <FieldError>{errors.debtorName.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           {isEdit ? (
@@ -221,14 +243,32 @@ export function ReceivableSheet({
             control={control}
             name="description"
             render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Concepto"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.description?.message}
-              />
+              <Field
+                data-invalid={errors.description ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="receivable-concept"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Concepto
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <NotebookPenIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="receivable-concept"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.description ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.description?.message ? (
+                  <FieldError>{errors.description.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>

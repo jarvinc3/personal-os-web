@@ -27,9 +27,13 @@ import { defaultContributionAccountId } from "@/src/modules/finance/savings-goal
 import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -419,14 +423,32 @@ export function SavingsGoalContributionSheet({
             control={control}
             name="notes"
             render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Nota"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.notes?.message}
-              />
+              <Field
+                data-invalid={errors.notes ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="contribution-notes"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nota
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <NotebookPenIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="contribution-notes"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.notes ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.notes?.message ? (
+                  <FieldError>{errors.notes.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <FinanceHelpText>
