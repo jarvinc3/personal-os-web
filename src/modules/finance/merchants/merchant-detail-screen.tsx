@@ -40,7 +40,14 @@ import {
   type FinancePaginated,
 } from "@/src/modules/finance/shared/types/api"
 import type { FinanceTransaction } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Alert,
   AlertDescription,
@@ -131,6 +138,14 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
     dateFrom: month.dateFrom,
     dateTo: month.dateTo,
   })
+
+  function handleMergeOpenChange(next: boolean) {
+    mergeSheet.onOpenChange(next)
+    if (!next) {
+      setMergeTarget(null)
+      setMergeSearch("")
+    }
+  }
   const movements = infiniteListItems(movementsQuery.data)
   const categoriesQuery = useCategories(isEnabled)
   const categories = categoriesQuery.data ?? []
@@ -363,32 +378,71 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
         merchant={merchant}
       />
 
-      <BottomSheet
-        open={mergeOpen}
-        onOpenChange={(next) => {
-          mergeSheet.onOpenChange(next)
-          if (!next) {
-            setMergeTarget(null)
-            setMergeSearch("")
-          }
-        }}
-        pending={mergeMutation.isPending}
-        title="Unir comercio"
-        description="Los movimientos del comercio abierto pasan al que elijas."
-      >
-        {duplicates.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            <p className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Sugeridos
-            </p>
+      <Drawer open={mergeOpen} onOpenChange={handleMergeOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Unir comercio"
+            description="Los movimientos del comercio abierto pasan al que elijas."
+            pending={mergeMutation.isPending}
+          />
+          <SheetBody pending={mergeMutation.isPending}>
+            {duplicates.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  Sugeridos
+                </p>
+                <div className="rounded-2xl border border-border bg-card">
+                  {duplicates.map((candidate) => (
+                    <MerchantCard
+                      key={candidate.id}
+                      merchant={candidate}
+                      display={display}
+                      variant="compact"
+                      duplicate
+                      selected={mergeTarget?.id === candidate.id}
+                      onPress={() =>
+                        setMergeTarget({
+                          id: candidate.id,
+                          name: candidate.name,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <Field className="gap-0.5">
+              <FieldLabel
+                htmlFor="merchant-merge-search"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Buscar
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <SearchIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="merchant-merge-search"
+                  value={mergeSearch}
+                  onChange={(event) => setMergeSearch(event.target.value)}
+                  placeholder="Netflix, Uber…"
+                />
+              </InputGroup>
+            </Field>
             <div className="rounded-2xl border border-border bg-card">
-              {duplicates.map((candidate) => (
+              {candidates.map((candidate) => (
                 <MerchantCard
                   key={candidate.id}
                   merchant={candidate}
+                  category={
+                    categories.find(
+                      (category) => category.id === candidate.categoryId
+                    ) ?? null
+                  }
                   display={display}
                   variant="compact"
-                  duplicate
                   selected={mergeTarget?.id === candidate.id}
                   onPress={() =>
                     setMergeTarget({ id: candidate.id, name: candidate.name })
@@ -396,53 +450,27 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
                 />
               ))}
             </div>
-          </div>
-        ) : null}
-
-        <Field className="gap-0.5">
-          <FieldLabel
-            htmlFor="merchant-merge-search"
-            className="pl-2 text-sm text-muted-foreground"
-          >
-            Buscar
-          </FieldLabel>
-          <InputGroup className="h-10 overflow-hidden px-1">
-            <InputGroupAddon align="inline-start">
-              <SearchIcon className="text-muted-foreground" />
-            </InputGroupAddon>
-            <InputGroupInput
-              id="merchant-merge-search"
-              value={mergeSearch}
-              onChange={(event) => setMergeSearch(event.target.value)}
-              placeholder="Netflix, Uber…"
+            <InfiniteListSentinel
+              hasNextPage={mergeCandidates.hasNextPage}
+              isFetchingNextPage={mergeCandidates.isFetchingNextPage}
+              onLoadMore={() => void mergeCandidates.fetchNextPage()}
             />
-          </InputGroup>
-        </Field>
-        <div className="rounded-2xl border border-border bg-card">
-          {candidates.map((candidate) => (
-            <MerchantCard
-              key={candidate.id}
-              merchant={candidate}
-              category={
-                categories.find(
-                  (category) => category.id === candidate.categoryId
-                ) ?? null
-              }
-              display={display}
-              variant="compact"
-              selected={mergeTarget?.id === candidate.id}
-              onPress={() =>
-                setMergeTarget({ id: candidate.id, name: candidate.name })
-              }
-            />
-          ))}
-        </div>
-        <InfiniteListSentinel
-          hasNextPage={mergeCandidates.hasNextPage}
-          isFetchingNextPage={mergeCandidates.isFetchingNextPage}
-          onLoadMore={() => void mergeCandidates.fetchNextPage()}
-        />
-      </BottomSheet>
+          </SheetBody>
+          {!mergeMutation.isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => handleMergeOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+      </Drawer>
 
       <AlertDialog
         open={mergeTarget !== null}

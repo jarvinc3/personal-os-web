@@ -11,9 +11,17 @@ import {
 } from "@/src/modules/finance/subscriptions/lib/subscription-calendar"
 import { upcomingChargeToCardSource } from "@/src/modules/finance/subscriptions/lib/subscription-card-source"
 import { SubscriptionCard } from "@/src/modules/finance/subscriptions/components/subscription-card"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 
 import {
   Empty,
@@ -22,7 +30,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { ClockIcon } from "lucide-react"
+import { ClockIcon, XIcon } from "lucide-react"
 
 type UpcomingSheetProps = {
   open: boolean
@@ -57,55 +65,70 @@ export function UpcomingSheet({
   })
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      helpAction={
-        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionUpcoming} />
-      }
-      title="Próximos cobros"
-      description={`Próximos ${windowDays} días · ${summaryLabel}`}
-    >
-      {query.isError ? (
-        <ErrorState
-          message={financeErrorMessage(query.error)}
-          onRetry={() => void query.refetch()}
-          isRetrying={query.isFetching}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Próximos cobros"
+          description={`Próximos ${windowDays} días · ${summaryLabel}`}
+          actions={
+            <SheetHelpAction
+              sheetKey={FINANCE_SHEET_KEYS.subscriptionUpcoming}
+            />
+          }
         />
-      ) : null}
-      {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
-      {!query.isPending && charges.length === 0 ? (
-        <Empty className="py-6">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ClockIcon />
-            </EmptyMedia>
-            <EmptyTitle>Sin cobros próximos</EmptyTitle>
-            <EmptyDescription>
-              Ninguna suscripción cobra en los próximos {windowDays} días. Si
-              alguna tiene la fecha vencida, la verás marcada como «Vencida» en
-              la lista.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-      <div className="flex flex-col gap-2">
-        {charges.map((charge) => (
-          <SubscriptionCard
-            key={charge.id}
-            subscription={upcomingChargeToCardSource(charge)}
-            display={display}
-            today={today}
-            windowDays={windowDays}
-            variant="compact"
-          />
-        ))}
-      </div>
-      <p className="pt-1 text-center text-xs text-muted-foreground">
-        Ventana de aviso: {windowDays} días · cámbiala en Ajustes ›
-        Suscripciones
-      </p>
-    </BottomSheet>
+        <SheetBody>
+          {query.isError ? (
+            <ErrorState
+              message={financeErrorMessage(query.error)}
+              onRetry={() => void query.refetch()}
+              isRetrying={query.isFetching}
+            />
+          ) : null}
+          {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
+          {!query.isPending && charges.length === 0 ? (
+            <Empty className="py-6">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ClockIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin cobros próximos</EmptyTitle>
+                <EmptyDescription>
+                  Ninguna suscripción cobra en los próximos {windowDays} días.
+                  Si alguna tiene la fecha vencida, la verás marcada como
+                  «Vencida» en la lista.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : null}
+          <div className="flex flex-col gap-2">
+            {charges.map((charge) => (
+              <SubscriptionCard
+                key={charge.id}
+                subscription={upcomingChargeToCardSource(charge)}
+                display={display}
+                today={today}
+                windowDays={windowDays}
+                variant="compact"
+              />
+            ))}
+          </div>
+          <p className="pt-1 text-center text-xs text-muted-foreground">
+            Ventana de aviso: {windowDays} días · cámbiala en Ajustes ›
+            Suscripciones
+          </p>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

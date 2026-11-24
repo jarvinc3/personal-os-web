@@ -17,7 +17,9 @@ import type {
   FinanceCard,
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import {
   Empty,
   EmptyDescription,
@@ -27,12 +29,22 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import { CreditCardIcon, ChevronLeftIcon, WalletIcon } from "lucide-react"
+import {
+  CreditCardIcon,
+  ChevronLeftIcon,
+  WalletIcon,
+  XIcon,
+} from "lucide-react"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { useEffect, useMemo, useState } from "react"
 
@@ -104,152 +116,165 @@ export function DestinationPickerSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title={
-        selected?.kind === "institution"
-          ? selected.name
-          : accountsOnly
-            ? "Cuenta"
-            : "Cuenta o tarjeta"
-      }
-      headerActionAlign="start"
-      headerAction={
-        selected ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setInstitutionId(null)
-              setTab("accounts")
-            }}
-          >
-            <ChevronLeftIcon />
-            Atrás
-          </Button>
-        ) : null
-      }
-    >
-      {selected?.kind === "institution" ? (
-        <Tabs {...tabsBehavior}>
-          <TabsList className="h-auto w-full rounded-2xl p-1">
-            <TabsTrigger value="accounts" className="rounded-xl px-3 py-2">
-              Cuentas
-            </TabsTrigger>
-            {accountsOnly ? null : (
-              <TabsTrigger value="cards" className="rounded-xl px-3 py-2">
-                Tarjetas
-              </TabsTrigger>
-            )}
-          </TabsList>
-          <TabsContent value="accounts" className="flex flex-col gap-2">
-            {selected.accounts.length === 0 ? (
-              <Empty className="py-6">
-                <EmptyHeader>
-                  <EmptyMedia variant="icon">
-                    <WalletIcon />
-                  </EmptyMedia>
-                  <EmptyTitle>Sin cuentas</EmptyTitle>
-                  <EmptyDescription>
-                    Esta institución no tiene cuentas.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              selected.accounts.map((account) => {
-                const target = encodeLedgerTarget("account", account.id)
-                return (
-                  <AccountProductRow
-                    key={account.id}
-                    account={account}
-                    display={display}
-                    disabled={target === excludeTarget}
-                    onPress={() => choose(target)}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title={
+            selected?.kind === "institution"
+              ? selected.name
+              : accountsOnly
+                ? "Cuenta"
+                : "Cuenta o tarjeta"
+          }
+          startAction={
+            selected ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setInstitutionId(null)
+                  setTab("accounts")
+                }}
+              >
+                <ChevronLeftIcon />
+                Atrás
+              </Button>
+            ) : null
+          }
+        />
+        <SheetBody>
+          {selected?.kind === "institution" ? (
+            <Tabs {...tabsBehavior}>
+              <TabsList className="h-auto w-full rounded-2xl p-1">
+                <TabsTrigger value="accounts" className="rounded-xl px-3 py-2">
+                  Cuentas
+                </TabsTrigger>
+                {accountsOnly ? null : (
+                  <TabsTrigger value="cards" className="rounded-xl px-3 py-2">
+                    Tarjetas
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              <TabsContent value="accounts" className="flex flex-col gap-2">
+                {selected.accounts.length === 0 ? (
+                  <Empty className="py-6">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <WalletIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Sin cuentas</EmptyTitle>
+                      <EmptyDescription>
+                        Esta institución no tiene cuentas.
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
+                ) : (
+                  selected.accounts.map((account) => {
+                    const target = encodeLedgerTarget("account", account.id)
+                    return (
+                      <AccountProductRow
+                        key={account.id}
+                        account={account}
+                        display={display}
+                        disabled={target === excludeTarget}
+                        onPress={() => choose(target)}
+                      />
+                    )
+                  })
+                )}
+              </TabsContent>
+              {accountsOnly ? null : (
+                <TabsContent value="cards" className="flex flex-col gap-2">
+                  {selected.cards.length === 0 ? (
+                    <Empty className="py-6">
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <CreditCardIcon />
+                        </EmptyMedia>
+                        <EmptyTitle>Sin tarjetas</EmptyTitle>
+                        <EmptyDescription>
+                          Esta institución no tiene tarjetas.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </Empty>
+                  ) : (
+                    selected.cards.map((card) => {
+                      const target = encodeLedgerTarget("card", card.id)
+                      return (
+                        <CardProductRow
+                          key={card.id}
+                          card={card}
+                          accounts={accounts}
+                          display={display}
+                          disabled={target === excludeTarget}
+                          onPress={() => choose(target)}
+                        />
+                      )
+                    })
+                  )}
+                </TabsContent>
+              )}
+            </Tabs>
+          ) : selectableGroups.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {accountsOnly
+                ? "Crea una cuenta para poder elegirla."
+                : "Crea una cuenta o una tarjeta antes de registrar un movimiento."}
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {selectableGroups.map((group) =>
+                group.kind === "cash" ? (
+                  <InstitutionWalletCard
+                    key={`cash:${group.id}`}
+                    card={buildCashCardFromAccount(group.account)}
+                    variant="compact"
+                    detail="none"
+                    disabled={
+                      encodeLedgerTarget("account", group.account.id) ===
+                      excludeTarget
+                    }
+                    onPress={() =>
+                      choose(encodeLedgerTarget("account", group.account.id))
+                    }
+                  />
+                ) : (
+                  <InstitutionWalletCard
+                    key={`institution:${group.id}`}
+                    card={buildInstitutionCardFromCatalog({
+                      institution: group.institution,
+                      counts: accountsOnly
+                        ? { accounts: group.accounts.length }
+                        : {
+                            accounts: group.accounts.length,
+                            cards: group.cards.length,
+                          },
+                    })}
+                    variant="compact"
+                    detail="counts"
+                    onPress={() => {
+                      setTab("accounts")
+                      setInstitutionId(group.id)
+                    }}
                   />
                 )
-              })
-            )}
-          </TabsContent>
-          {accountsOnly ? null : (
-            <TabsContent value="cards" className="flex flex-col gap-2">
-              {selected.cards.length === 0 ? (
-                <Empty className="py-6">
-                  <EmptyHeader>
-                    <EmptyMedia variant="icon">
-                      <CreditCardIcon />
-                    </EmptyMedia>
-                    <EmptyTitle>Sin tarjetas</EmptyTitle>
-                    <EmptyDescription>
-                      Esta institución no tiene tarjetas.
-                    </EmptyDescription>
-                  </EmptyHeader>
-                </Empty>
-              ) : (
-                selected.cards.map((card) => {
-                  const target = encodeLedgerTarget("card", card.id)
-                  return (
-                    <CardProductRow
-                      key={card.id}
-                      card={card}
-                      accounts={accounts}
-                      display={display}
-                      disabled={target === excludeTarget}
-                      onPress={() => choose(target)}
-                    />
-                  )
-                })
               )}
-            </TabsContent>
+            </div>
           )}
-        </Tabs>
-      ) : selectableGroups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {accountsOnly
-            ? "Crea una cuenta para poder elegirla."
-            : "Crea una cuenta o una tarjeta antes de registrar un movimiento."}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {selectableGroups.map((group) =>
-            group.kind === "cash" ? (
-              <InstitutionWalletCard
-                key={`cash:${group.id}`}
-                card={buildCashCardFromAccount(group.account)}
-                variant="compact"
-                detail="none"
-                disabled={
-                  encodeLedgerTarget("account", group.account.id) ===
-                  excludeTarget
-                }
-                onPress={() =>
-                  choose(encodeLedgerTarget("account", group.account.id))
-                }
-              />
-            ) : (
-              <InstitutionWalletCard
-                key={`institution:${group.id}`}
-                card={buildInstitutionCardFromCatalog({
-                  institution: group.institution,
-                  counts: accountsOnly
-                    ? { accounts: group.accounts.length }
-                    : {
-                        accounts: group.accounts.length,
-                        cards: group.cards.length,
-                      },
-                })}
-                variant="compact"
-                detail="counts"
-                onPress={() => {
-                  setTab("accounts")
-                  setInstitutionId(group.id)
-                }}
-              />
-            )
-          )}
-        </div>
-      )}
-    </BottomSheet>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

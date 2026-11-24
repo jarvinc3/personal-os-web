@@ -5,7 +5,15 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { PROPOSAL_STATUS_LABEL } from "@/src/modules/finance/product-proposals/lib/proposal-status"
 import {
   EMAIL_PRODUCT_PROPOSAL_STATUSES,
@@ -16,6 +24,7 @@ import {
   ClockIcon,
   LoaderCircleIcon,
   XCircleIcon,
+  XIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -47,39 +56,52 @@ export function ProposalFiltersSheet({
   onChange,
 }: ProposalFiltersSheetProps) {
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Filtrar propuestas"
-      description="Elige el estado que quieres ver"
-      closeLabel="Cerrar"
-    >
-      <Field className="gap-1">
-        <FieldLabel>Estado</FieldLabel>
-        <ToggleGroup
-          value={[status]}
-          onValueChange={(next) => {
-            if (next.length > 0) {
-              onChange(next[0])
-            }
-          }}
-          variant="outline"
-          size="lg"
-          orientation="vertical"
-          aria-label="Estado"
-          className="w-full flex-col items-stretch"
-        >
-          {STATUS_OPTIONS.map((option) => (
-            <ToggleGroupItem
-              key={option.value}
-              value={option.value}
-              className="h-11 w-full flex-none justify-start rounded-full text-base"
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Filtrar propuestas"
+          description="Elige el estado que quieres ver"
+        />
+        <SheetBody>
+          <Field className="gap-1">
+            <FieldLabel>Estado</FieldLabel>
+            <ToggleGroup
+              value={[status]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  onChange(next[0])
+                }
+              }}
+              variant="outline"
+              size="lg"
+              orientation="vertical"
+              aria-label="Estado"
+              className="w-full flex-col items-stretch"
             >
-              {option.label}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </Field>
-    </BottomSheet>
+              {STATUS_OPTIONS.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="h-11 w-full flex-none justify-start rounded-full text-base"
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

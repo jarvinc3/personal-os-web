@@ -2,7 +2,14 @@
 
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -42,7 +49,7 @@ import {
 import { wallClockToIso } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildTransactionFormParams } from "@/src/modules/finance/transactions/lib/transaction-prefill"
 import type { QuickEntryParseResult } from "@/src/modules/finance/quick-entry/types"
-import { AlignLeftIcon, SquarePenIcon, StoreIcon } from "lucide-react"
+import { AlignLeftIcon, SquarePenIcon, StoreIcon, XIcon } from "lucide-react"
 
 type QuickEntryPreviewSheetProps = {
   open: boolean
@@ -151,116 +158,136 @@ export function QuickEntryPreviewSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        title="Vista previa"
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.quickEntryPreview} />
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <Field className="gap-1">
-            <FieldLabel>Tipo</FieldLabel>
-            <ToggleGroup
-              value={[type]}
-              onValueChange={(next) => {
-                if (next.length > 0) {
-                  setType(next[0])
-                }
-              }}
-              variant="outline"
-              size="sm"
-              aria-label="Tipo"
-              className="w-full"
-            >
-              {TYPE_OPTIONS.map((option) => (
-                <ToggleGroupItem
-                  key={option.value}
-                  value={option.value}
-                  className="h-11 flex-1 rounded-full text-base"
-                >
-                  {option.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </Field>
-
-          <FinanceMoneyField
-            calculatorKey="quick-entry-amount"
-            amount={amount}
-            onAmountChange={setAmount}
-            onAmountCommit={setAmount}
-            currency={display.currency}
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Vista previa"
+            actions={
+              <SheetHelpAction
+                sheetKey={FINANCE_SHEET_KEYS.quickEntryPreview}
+              />
+            }
           />
+          <SheetBody>
+            <div className="flex flex-col gap-4">
+              <Field className="gap-1">
+                <FieldLabel>Tipo</FieldLabel>
+                <ToggleGroup
+                  value={[type]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      setType(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Tipo"
+                  className="w-full"
+                >
+                  {TYPE_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="h-11 flex-1 rounded-full text-base"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
 
-          <div className="flex flex-col gap-1">
-            <span className="px-1 text-xs text-muted-foreground">
-              Categoría
-            </span>
-            <CategoryTrigger
-              category={selectedCategory}
-              onClick={() => openPicker("category")}
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <span className="px-1 text-xs text-muted-foreground">
-              Cuenta o tarjeta
-            </span>
-            <DestinationTrigger
-              destination={destination}
-              accounts={accounts}
-              cards={cards}
-              display={display}
-              onClick={() => openPicker("destination")}
-            />
-          </div>
-
-          <FinanceDateField label="Fecha" value={date} onChange={setDate} />
-
-          <Field className="gap-0.5">
-            <InputGroup className="h-10 overflow-hidden px-1">
-              <InputGroupAddon align="inline-start">
-                <StoreIcon className="text-muted-foreground" />
-              </InputGroupAddon>
-              <InputGroupInput
-                value={merchant}
-                onChange={(event) => setMerchant(event.target.value)}
-                aria-label="Comercio"
+              <FinanceMoneyField
+                calculatorKey="quick-entry-amount"
+                amount={amount}
+                onAmountChange={setAmount}
+                onAmountCommit={setAmount}
+                currency={display.currency}
               />
-            </InputGroup>
-          </Field>
-          <Field className="gap-0.5">
-            <InputGroup className="h-10 overflow-hidden px-1">
-              <InputGroupAddon align="inline-start">
-                <AlignLeftIcon className="text-muted-foreground" />
-              </InputGroupAddon>
-              <InputGroupInput
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                aria-label="Descripción"
-              />
-            </InputGroup>
-          </Field>
 
-          {canSave ? (
+              <div className="flex flex-col gap-1">
+                <span className="px-1 text-xs text-muted-foreground">
+                  Categoría
+                </span>
+                <CategoryTrigger
+                  category={selectedCategory}
+                  onClick={() => openPicker("category")}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="px-1 text-xs text-muted-foreground">
+                  Cuenta o tarjeta
+                </span>
+                <DestinationTrigger
+                  destination={destination}
+                  accounts={accounts}
+                  cards={cards}
+                  display={display}
+                  onClick={() => openPicker("destination")}
+                />
+              </div>
+
+              <FinanceDateField label="Fecha" value={date} onChange={setDate} />
+
+              <Field className="gap-0.5">
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <StoreIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    value={merchant}
+                    onChange={(event) => setMerchant(event.target.value)}
+                    aria-label="Comercio"
+                  />
+                </InputGroup>
+              </Field>
+              <Field className="gap-0.5">
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <AlignLeftIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    aria-label="Descripción"
+                  />
+                </InputGroup>
+              </Field>
+
+              {canSave ? (
+                <Button
+                  type="button"
+                  onClick={save}
+                  disabled={createTransaction.isPending}
+                >
+                  {createTransaction.isPending ? <Spinner /> : null}
+                  Guardar
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={openGuidedFlow}
+                >
+                  <SquarePenIcon className="size-4 shrink-0" />
+                  Completar en el formulario
+                </Button>
+              )}
+            </div>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
             <Button
               type="button"
-              onClick={save}
-              disabled={createTransaction.isPending}
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
             >
-              {createTransaction.isPending ? <Spinner /> : null}
-              Guardar
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
             </Button>
-          ) : (
-            <Button type="button" variant="secondary" onClick={openGuidedFlow}>
-              <SquarePenIcon className="size-4 shrink-0" />
-              Completar en el formulario
-            </Button>
-          )}
-        </div>
-      </BottomSheet>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* La vista previa se cierra sola al recargar: el selector no vive sin ella. */}
       <CategoryPickerSheet

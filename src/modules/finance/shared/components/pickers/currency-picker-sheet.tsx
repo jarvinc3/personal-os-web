@@ -15,7 +15,15 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Field } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
@@ -24,7 +32,7 @@ import {
 } from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { CheckIcon, SearchIcon } from "lucide-react"
+import { CheckIcon, SearchIcon, XIcon } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 type CurrencyPickerSheetProps = {
@@ -141,92 +149,108 @@ export function CurrencyPickerSheet({
   }, [open])
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title={title}>
-      {searchable ? (
-        <div className="sticky top-0 z-10 shrink-0 bg-background">
-          <Field className="gap-0.5">
-            <InputGroup className="h-10 min-h-10 overflow-hidden px-1">
-              <InputGroupAddon align="inline-start">
-                <SearchIcon className="text-muted-foreground" />
-              </InputGroupAddon>
-              <InputGroupInput
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Buscar por código o nombre"
-                aria-label="Buscar moneda"
-                autoComplete="off"
-              />
-            </InputGroup>
-          </Field>
-        </div>
-      ) : null}
-      {!restricted && currenciesQuery.isPending && listed.length === 0 ? (
-        <div className="flex justify-center py-8">
-          <Spinner />
-        </div>
-      ) : listed.length === 0 ? (
-        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-          <EmptyHeader>
-            <EmptyTitle>No hay otras monedas</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : visible.length === 0 ? (
-        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-          <EmptyHeader>
-            <EmptyTitle>Ninguna moneda coincide</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {visible.map((code) => {
-            const selected = code === current
-            return (
-              <button
-                key={code}
-                type="button"
-                className={cn(
-                  "flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left",
-                  PRESSABLE_CLASS,
-                  selected && "border-primary"
-                )}
-                onClick={() => {
-                  onSelect(code)
-                  onOpenChange(false)
-                }}
-              >
-                {showNames ? (
-                  <span className="flex min-w-0 items-center gap-3">
-                    <CurrencyFlag code={code} />
-                    <span className="min-w-0">
-                      <span className="block text-sm">{code}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {currencyDisplayName(code)}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title={title} />
+        <SheetBody>
+          {searchable ? (
+            <div className="sticky top-0 z-10 shrink-0 bg-background">
+              <Field className="gap-0.5">
+                <InputGroup className="h-10 min-h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <SearchIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Buscar por código o nombre"
+                    aria-label="Buscar moneda"
+                    autoComplete="off"
+                  />
+                </InputGroup>
+              </Field>
+            </div>
+          ) : null}
+          {!restricted && currenciesQuery.isPending && listed.length === 0 ? (
+            <div className="flex justify-center py-8">
+              <Spinner />
+            </div>
+          ) : listed.length === 0 ? (
+            <Empty className={EMPTY_COMPACT_CLASS_NAME}>
+              <EmptyHeader>
+                <EmptyTitle>No hay otras monedas</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          ) : visible.length === 0 ? (
+            <Empty className={EMPTY_COMPACT_CLASS_NAME}>
+              <EmptyHeader>
+                <EmptyTitle>Ninguna moneda coincide</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {visible.map((code) => {
+                const selected = code === current
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left",
+                      PRESSABLE_CLASS,
+                      selected && "border-primary"
+                    )}
+                    onClick={() => {
+                      onSelect(code)
+                      onOpenChange(false)
+                    }}
+                  >
+                    {showNames ? (
+                      <span className="flex min-w-0 items-center gap-3">
+                        <CurrencyFlag code={code} />
+                        <span className="min-w-0">
+                          <span className="block text-sm">{code}</span>
+                          <span className="block truncate text-xs text-muted-foreground">
+                            {currencyDisplayName(code)}
+                          </span>
+                        </span>
                       </span>
+                    ) : (
+                      <CurrencyTriggerLabel code={code} />
+                    )}
+                    <span className="flex shrink-0 items-center gap-2">
+                      {showQuotes ? (
+                        <span className="text-sm text-muted-foreground tabular-nums">
+                          {code === quoteCurrency
+                            ? "Principal"
+                            : formatQuote(
+                                quotes?.get(code),
+                                quoteCurrency ?? "",
+                                formatLocale
+                              )}
+                        </span>
+                      ) : null}
+                      {selected ? <CheckIcon className="size-4" /> : null}
                     </span>
-                  </span>
-                ) : (
-                  <CurrencyTriggerLabel code={code} />
-                )}
-                <span className="flex shrink-0 items-center gap-2">
-                  {showQuotes ? (
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {code === quoteCurrency
-                        ? "Principal"
-                        : formatQuote(
-                            quotes?.get(code),
-                            quoteCurrency ?? "",
-                            formatLocale
-                          )}
-                    </span>
-                  ) : null}
-                  {selected ? <CheckIcon className="size-4" /> : null}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </BottomSheet>
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

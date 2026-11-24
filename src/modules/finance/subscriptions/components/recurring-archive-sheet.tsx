@@ -13,9 +13,18 @@ import type {
   FinanceRecurringStatus,
   FinanceRecurringPattern,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { XIcon } from "lucide-react"
 
 import { useState } from "react"
 
@@ -45,56 +54,69 @@ export function RecurringArchiveSheet({
   const categories = categoriesQuery.data ?? []
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Bandeja de recurrentes"
-      description="Cobros ya confirmados o descartados."
-    >
-      <ToggleGroup
-        value={[tab]}
-        onValueChange={(next) => {
-          if (next.length > 0) {
-            setTab(next[0])
-          }
-        }}
-        variant="outline"
-        size="sm"
-        className="w-full"
-      >
-        {ARCHIVE_TABS.map((option) => (
-          <ToggleGroupItem
-            key={option.value}
-            value={option.value}
-            className="h-11 flex-1 rounded-full text-base"
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Bandeja de recurrentes"
+          description="Cobros ya confirmados o descartados."
+        />
+        <SheetBody>
+          <ToggleGroup
+            value={[tab]}
+            onValueChange={(next) => {
+              if (next.length > 0) {
+                setTab(next[0])
+              }
+            }}
+            variant="outline"
+            size="sm"
+            className="w-full"
           >
-            {option.label}
-          </ToggleGroupItem>
-        ))}
-      </ToggleGroup>
-      {query.isPending && !query.data ? (
-        <div className="flex justify-center py-6">
-          <Spinner />
-        </div>
-      ) : null}
-      {!query.isPending && items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
-          {tab === "CONFIRMED"
-            ? "Sin recurrentes confirmados."
-            : "Sin descartados."}
-        </p>
-      ) : null}
-      <div className="flex flex-col gap-2">
-        {items.map((pattern: FinanceRecurringPattern) => (
-          <RecurringPatternCard
-            key={pattern.id}
-            pattern={pattern}
-            categories={categories}
-            display={display}
-          />
-        ))}
-      </div>
-    </BottomSheet>
+            {ARCHIVE_TABS.map((option) => (
+              <ToggleGroupItem
+                key={option.value}
+                value={option.value}
+                className="h-11 flex-1 rounded-full text-base"
+              >
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          {query.isPending && !query.data ? (
+            <div className="flex justify-center py-6">
+              <Spinner />
+            </div>
+          ) : null}
+          {!query.isPending && items.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">
+              {tab === "CONFIRMED"
+                ? "Sin recurrentes confirmados."
+                : "Sin descartados."}
+            </p>
+          ) : null}
+          <div className="flex flex-col gap-2">
+            {items.map((pattern: FinanceRecurringPattern) => (
+              <RecurringPatternCard
+                key={pattern.id}
+                pattern={pattern}
+                categories={categories}
+                display={display}
+              />
+            ))}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
