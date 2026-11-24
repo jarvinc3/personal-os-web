@@ -13,7 +13,7 @@ Productos tiene el atajo **Detectados en correos** (`/finance/products/email-pro
 ## Convenciones de formularios
 
 - Alta y edición comparten la pieza: el `mode` decide título, CTA y texto de ayuda. El alta se habilita por validez del esquema; la edición, solo si hay cambios (`isDirty`).
-- Un formulario de ruta usa `FinanceFormScreen` con la barra de envío fija; uno en sheet usa las acciones del `BottomSheet`.
+- Un formulario de ruta usa `FinanceFormScreen` con la barra de envío fija; uno en hoja usa las acciones del `DrawerFooter`.
 - El dinero usa `FinanceMoneyField` (teclado y calculadora) y la moneda, `FinanceCurrencyPickerSheet` (con bandera). No hay inputs de monto genéricos.
 - Cuenta o tarjeta se elige con `DestinationPickerSheet` desde un `DestinationTrigger`, no en un `<select>`.
 - Cerrar con cambios sin guardar pide confirmación con `useDiscardChanges` (`shared/hooks/use-discard-changes.tsx`); un guardado con éxito cierra directo.

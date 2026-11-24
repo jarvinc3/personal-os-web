@@ -7,7 +7,7 @@ Inventario para agentes. Antes de inventar un control, buscar aquí y en `src/sh
 - `ui/`: solo componentes de shadcn.
 - `shell/`: cabecera (`shell/header/`), barra lateral, tab bar, layout de secciones, pending de navegación y logo.
 - `forms/`: campos, selectores, ruedas y `FormScreen`.
-- `sheets/`: `BottomSheet` y su variante.
+- `sheets/`: `SheetHeader`, `SheetBody` y las clases de la hoja ancha y flotante.
 - `fab/`: acción flotante y su contexto.
 - `agent-chat/`: disparador del overlay global del agente; el overlay vive en el módulo de Inteligencia.
 - `feedback/`: carga, placeholder de módulo y centinela de lista infinita.
@@ -68,9 +68,9 @@ Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. D
 
 | Necesitas                                                    | Usar                                                                                                                            | Path                                                                                                                                                                                                                                                                                             |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Sheet / drawer de módulo (edición)                           | `BottomSheet`                                                                                                                   | `src/shared/components/sheets/bottom-sheet.tsx`                                                                                                                                                                                                                                                  |
-| Evento (llegó, listo, falló)                                 | `BottomSheet` `variant="floating"`                                                                                              | igual; card abajo, no drawer de formulario                                                                                                                                                                                                                                                       |
-| Panel ancho con vista previa al lado del formulario          | `BottomSheet` `size="wide"`                                                                                                     | igual; desde `md` el drawer derecho se ensancha y las columnas se apilan en móvil                                                                                                                                                                                                                |
+| Sheet / drawer de módulo (edición)                           | `Drawer` + `SheetHeader` + `SheetBody` + `DrawerFooter`                                                                         | `src/shared/components/sheets/sheet-header.tsx`, `sheet-body.tsx` y `src/shared/components/ui/drawer.tsx`                                                                                                                                                                                        |
+| Evento (llegó, listo, falló)                                 | Hoja flotante: `Drawer swipeDirection="down"` + `FLOATING_SHEET_CONTENT_CLASS`                                                  | `src/shared/components/sheets/sheet-layout.ts`; card abajo, no drawer de formulario                                                                                                                                                                                                              |
+| Panel ancho con vista previa al lado del formulario          | `WIDE_SHEET_CONTENT_CLASS` en `DrawerContent`                                                                                   | `src/shared/components/sheets/sheet-layout.ts`; desde `md` el drawer derecho se ensancha y las columnas se apilan en móvil                                                                                                                                                                       |
 | Sección con título (cualquier vista)                         | `SummarySection`. No `Card` ni `CardHeader` / `CardTitle` / `CardContent` / `CardFooter` en pantallas de producto               | `src/shared/components/data-display/summary.tsx`                                                                                                                                                                                                                                                 |
 | Fila de lista (icono, título, valor)                         | `SummaryItem`                                                                                                                   | igual. `tintRow` pinta el fondo de la fila con `accentColor`; por defecto no                                                                                                                                                                                                                     |
 | Grupo de filas                                               | `SummarySection` (título + icono) o `SettingsSection` (etiqueta corta)                                                          | `summary.tsx` y `src/shared/components/settings/settings-section.tsx`. No un `div` `rounded-2xl border bg-card`                                                                                                                                                                                  |
@@ -92,11 +92,11 @@ Un `Input type="number"` para cantidades **sí** es válido; no es fecha/hora. D
 
 Un bloque con título en cualquier superficie (formulario, panel, sheet, lista, chat) es `SummarySection`. `Card` y sus partes no se importan en pantallas de producto. El primitivo `src/shared/components/ui/card.tsx` no sustituye a `SummarySection`. El agrupado de campos de un formulario vive en [form-sections.mdc](../../.cursor/rules/form-sections.mdc); el chrome, en [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc).
 
-No armar un drawer con `Drawer` crudo si `BottomSheet` cubre el caso (título, description, actions, pending).
+Cada hoja compone `Drawer`, `DrawerContent`, `SheetHeader`, `SheetBody` y `DrawerFooter`. Un selector que se abre desde una hoja se monta dentro de su `Drawer` para apilarse como drawer anidado.
 
 ### Hoja por ruta
 
-Todo bottom-sheet se abre con la URL, no con un estado local: `useSheetParam(key)` y, cuando la hoja muestra un registro, `sheetId`. En Finanzas la clave sale de `FINANCE_SHEET_KEYS`; en Ajustes, de `SETTINGS_SHEET_KEYS`, que comparten Privacidad y Finanzas para el vaciado (`wipeData`). Regla completa: [`sheet-url-route.mdc`](../../.cursor/rules/sheet-url-route.mdc).
+Toda hoja se abre con la URL, no con un estado local: `useSheetParam(key)` y, cuando la hoja muestra un registro, `sheetId`. En Finanzas la clave sale de `FINANCE_SHEET_KEYS`; en Ajustes, de `SETTINGS_SHEET_KEYS`, que comparten Privacidad y Finanzas para el vaciado (`wipeData`). Regla completa: [`sheet-url-route.mdc`](../../.cursor/rules/sheet-url-route.mdc).
 
 ```tsx
 const category = useSheetParam(FINANCE_SHEET_KEYS.category)
@@ -110,9 +110,11 @@ const editing = useSheetListEntity(
 
 onClick={() => category.setOpen(true, item.id)}
 
-<BottomSheet open={category.open} onOpenChange={category.setOpen}>
-  <CategorySheet category={editing} />
-</BottomSheet>
+<CategorySheet
+  open={category.open}
+  onOpenChange={category.setOpen}
+  category={editing}
+/>
 ```
 
 Un sheet informativo (ayuda, glosario, historial, «Novedades») también lleva ruta, y una hoja anidada (un selector dentro de un formulario que ya está en hoja) usa el segundo parámetro (`?picker=<clave>`) con `usePicker` de `src/shared/hooks/use-picker` (#251). Un `AlertDialog` de confirmación no lleva ruta: Esc cancela, un clic fuera no cierra. Las claves de los ajustes de Finanzas también son constantes (`financeSettingsDisplay`, `financeSettingsMonth`, `financeSettingsMovements`, `financeSettingsFixedIncome`, `financeSettingsSubscriptions` y `financeSettingsNotifications`), y la calculadora de importes usa una clave por monto (`?picker=calculator-<monto>`, por ejemplo `calculator-card-limit`): dos montos visibles a la vez no comparten clave, así se abre solo la calculadora del campo pulsado. Una hoja nueva se abre siempre por ruta.
@@ -172,7 +174,7 @@ Un patrón se pinta siempre con el mismo componente. Si cambia un detalle, cambi
 | Patrón                                  | Componente canónico                                                                                                                                                                                                          | Estado                                      |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Confirmar una acción destructiva        | `AlertDialog` + `AlertDialogMedia` + `Spinner`, compuesto en cada pantalla; el guarda de un sheet con cambios es `useDiscardChanges`                                                                                         | Completo                                    |
-| Cerrar un sheet                         | `BottomSheet` pinta el cierre por defecto; `actions.close` lo reemplaza, `closeLabel` cambia el texto y `showClose={false}` lo quita ([`bottom-sheet.tsx`](../../src/shared/components/sheets/bottom-sheet.tsx))             | Completo                                    |
+| Cerrar un sheet                         | El botón Cancelar o Cerrar del `DrawerFooter` llama al `onOpenChange` de la hoja; si no hay cierre, se omite el botón ([`sheet-layout.ts`](../../src/shared/components/sheets/sheet-layout.ts))                              | Completo                                    |
 | Cerrar un sheet con cambios sin guardar | `useDiscardChanges` ([`use-discard-changes.tsx`](../../src/modules/finance/shared/hooks/use-discard-changes.tsx))                                                                                                            | Completo                                    |
 | Monto en pantalla                       | `Money` ([`money.tsx`](../../src/modules/finance/shared/components/money.tsx)) sobre `formatFinanceMoney`; escribirlo, `FinanceMoneyField`                                                                                   | Completo                                    |
 | Fecha y hora                            | Formato: [`date-format.ts`](../../src/shared/lib/date-format.ts), siempre con el locale del perfil (`dayMonth`, `dayMonthYear`, `monthYear`, `weekday`, `time`). Entrada: `FinanceDateField` / `WheelField`                  | Completo                                    |
@@ -211,33 +213,33 @@ Estado del botón de envío: [`.cursor/rules/form-submit-disabled.mdc`](../../.c
 
 Una regla por archivo `.mdc`; se leen todas antes de crear o cambiar un control. El detalle vive en cada `.mdc`; aquí solo el índice y su componente canónico.
 
-| Regla                                                                              | Componente o helper canónico                                                                           |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc)           | `wheel-picker.tsx`, `BottomSheet`, `FinanceDateField`, `SummarySection` (bloque con título; no `Card`) |
-| [leaf-module-ux.mdc](../../.cursor/rules/leaf-module-ux.mdc)                       | hero + `BottomSheet` (Keep Awake)                                                                      |
-| [navigation-pending.mdc](../../.cursor/rules/navigation-pending.mdc)               | `LinkPendingOverlay` / `usePendingNavigation`                                                          |
-| [confirm-important-changes.mdc](../../.cursor/rules/confirm-important-changes.mdc) | `AlertDialog`                                                                                          |
-| [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc)                   | `SettingsRow` / `SwitchFieldRow`                                                                       |
-| [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc)             | icono + `aria-label`                                                                                   |
-| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc)                     | `FinanceFormScreen`                                                                                    |
-| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc)                   | `BottomSheet` (acciones del sheet) + `useDiscardChanges`                                               |
-| [form-sections.mdc](../../.cursor/rules/form-sections.mdc)                         | agrupado de campos del formulario                                                                      |
-| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc)               | `Field` / `FieldLabel` / `FieldError` en cualquier control con etiqueta                                |
-| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc)               | hoja de catálogo en cualquier vista; `usePicker` en el formulario                                      |
-| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc)                   | constructor de payload + `toast`                                                                       |
-| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc)             | campos derivados del estado elegido                                                                    |
-| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc)           | botón de envío                                                                                         |
-| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc)                   | icono líder en todo campo de dato                                                                      |
-| [icons-required.mdc](../../.cursor/rules/icons-required.mdc)                       | icono obligatorio en todo botón y control                                                              |
-| [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc)               | placeholder solo para ejemplo o formato, en cualquier campo                                            |
-| [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc)           | `useInfiniteQuery` + `IntersectionObserver`                                                            |
-| [ui-section-states.mdc](../../.cursor/rules/ui-section-states.mdc)                 | `FinanceListSkeleton` / `Empty` / `FinanceErrorState`                                                  |
-| [ui-row-group.mdc](../../.cursor/rules/ui-row-group.mdc)                           | `SummarySection` o `SettingsSection` alrededor de las filas                                            |
-| [finance-brand-logo.mdc](../../.cursor/rules/finance-brand-logo.mdc)               | `BrandLogo` / `CardNetworkMark`                                                                        |
-| [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                                                                   |
-| [entity-cards.mdc](../../.cursor/rules/entity-cards.mdc)                           | card de la entidad + `variant` (completa, compacta, inline)                                            |
-| [sheet-url-route.mdc](../../.cursor/rules/sheet-url-route.mdc)                     | `useSheetParam` + `sheetId`; `AlertDialog` sin ruta                                                    |
-| [ui-single-source.mdc](../../.cursor/rules/ui-single-source.mdc)                   | la tabla «Una sola fuente de verdad»; galerías de Apariencia                                           |
+| Regla                                                                              | Componente o helper canónico                                                                                      |
+| ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [ui-shared-components.mdc](../../.cursor/rules/ui-shared-components.mdc)           | `wheel-picker.tsx`, `Drawer` + `SheetHeader`, `FinanceDateField`, `SummarySection` (bloque con título; no `Card`) |
+| [leaf-module-ux.mdc](../../.cursor/rules/leaf-module-ux.mdc)                       | hero + hoja (`Drawer` + `SheetHeader`) (Keep Awake)                                                               |
+| [navigation-pending.mdc](../../.cursor/rules/navigation-pending.mdc)               | `LinkPendingOverlay` / `usePendingNavigation`                                                                     |
+| [confirm-important-changes.mdc](../../.cursor/rules/confirm-important-changes.mdc) | `AlertDialog`                                                                                                     |
+| [switch-row-icons.mdc](../../.cursor/rules/switch-row-icons.mdc)                   | `SettingsRow` / `SwitchFieldRow`                                                                                  |
+| [visual-status-icons.mdc](../../.cursor/rules/visual-status-icons.mdc)             | icono + `aria-label`                                                                                              |
+| [form-shell-page.mdc](../../.cursor/rules/form-shell-page.mdc)                     | `FinanceFormScreen`                                                                                               |
+| [form-shell-sheet.mdc](../../.cursor/rules/form-shell-sheet.mdc)                   | Hoja con `Drawer` + `SheetHeader` (acciones del pie) + `useDiscardChanges`                                        |
+| [form-sections.mdc](../../.cursor/rules/form-sections.mdc)                         | agrupado de campos del formulario                                                                                 |
+| [form-field-anatomy.mdc](../../.cursor/rules/form-field-anatomy.mdc)               | `Field` / `FieldLabel` / `FieldError` en cualquier control con etiqueta                                           |
+| [form-picker-fields.mdc](../../.cursor/rules/form-picker-fields.mdc)               | hoja de catálogo en cualquier vista; `usePicker` en el formulario                                                 |
+| [form-submit-flow.mdc](../../.cursor/rules/form-submit-flow.mdc)                   | constructor de payload + `toast`                                                                                  |
+| [form-derived-fields.mdc](../../.cursor/rules/form-derived-fields.mdc)             | campos derivados del estado elegido                                                                               |
+| [form-submit-disabled.mdc](../../.cursor/rules/form-submit-disabled.mdc)           | botón de envío                                                                                                    |
+| [form-field-icons.mdc](../../.cursor/rules/form-field-icons.mdc)                   | icono líder en todo campo de dato                                                                                 |
+| [icons-required.mdc](../../.cursor/rules/icons-required.mdc)                       | icono obligatorio en todo botón y control                                                                         |
+| [input-placeholders.mdc](../../.cursor/rules/input-placeholders.mdc)               | placeholder solo para ejemplo o formato, en cualquier campo                                                       |
+| [list-infinite-scroll.mdc](../../.cursor/rules/list-infinite-scroll.mdc)           | `useInfiniteQuery` + `IntersectionObserver`                                                                       |
+| [ui-section-states.mdc](../../.cursor/rules/ui-section-states.mdc)                 | `FinanceListSkeleton` / `Empty` / `FinanceErrorState`                                                             |
+| [ui-row-group.mdc](../../.cursor/rules/ui-row-group.mdc)                           | `SummarySection` o `SettingsSection` alrededor de las filas                                                       |
+| [finance-brand-logo.mdc](../../.cursor/rules/finance-brand-logo.mdc)               | `BrandLogo` / `CardNetworkMark`                                                                                   |
+| [finance-money-display.mdc](../../.cursor/rules/finance-money-display.mdc)         | `formatFinanceMoney`                                                                                              |
+| [entity-cards.mdc](../../.cursor/rules/entity-cards.mdc)                           | card de la entidad + `variant` (completa, compacta, inline)                                                       |
+| [sheet-url-route.mdc](../../.cursor/rules/sheet-url-route.mdc)                     | `useSheetParam` + `sheetId`; `AlertDialog` sin ruta                                                               |
+| [ui-single-source.mdc](../../.cursor/rules/ui-single-source.mdc)                   | la tabla «Una sola fuente de verdad»; galerías de Apariencia                                                      |
 
 Molde: `transaction-form.tsx` y `transfer-form.tsx`. No copiar los componentes de Finanzas a otros módulos; sí el patrón.
 

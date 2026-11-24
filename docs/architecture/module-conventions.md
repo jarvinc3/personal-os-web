@@ -105,14 +105,14 @@ Referencia `VERIFICADO` 2026-09-18: [`keep-awake-screen.tsx`](../../src/modules/
 
 La pantalla **es** la acción (Keep Awake, un timer, un recorder). No es un contenedor de mini-apps. Finanzas (`/finance/movimientos`) no usa este molde.
 
-| Superficie               | Qué va ahí                                                                                                                    |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Hero                     | Un estado, un número, la CTA. Centrado, `max-w-lg`.                                                                           |
-| Chrome                   | Iconos izq/der que abren sheets (recordatorio, historial, ayuda). Sin tabs locales.                                           |
-| `BottomSheet` default    | Edición secundaria. Borrador; **Guardar** / **Aceptar** confirma, **Cerrar** descarta, **Quitar** / **Limpiar** es explícito. |
-| `BottomSheet` `floating` | Evento: llegó la hora, terminó, falló. Poco texto, visual fuerte.                                                             |
-| Popover                  | Un ajuste puntual (p. ej. duración), no un flujo entero.                                                                      |
-| Página                   | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse.                                          |
+| Superficie                  | Qué va ahí                                                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Hero                        | Un estado, un número, la CTA. Centrado, `max-w-lg`.                                                                           |
+| Chrome                      | Iconos izq/der que abren sheets (recordatorio, historial, ayuda). Sin tabs locales.                                           |
+| Hoja con `Drawer` (edición) | Edición secundaria. Borrador; **Guardar** / **Aceptar** confirma, **Cerrar** descarta, **Quitar** / **Limpiar** es explícito. |
+| Hoja flotante               | Evento: llegó la hora, terminó, falló. Poco texto, visual fuerte.                                                             |
+| Popover                     | Un ajuste puntual (p. ej. duración), no un flujo entero.                                                                      |
+| Página                      | Chip / punto / badge si hay algo activo. El usuario no abre el sheet para enterarse.                                          |
 
 La screen **compone** (toolbar, hero, acciones, sheets) y habla con el contexto. Extraer un componente cuando tiene trabajo propio (ruedas, prompt con timers). No extraer un panel que solo reenvía props.
 
@@ -206,10 +206,10 @@ Keep Awake y Home **no** son slugs de `MODULE_REGISTRY`.
 
 Hoja (además):
 
-- [ ] Un hero (estado + número/CTA); secundario en `BottomSheet`, no en `Tabs*`.
+- [ ] Un hero (estado + número/CTA); secundario en una hoja (`Drawer` + `SheetHeader`), no en `Tabs*`.
 - [ ] Edición = borrador hasta Guardar/Aceptar; Cerrar descarta.
 - [ ] Estado activo visible en la página (chip, punto, badge).
-- [ ] Eventos en `BottomSheet` `floating`.
+- [ ] Eventos en hoja flotante (`Drawer` con `FLOATING_SHEET_CONTENT_CLASS`).
 - [ ] La screen compone; sin panel que solo reenvía props.
 
 ## Evidencia

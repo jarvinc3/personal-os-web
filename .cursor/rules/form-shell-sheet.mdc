@@ -1,34 +1,30 @@
 ---
-description: A form inside a BottomSheet uses the sheet actions, with edit gated by isDirty and create by schema validity.
+description: A form inside a Drawer uses the sheet footer actions, with edit gated by isDirty and create by schema validity.
 alwaysApply: true
 ---
 
 # Formulario en sheet
 
-Un formulario dentro de `BottomSheet` no usa la barra de la página: usa las acciones del sheet. La hoja y su cierre se abren por ruta: [`sheet-url-route.mdc`](./sheet-url-route.mdc).
+Un formulario dentro de una hoja (`Drawer` con `SheetHeader` y `SheetBody`) no usa la barra de la página: usa las acciones del pie. La hoja y su cierre se abren por ruta: [`sheet-url-route.mdc`](./sheet-url-route.mdc).
 
-- Pie del sheet: `actions.close` a la izquierda ("Cancelar" con `XIcon`) y `actions.submit` a la derecha ("Guardar" con `SaveIcon`). Ambos deshabilitados mientras corre la mutación.
+- Pie del sheet: botón de cancelar a la izquierda ("Cancelar" con `XIcon`) y botón de guardar a la derecha ("Guardar" con `SaveIcon`), dentro de `DrawerFooter` con `SHEET_FOOTER_CLASS`. Ambos deshabilitados mientras corre la mutación.
 - El submit muestra `Spinner` y cambia el texto a "Guardando..." mientras envía.
 - Sheet de edición: se habilita solo si hay cambios (`formState.isDirty`). Guardar sin cambios no hace nada. Al abrir, se reinicia el borrador desde el valor guardado.
 - Sheet de alta: se habilita por validez del esquema, igual que la página ([form-submit-disabled.mdc](./form-submit-disabled.mdc)).
-- Cerrar con cambios sin guardar pide confirmación con `AlertDialog` ("¿Descartar los cambios?"), no descarta en silencio. El cierre del `BottomSheet` y el botón Cancelar pasan por el mismo guarda; un guardado con éxito cierra directo. En Finanzas el guarda es `useDiscardChanges` (`src/modules/finance/shared/hooks/use-discard-changes.tsx`).
+- Cerrar con cambios sin guardar pide confirmación con `AlertDialog` ("¿Descartar los cambios?"), no descarta en silencio. El cierre del `Drawer` y el botón Cancelar pasan por el mismo guarda; un guardado con éxito cierra directo. En Finanzas el guarda es `useDiscardChanges` (`src/modules/finance/shared/hooks/use-discard-changes.tsx`).
 - Los campos se agrupan en `SummarySection` con icono, igual que en la página ([form-sections.mdc](./form-sections.mdc)).
 
 ```tsx
-actions={{
-  close: (
-    <Button variant="outline" className="flex-1" onClick={close}>
-      <XIcon className="size-4 shrink-0" />
-      Cancelar
-    </Button>
-  ),
-  submit: (
-    <Button className="flex-1" disabled={isPending || !isDirty} onClick={onSubmit}>
-      {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
-      {isPending ? "Guardando..." : "Guardar"}
-    </Button>
-  ),
-}}
+<DrawerFooter className={SHEET_FOOTER_CLASS}>
+  <Button variant="outline" className="flex-1" onClick={close}>
+    <XIcon className="size-4 shrink-0" />
+    Cancelar
+  </Button>
+  <Button className="flex-1" disabled={isPending || !isDirty} onClick={onSubmit}>
+    {isPending ? <Spinner data-icon="inline-start" /> : <SaveIcon className="size-4 shrink-0" />}
+    {isPending ? "Guardando..." : "Guardar"}
+  </Button>
+</DrawerFooter>
 ```
 
 Moldes: `src/modules/finance/catalog/components/account-sheet.tsx` y `src/modules/settings/components/sheets/edit-quiet-hours-sheet.tsx`.

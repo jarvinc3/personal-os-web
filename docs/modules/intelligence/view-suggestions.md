@@ -8,7 +8,7 @@ La fila muestra hasta tres sugerencias activas del back para la vista actual. Co
 - **Dentro del overlay:** la misma fila va encima del composer, siempre con las sugerencias activas aunque la fila exterior se haya ocultado. Cada badge lleva su propia X.
 - La fila tiene scroll horizontal y un fundido en los bordes cuando el contenido no cabe. No lleva paginación.
 - Tocar un badge en la fila exterior abre el overlay con `?suggestion=<id>` y deja el prompt de esa sugerencia en el composer. Tocar uno dentro del overlay hace lo mismo sin cerrar nada.
-- La fila se oculta mientras hay un `BottomSheet` abierto para no quedar detrás de la hoja. La vista con sheet se atiende dentro del overlay, que calcula su alcance con `route + sheet`.
+- La fila se oculta mientras hay una hoja (`Drawer`) abierta para no quedar detrás de la hoja. La vista con sheet se atiende dentro del overlay, que calcula su alcance con `route + sheet`.
 
 ## Ocultar y descartar
 

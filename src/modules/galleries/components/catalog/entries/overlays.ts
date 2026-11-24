@@ -2,60 +2,6 @@ import type { GalleryComponentMeta } from "@/src/modules/galleries/components/ca
 
 export const overlaysDocs: readonly GalleryComponentMeta[] = [
   {
-    id: "bottom-sheet",
-    name: "BottomSheet",
-    category: "overlays",
-    kind: "domain",
-    description:
-      "Hoja de edición, flotante para un evento o ancha con dos columnas, siempre por ruta.",
-    whenToUse:
-      "Edición o contenido secundario en cualquier módulo, con su URL y su cierre por Atrás.",
-    whenNotToUse:
-      "Una confirmación: AlertDialog. Una vista que merece ruta propia: pantalla.",
-    importPath: "@/src/shared/components/sheets/bottom-sheet",
-    snippet: `import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-
-const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
-
-<BottomSheet
-  open={sheet.open}
-  onOpenChange={sheet.setOpen}
-  title="Editar comercio"
-  actions={{ submit: <Button>Guardar</Button> }}
->
-  {children}
-</BottomSheet>`,
-    subcomponents: [],
-    anatomy: [{ name: "BottomSheet" }],
-    variants: [
-      { name: "variant", values: "default, floating" },
-      { name: "size", values: "default, wide" },
-      { name: "states", values: "open, pending, closed" },
-    ],
-    props: [
-      {
-        name: "open / onOpenChange",
-        type: "boolean / (open: boolean) => void",
-        description: "Estado que vive en la URL con useSheetParam.",
-      },
-      {
-        name: "actions",
-        type: "{ close?, submit?, delete? }",
-        description: "Acciones del pie de la hoja.",
-      },
-      {
-        name: "pending",
-        type: "boolean",
-        description: "Deshabilita las acciones y muestra el pending.",
-      },
-      {
-        name: "variant / size",
-        type: "BottomSheetVariant / BottomSheetSize",
-        description: "Evento flotante o panel ancho.",
-      },
-    ],
-  },
-  {
     id: "alert-dialog",
     name: "AlertDialog",
     category: "overlays",
@@ -65,7 +11,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     whenToUse:
       "Toda confirmación de una acción destructiva o difícil de deshacer: título en pregunta, consecuencia, icono y pending.",
     whenNotToUse:
-      "Navegación, abrir una hoja o un alta reversible. Una edición: BottomSheet.",
+      "Navegación, abrir una hoja o un alta reversible. Una edición: una hoja con Drawer.",
     importPath: "@/src/shared/components/ui/alert-dialog",
     snippet: `import {
   AlertDialog,
@@ -171,7 +117,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     whenToUse:
       "Un contenido modal que no es una confirmación y no merece una hoja.",
     whenNotToUse:
-      "Una edición de producto: BottomSheet por ruta. Una confirmación: AlertDialog.",
+      "Una edición de producto: una hoja con Drawer por ruta. Una confirmación: AlertDialog.",
     importPath: "@/src/shared/components/ui/dialog",
     snippet: `import {
   Dialog,
@@ -232,26 +178,33 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     category: "overlays",
     kind: "ui",
     description:
-      "Panel deslizante primitivo, con swipe para cerrar. Es la base de BottomSheet y del sidebar móvil.",
-    whenToUse: "El primitivo que compone BottomSheet o el sidebar móvil.",
+      "Panel deslizante con swipe. Cada hoja de producto compone Drawer, SheetHeader, SheetBody y su pie; los selectores se abren como drawers anidados.",
+    whenToUse:
+      "Toda hoja de producto: edición, selección o aviso, siempre por ruta. La cabecera y el cuerpo viven en SheetHeader y SheetBody.",
     whenNotToUse:
-      "Una edición de producto: BottomSheet, que ya envuelve Drawer. La demo abre por ruta.",
+      "Una confirmación: AlertDialog. Una vista que merece ruta propia: pantalla.",
     importPath: "@/src/shared/components/ui/drawer",
-    snippet: `import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/src/shared/components/ui/drawer"
+    snippet: `import { Drawer, DrawerContent, DrawerFooter } from "@/src/shared/components/ui/drawer"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 
-<Drawer open={open} onOpenChange={setOpen}>
+const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
+
+<Drawer open={sheet.open} onOpenChange={(next) => sheet.setOpen(next)}>
   <DrawerContent>
-    <DrawerHeader>
-      <DrawerTitle>Título</DrawerTitle>
-      <DrawerDescription>Descripción</DrawerDescription>
-    </DrawerHeader>
-    {children}
+    <SheetHeader title="Editar comercio" description="Los cambios se guardan al confirmar." />
+    <SheetBody>{children}</SheetBody>
+    <DrawerFooter className={SHEET_FOOTER_CLASS}>
+      <Button type="button" variant="outline" className="flex-1" onClick={() => sheet.setOpen(false)}>
+        <XIcon aria-hidden="true" />
+        Cancelar
+      </Button>
+      <Button type="button" className="flex-1" onClick={onSave}>
+        <SaveIcon aria-hidden="true" />
+        Guardar
+      </Button>
+    </DrawerFooter>
   </DrawerContent>
 </Drawer>`,
     subcomponents: [
@@ -270,7 +223,11 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
         children: [
           {
             name: "DrawerContent",
-            children: [{ name: "DrawerHeader" }, { name: "DrawerFooter" }],
+            children: [
+              { name: "SheetHeader" },
+              { name: "SheetBody" },
+              { name: "DrawerFooter" },
+            ],
           },
         ],
       },
@@ -310,6 +267,12 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
         description:
           "Muestra el tirador que permite arrastrar entre puntos de anclaje.",
       },
+      {
+        name: "composición de producto",
+        type: "SheetHeader + SheetBody + DrawerFooter",
+        description:
+          "La cabecera, el cuerpo desplazable y el pie que repite cada hoja. Un selector dentro de otra hoja se monta dentro de su Drawer y se apila como drawer anidado.",
+      },
     ],
   },
   {
@@ -321,7 +284,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     whenToUse:
       "Un ajuste puntual, una ayuda o un contenido corto junto a su disparador.",
     whenNotToUse:
-      "Un formulario de edición: BottomSheet. Un menú de acciones: DropdownMenu.",
+      "Un formulario de edición: una hoja con Drawer. Un menú de acciones: DropdownMenu.",
     importPath: "@/src/shared/components/ui/popover",
     snippet: `import {
   Popover,
@@ -383,7 +346,8 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "Menú de acciones anclado a un botón, con grupos, atajos y submenús.",
     whenToUse:
       "Las acciones secundarias de una fila o un encabezado, detrás de un botón de más.",
-    whenNotToUse: "Un formulario: BottomSheet. Una confirmación: AlertDialog.",
+    whenNotToUse:
+      "Un formulario: una hoja con Drawer. Una confirmación: AlertDialog.",
     importPath: "@/src/shared/components/ui/dropdown-menu",
     snippet: `import {
   DropdownMenu,

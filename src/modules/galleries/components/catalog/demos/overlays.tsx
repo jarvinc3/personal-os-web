@@ -1,9 +1,7 @@
 import { useState } from "react"
 import {
-  BellIcon,
   CopyIcon,
   EllipsisVerticalIcon,
-  FileTextIcon,
   HomeIcon,
   LandmarkIcon,
   LayersIcon,
@@ -13,14 +11,15 @@ import {
   SaveIcon,
   SearchIcon,
   SettingsIcon,
-  StoreIcon,
   Trash2Icon,
   WalletIcon,
   XIcon,
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -109,109 +108,11 @@ import type {
 } from "@/src/modules/galleries/components/catalog/types"
 
 const SHEET_PARAM = "ejemplo"
-const EDIT_SHEET_ID = "editar"
-const FLOATING_SHEET_ID = "flotante"
-const WIDE_SHEET_ID = "ancha"
 const DRAWER_SHEET_ID = "drawer"
 
 const NESTED_PICKER_NONE = "none"
 const NESTED_PICKER_OPEN = "anidado"
 type NestedPicker = typeof NESTED_PICKER_NONE | typeof NESTED_PICKER_OPEN
-
-function BottomSheetDemo() {
-  const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
-  const [name, setName] = useState("Comercio Ejemplo")
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      <Button onClick={() => setOpen(true, EDIT_SHEET_ID)}>
-        <StoreIcon />
-        Abrir hoja de edición
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => setOpen(true, FLOATING_SHEET_ID)}
-      >
-        <BellIcon />
-        Abrir hoja flotante
-      </Button>
-      <Button variant="outline" onClick={() => setOpen(true, WIDE_SHEET_ID)}>
-        <FileTextIcon />
-        Abrir panel ancho
-      </Button>
-
-      <BottomSheet
-        open={open && sheetId === EDIT_SHEET_ID}
-        onOpenChange={setOpen}
-        title="Editar comercio"
-        description="Los cambios se guardan al confirmar."
-        actions={{
-          submit: (
-            <Button onClick={() => simulatedTap("Guardar comercio")}>
-              <SaveIcon />
-              Guardar
-            </Button>
-          ),
-        }}
-      >
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="text-muted-foreground">Nombre</span>
-          <input
-            className="h-10 rounded-xl border border-border bg-card px-3"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-          />
-        </label>
-      </BottomSheet>
-
-      <BottomSheet
-        open={open && sheetId === WIDE_SHEET_ID}
-        onOpenChange={setOpen}
-        size="wide"
-        title="Panel ancho"
-        description="Vista previa a la izquierda y formulario a la derecha desde md."
-        actions={{
-          submit: (
-            <Button onClick={() => simulatedTap("Guardar panel ancho")}>
-              <SaveIcon />
-              Guardar
-            </Button>
-          ),
-        }}
-      >
-        <div className="grid gap-4 md:grid-cols-2">
-          <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-            Vista previa del registro.
-          </p>
-          <p className="rounded-lg border border-border p-3 text-sm">
-            Formulario de ejemplo.
-          </p>
-        </div>
-      </BottomSheet>
-
-      <BottomSheet
-        variant="floating"
-        open={open && sheetId === FLOATING_SHEET_ID}
-        onOpenChange={setOpen}
-        title="Sincronización completada"
-        description="Se importaron 12 movimientos del correo."
-        actions={{
-          submit: (
-            <Button onClick={() => setOpen(false)}>
-              <BellIcon />
-              Entendido
-            </Button>
-          ),
-        }}
-      >
-        <p className="text-sm text-muted-foreground">
-          Este es el aviso de un evento: la hoja baja como una card y no cubre
-          toda la pantalla.
-        </p>
-      </BottomSheet>
-    </div>
-  )
-}
 
 function DrawerDemo() {
   const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
@@ -221,24 +122,38 @@ function DrawerDemo() {
     <>
       <Button variant="outline" onClick={() => setOpen(true, DRAWER_SHEET_ID)}>
         <PanelBottomIcon />
-        Abrir drawer
+        Abrir hoja
       </Button>
       <Drawer open={drawerOpen} onOpenChange={(next) => setOpen(next)}>
         <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Drawer de ejemplo</DrawerTitle>
-            <DrawerDescription>
-              Se abre por la URL; Atrás lo cierra.
-            </DrawerDescription>
-          </DrawerHeader>
-          <div className="px-4 pb-4 text-sm text-muted-foreground">
-            El contenido del panel vive aquí. En producto se compone con
-            BottomSheet.
-          </div>
-          <DrawerFooter>
-            <DrawerClose render={<Button variant="outline" />}>
-              Cerrar
-            </DrawerClose>
+          <SheetHeader
+            title="Editar comercio"
+            description="Los cambios se guardan al confirmar."
+          />
+          <SheetBody>
+            <p className="text-sm text-muted-foreground">
+              La cabecera vive en SheetHeader y el cuerpo desplazable en
+              SheetBody. El pie repite las acciones de la hoja.
+            </p>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setOpen(false)}
+            >
+              <XIcon aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              className="flex-1"
+              onClick={() => simulatedTap("Guardar comercio")}
+            >
+              <SaveIcon aria-hidden="true" />
+              Guardar
+            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
@@ -247,80 +162,6 @@ function DrawerDemo() {
 }
 
 export const overlaysDemos: GalleryDemoMap = {
-  "bottom-sheet": [
-    {
-      label: "Edición, flotante y panel ancho",
-      code: `
-const { open, sheetId, setOpen } = useSheetParam("ejemplo")
-const [name, setName] = useState("Comercio Ejemplo")
-
-<div className="flex flex-wrap gap-2">
-  <Button onClick={() => setOpen(true, "editar-comercio")}>
-    <StoreIcon />
-    Abrir hoja de edición
-  </Button>
-  <Button variant="outline" onClick={() => setOpen(true, "aviso-flotante")}>
-    <BellIcon />
-    Abrir hoja flotante
-  </Button>
-  <Button variant="outline" onClick={() => setOpen(true, "panel-ancho")}>
-    <FileTextIcon />
-    Abrir panel ancho
-  </Button>
-
-  <BottomSheet
-    open={open && sheetId === "editar-comercio"}
-    onOpenChange={setOpen}
-    title="Editar comercio"
-    description="Los cambios se guardan al confirmar."
-    actions={{ submit: <Button onClick={() => simulatedTap("Guardar comercio")}><SaveIcon />Guardar</Button> }}
-  >
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="text-muted-foreground">Nombre</span>
-      <input
-        className="h-10 rounded-xl border border-border bg-card px-3"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-      />
-    </label>
-  </BottomSheet>
-
-  <BottomSheet
-    open={open && sheetId === "panel-ancho"}
-    onOpenChange={setOpen}
-    size="wide"
-    title="Panel ancho"
-    description="Vista previa a la izquierda y formulario a la derecha desde md."
-    actions={{ submit: <Button onClick={() => simulatedTap("Guardar panel ancho")}><SaveIcon />Guardar</Button> }}
-  >
-    <div className="grid gap-4 md:grid-cols-2">
-      <p className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-        Vista previa del registro.
-      </p>
-      <p className="rounded-lg border border-border p-3 text-sm">
-        Formulario de ejemplo.
-      </p>
-    </div>
-  </BottomSheet>
-
-  <BottomSheet
-    variant="floating"
-    open={open && sheetId === "aviso-flotante"}
-    onOpenChange={setOpen}
-    title="Sincronización completada"
-    description="Se importaron 12 movimientos del correo."
-    actions={{ submit: <Button onClick={() => setOpen(false)}><BellIcon />Entendido</Button> }}
-  >
-    <p className="text-sm text-muted-foreground">
-      Este es el aviso de un evento: la hoja baja como una card y no cubre toda
-      la pantalla.
-    </p>
-  </BottomSheet>
-</div>
-`,
-      node: <BottomSheetDemo />,
-    },
-  ],
   "alert-dialog": [
     {
       label: "Confirmación destructiva",
@@ -500,7 +341,7 @@ const [name, setName] = useState("Comercio Ejemplo")
   ],
   drawer: [
     {
-      label: "Drawer abierto por ruta",
+      label: "Hoja de producto por ruta",
       code: `
 const { open, sheetId, setOpen } = useSheetParam("ejemplo")
 const drawerOpen = open && sheetId === "drawer"
@@ -508,26 +349,33 @@ const drawerOpen = open && sheetId === "drawer"
 <>
   <Button variant="outline" onClick={() => setOpen(true, "drawer")}>
     <PanelBottomIcon />
-    Abrir drawer
+    Abrir hoja
   </Button>
-  <Drawer
-    open={drawerOpen}
-    onOpenChange={(next) => setOpen(next)}
-  >
+  <Drawer open={drawerOpen} onOpenChange={(next) => setOpen(next)}>
     <DrawerContent>
-      <DrawerHeader>
-        <DrawerTitle>Drawer de ejemplo</DrawerTitle>
-        <DrawerDescription>
-          Se abre por la URL; Atrás lo cierra.
-        </DrawerDescription>
-      </DrawerHeader>
-      <div className="px-4 pb-4 text-sm text-muted-foreground">
-        El contenido del panel vive aquí. En producto se compone con BottomSheet.
-      </div>
-      <DrawerFooter>
-        <DrawerClose render={<Button variant="outline" />}>
-          Cerrar
-        </DrawerClose>
+      <SheetHeader
+        title="Editar comercio"
+        description="Los cambios se guardan al confirmar."
+      />
+      <SheetBody>
+        <p className="text-sm text-muted-foreground">
+          La cabecera vive en SheetHeader y el cuerpo desplazable en SheetBody.
+        </p>
+      </SheetBody>
+      <DrawerFooter className={SHEET_FOOTER_CLASS}>
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={() => setOpen(false)}
+        >
+          <XIcon aria-hidden="true" />
+          Cancelar
+        </Button>
+        <Button type="button" className="flex-1" onClick={onSave}>
+          <SaveIcon aria-hidden="true" />
+          Guardar
+        </Button>
       </DrawerFooter>
     </DrawerContent>
   </Drawer>
@@ -795,54 +643,6 @@ const drawerOpen = open && sheetId === "drawer"
       ),
     },
   ],
-}
-
-type SheetExampleProps = {
-  id: string
-  variant?: "default" | "floating"
-  size?: "default" | "wide"
-  pending?: boolean
-  title?: string
-}
-
-function SheetExample({
-  id,
-  variant = "default",
-  size = "default",
-  pending = false,
-  title = "Editar comercio",
-}: SheetExampleProps) {
-  const { open, sheetId, setOpen } = useSheetParam(SHEET_PARAM)
-
-  return (
-    <>
-      <Button variant="outline" onClick={() => setOpen(true, id)}>
-        <PanelBottomIcon />
-        Abrir hoja
-      </Button>
-      <BottomSheet
-        open={open && sheetId === id}
-        variant={variant}
-        size={size}
-        pending={pending}
-        onOpenChange={(next) => setOpen(next)}
-        title={title}
-        description="Los cambios se guardan al confirmar."
-        actions={{
-          submit: (
-            <Button onClick={() => setOpen(false)}>
-              <SaveIcon />
-              Guardar
-            </Button>
-          ),
-        }}
-      >
-        <p className="text-sm text-muted-foreground">
-          El contenido de la hoja vive aquí.
-        </p>
-      </BottomSheet>
-    </>
-  )
 }
 
 type DrawerExampleProps = {
@@ -1293,33 +1093,6 @@ function CommandDialogExample() {
 }
 
 export const overlaysVariantDemos: GalleryVariantDemoMap = {
-  "bottom-sheet": {
-    variant: [
-      { label: "default", node: <SheetExample id="hoja-default" /> },
-      {
-        label: "floating",
-        node: (
-          <SheetExample
-            id="hoja-flotante"
-            variant="floating"
-            title="Sincronización completada"
-          />
-        ),
-      },
-    ],
-    size: [
-      { label: "default", node: <SheetExample id="hoja-tamano-default" /> },
-      {
-        label: "wide",
-        node: <SheetExample id="hoja-ancha" size="wide" title="Panel ancho" />,
-      },
-    ],
-    states: [
-      { label: "open", node: <SheetExample id="hoja-abierta" /> },
-      { label: "pending", node: <SheetExample id="hoja-pendiente" pending /> },
-      { label: "closed", node: <SheetExample id="hoja-cerrada" /> },
-    ],
-  },
   "alert-dialog": {
     "size (Content)": [
       { label: "default", node: <AlertExample /> },

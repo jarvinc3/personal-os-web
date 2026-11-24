@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Las hojas de producto componen `Drawer`, `SheetHeader`, `SheetBody` y su pie; los selectores abiertos desde una hoja se apilan como drawers anidados y el botón del agente queda solo en las hojas que ya declaran ayuda. Se retira el wrapper `BottomSheet` y sus fichas de galería (#418).
+
 - Interno: los armadores de cuenta, institución y tarjeta del catálogo devuelven sus campos opcionales en vez de escribir en el cuerpo recibido; la composición queda en el armador y el resultado es el mismo (#620).
 
 - Interno: los armadores de formulario de Finanzas se parten por intención: identidad de tarjeta, datos de suscripción, campos y validaciones del asistente de préstamo, y validaciones de Ajustes. Mismos valores, mismos mensajes y mismos cuerpos (#584).
