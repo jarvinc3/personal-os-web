@@ -8,7 +8,6 @@ type SheetBodyProps = {
   children: ReactNode
 }
 
-/** Cuerpo desplazable de una hoja; con `pending` muestra el spinner. */
 export function SheetBody({ pending = false, children }: SheetBodyProps) {
   return (
     <div

@@ -8,6 +8,5 @@ export const WIDE_SHEET_CONTENT_CLASS =
 export const FLOATING_SHEET_CONTENT_CLASS =
   "mx-auto w-[calc(100%-2rem)] max-w-md overflow-hidden rounded-xl border data-[swipe-direction=down]:bottom-4 data-[swipe-direction=down]:rounded-xl"
 
-/** Pie de una hoja: acciones en fila, alineadas al final. */
 export const SHEET_FOOTER_CLASS =
   "mt-4 flex w-full flex-row items-center justify-end gap-2 pt-4"
