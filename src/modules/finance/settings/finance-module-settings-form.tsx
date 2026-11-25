@@ -3,6 +3,7 @@
 import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { SETTINGS_SHEET_KEYS, WipeDataSheet } from "@/src/modules/settings"
@@ -160,6 +161,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const financeBranches = findAppBranches(branchesQuery.data, DATA_APP.FINANCE)
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
+  const institutionsQuery = useInstitutions(isModuleEnabled)
+  const institutions = institutionsQuery.data ?? []
   const moneyDisplay = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -412,6 +415,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       >
         <MovementDefaultsSection
           control={control}
+          institutions={institutions}
           accounts={accounts}
           display={moneyDisplay}
         />
@@ -425,6 +429,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <FixedIncomeSection
           control={control}
           baseCurrency={config.baseCurrency}
+          institutions={institutions}
           accounts={accounts}
           display={moneyDisplay}
         />

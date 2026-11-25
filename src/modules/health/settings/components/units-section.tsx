@@ -7,6 +7,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -43,10 +44,8 @@ export function HealthUnitsSection({
       >
         <FieldLabel
           onClick={() => setValue("units", "metric", { shouldDirty: true })}
-          className={cn(
-            FIELD_CHOICE_CLASS_NAME,
-            units === "metric" ? "border bg-card/50" : "border-border bg-card"
-          )}
+          className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+          style={activeRowStyle(MODULE_ACCENT, units === "metric")}
         >
           <FieldMedia icon={Ruler} color={MODULE_ACCENT} />
           <FieldContent>
@@ -56,10 +55,8 @@ export function HealthUnitsSection({
         </FieldLabel>
         <FieldLabel
           onClick={() => setValue("units", "imperial", { shouldDirty: true })}
-          className={cn(
-            FIELD_CHOICE_CLASS_NAME,
-            units === "imperial" ? "border bg-card/50" : "border-border bg-card"
-          )}
+          className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+          style={activeRowStyle(MODULE_ACCENT, units === "imperial")}
         >
           <FieldMedia icon={Ruler} color={MODULE_ACCENT} />
           <FieldContent>

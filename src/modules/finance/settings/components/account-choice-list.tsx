@@ -1,27 +1,22 @@
-import {
-  FIELD_CHOICE_CLASS_NAME,
-  FieldContent,
-  FieldDescription,
-  FieldLabel,
-  FieldMedia,
-  FieldTitle,
-} from "@/src/shared/components/ui/field"
-import { cn } from "@/src/shared/lib/utils"
-import {
-  EMPTY_COMPACT_CLASS_NAME,
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { getModule } from "@/src/shared/constants/module-registry"
-import { Wallet } from "lucide-react"
+"use client"
 
-const MODULE_ACCENT = getModule("finance").accent
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
+import {
+  encodeLedgerTarget,
+  splitLedgerTarget,
+} from "@/src/modules/finance/shared/lib/ledger-payloads"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 
 type AccountChoiceListProps = {
+  /** Clave del selector en la ruta; cada lista usa la suya. */
+  pickerKey: string
+  institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   display: FinanceMoneyDisplay
   selectedId: string
@@ -30,44 +25,39 @@ type AccountChoiceListProps = {
 }
 
 export function AccountChoiceList({
+  pickerKey,
+  institutions,
   accounts,
   display,
   selectedId,
   onSelect,
   noneLabel,
 }: AccountChoiceListProps) {
+  const { picker, openPicker, closeHandlerFor } = usePicker<string>("none")
+
   return (
     <>
-      <FieldLabel
-        onClick={() => onSelect("")}
-        className={cn(
-          FIELD_CHOICE_CLASS_NAME,
-          selectedId === "" ? "border bg-card/50" : "border-border bg-card"
-        )}
-        style={selectedId === "" ? { borderColor: MODULE_ACCENT } : undefined}
-      >
-        <FieldMedia icon={Wallet} color={MODULE_ACCENT} />
-        <FieldContent>
-          <FieldTitle className="text-sm">{noneLabel}</FieldTitle>
-        </FieldContent>
-      </FieldLabel>
-      {accounts.map((account) => (
-        <AccountProductRow
-          key={account.id}
-          account={account}
-          display={display}
-          variant="compact"
-          selected={selectedId === account.id}
-          onPress={() => onSelect(account.id)}
-        />
-      ))}
-      {accounts.length === 0 ? (
-        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-          <EmptyHeader>
-            <EmptyTitle>No hay cuentas todavía</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
+      <DestinationTrigger
+        destination={
+          selectedId ? encodeLedgerTarget("account", selectedId) : ""
+        }
+        accounts={accounts}
+        cards={[]}
+        display={display}
+        placeholder={noneLabel}
+        onClick={() => openPicker(pickerKey)}
+      />
+      <DestinationPickerSheet
+        open={picker === pickerKey}
+        onOpenChange={closeHandlerFor(pickerKey)}
+        institutions={institutions}
+        accounts={accounts}
+        cards={[]}
+        display={display}
+        accountsOnly
+        noneLabel={noneLabel}
+        onSelect={(next) => onSelect(splitLedgerTarget(next).accountId ?? "")}
+      />
     </>
   )
 }

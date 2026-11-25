@@ -62,6 +62,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import {
   SummaryItem,
@@ -69,6 +70,9 @@ import {
 } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
+import { getModule } from "@/src/shared/constants/module-registry"
+
+const MODULE_ACCENT = getModule("finance").accent
 
 const TERM_OPTIONS = LOAN_WIZARD_TERMS.map((term) => ({
   value: String(term),
@@ -156,10 +160,8 @@ export function LoanWizardWhoStep({
     <SummarySection title="¿Con quién es el préstamo?" icon={LandmarkIcon}>
       <FieldLabel
         onClick={() => onSelectWho("BANK")}
-        className={cn(
-          FIELD_CHOICE_CLASS_NAME,
-          who === "BANK" ? "border bg-card/50" : "border-border bg-card"
-        )}
+        className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+        style={activeRowStyle(MODULE_ACCENT, who === "BANK")}
       >
         <FieldMedia icon={LandmarkIcon} />
         <FieldContent>
@@ -171,10 +173,8 @@ export function LoanWizardWhoStep({
       </FieldLabel>
       <FieldLabel
         onClick={() => onSelectWho("PERSON")}
-        className={cn(
-          FIELD_CHOICE_CLASS_NAME,
-          who === "PERSON" ? "border bg-card/50" : "border-border bg-card"
-        )}
+        className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+        style={activeRowStyle(MODULE_ACCENT, who === "PERSON")}
       >
         <FieldMedia icon={UserIcon} />
         <FieldContent>

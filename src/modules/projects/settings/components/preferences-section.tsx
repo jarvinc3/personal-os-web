@@ -6,6 +6,7 @@ import {
   FieldContent,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -31,7 +32,7 @@ export function ProjectsPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={Archive} color={MODULE_ACCENT} />
             <FieldContent>
@@ -52,7 +53,7 @@ export function ProjectsPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={Bell} color={MODULE_ACCENT} />
             <FieldContent>
@@ -75,7 +76,7 @@ export function ProjectsPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={ArrowRightLeft} color={MODULE_ACCENT} />
             <FieldContent>

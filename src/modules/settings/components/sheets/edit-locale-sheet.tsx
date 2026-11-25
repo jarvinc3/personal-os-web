@@ -8,6 +8,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
@@ -84,15 +85,9 @@ export function EditLocaleSheet({ open, onOpenChange }: SettingsSheetProps) {
                   onClick={() => setLocale(option.value)}
                   className={cn(
                     FIELD_CHOICE_CLASS_NAME,
-                    locale === option.value
-                      ? "border bg-card/50"
-                      : "border-border bg-card"
+                    "border-border bg-card"
                   )}
-                  style={
-                    locale === option.value
-                      ? { borderColor: LOCALE_ACCENT }
-                      : undefined
-                  }
+                  style={activeRowStyle(LOCALE_ACCENT, locale === option.value)}
                 >
                   <FieldMedia icon={GlobeIcon} color={LOCALE_ACCENT} />
                   <FieldContent>

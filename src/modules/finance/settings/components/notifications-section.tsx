@@ -4,6 +4,7 @@ import {
   FieldContent,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { DayWheel } from "@/src/shared/components/forms/wheel-picker"
@@ -154,9 +155,7 @@ export function NotificationsSection({
                 <Field
                   variant="card"
                   orientation="horizontal"
-                  style={
-                    field.value ? { borderColor: MODULE_ACCENT } : undefined
-                  }
+                  style={activeRowStyle(MODULE_ACCENT, field.value)}
                 >
                   <FieldMedia icon={row.icon} color={MODULE_ACCENT} />
                   <FieldContent>

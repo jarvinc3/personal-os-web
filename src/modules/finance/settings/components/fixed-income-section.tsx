@@ -5,6 +5,7 @@ import {
   FieldDescription,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { DayListField } from "@/src/shared/components/forms/day-list-field"
@@ -19,7 +20,10 @@ import { Controller, useWatch, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
 import { AccountChoiceList } from "./account-choice-list"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -31,6 +35,7 @@ const FREQUENCY_OPTIONS = [
 type FixedIncomeSectionProps = {
   control: Control<FinanceModuleFormValues>
   baseCurrency: string
+  institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   display: FinanceMoneyDisplay
 }
@@ -38,6 +43,7 @@ type FixedIncomeSectionProps = {
 export function FixedIncomeSection({
   control,
   baseCurrency,
+  institutions,
   accounts,
   display,
 }: FixedIncomeSectionProps) {
@@ -55,7 +61,7 @@ export function FixedIncomeSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={HandCoins} color={MODULE_ACCENT} />
             <FieldContent>
@@ -129,6 +135,8 @@ export function FixedIncomeSection({
               name="fixedIncomeAccountId"
               render={({ field }) => (
                 <AccountChoiceList
+                  pickerKey="fixed-income-account"
+                  institutions={institutions}
                   accounts={accounts}
                   display={display}
                   selectedId={field.value}

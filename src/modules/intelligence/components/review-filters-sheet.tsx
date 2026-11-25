@@ -31,6 +31,7 @@ import {
   FieldError,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
@@ -492,11 +493,10 @@ function ReviewFiltersSheetForm({
               <Field
                 variant="card"
                 orientation="horizontal"
-                style={
+                style={activeRowStyle(
+                  SETTINGS_REGISTRY.ai.accent,
                   draft.uncertain
-                    ? { borderColor: SETTINGS_REGISTRY.ai.accent }
-                    : undefined
-                }
+                )}
               >
                 <FieldMedia icon={CircleHelpIcon} />
                 <FieldContent>

@@ -6,6 +6,7 @@ import {
   FieldContent,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -31,7 +32,7 @@ export function HealthPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={EyeOff} color={MODULE_ACCENT} />
             <FieldContent>
@@ -54,7 +55,7 @@ export function HealthPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={Target} color={MODULE_ACCENT} />
             <FieldContent>
@@ -77,7 +78,7 @@ export function HealthPreferencesSection({
           <Field
             variant="card"
             orientation="horizontal"
-            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
           >
             <FieldMedia icon={CalendarDays} color={MODULE_ACCENT} />
             <FieldContent>

@@ -4,6 +4,7 @@ import {
   FieldContent,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
@@ -101,7 +102,7 @@ export function DisplaySection({ control, baseCurrency }: DisplaySectionProps) {
               <Field
                 variant="card"
                 orientation="horizontal"
-                style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+                style={activeRowStyle(MODULE_ACCENT, field.value)}
               >
                 <FieldMedia icon={Coins} color={MODULE_ACCENT} />
                 <FieldContent>
@@ -122,7 +123,7 @@ export function DisplaySection({ control, baseCurrency }: DisplaySectionProps) {
               <Field
                 variant="card"
                 orientation="horizontal"
-                style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+                style={activeRowStyle(MODULE_ACCENT, field.value)}
               >
                 <FieldMedia icon={Shrink} color={MODULE_ACCENT} />
                 <FieldContent>

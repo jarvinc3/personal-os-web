@@ -60,6 +60,8 @@ type DestinationPickerSheetProps = {
   excludeTarget?: string | null
   /** A transfer origin is always an account, never a card. */
   accountsOnly?: boolean
+  /** Fila para dejar la elección sin cuenta. */
+  noneLabel?: string
 }
 
 export function DestinationPickerSheet({
@@ -72,6 +74,7 @@ export function DestinationPickerSheet({
   onSelect,
   excludeTarget = null,
   accountsOnly = false,
+  noneLabel,
 }: DestinationPickerSheetProps) {
   const [institutionId, setInstitutionId] = useState<string | null>(null)
   const [tab, setTab] = useState("accounts")
@@ -144,6 +147,17 @@ export function DestinationPickerSheet({
           }
         />
         <SheetBody>
+          {noneLabel && !selected ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="justify-start"
+              onClick={() => choose("")}
+            >
+              <WalletIcon className="size-4 shrink-0" aria-hidden="true" />
+              {noneLabel}
+            </Button>
+          ) : null}
           {selected?.kind === "institution" ? (
             <Tabs {...tabsBehavior}>
               <TabsList className="h-auto w-full rounded-2xl p-1">

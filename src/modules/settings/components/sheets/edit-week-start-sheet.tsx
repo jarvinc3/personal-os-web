@@ -8,6 +8,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
@@ -98,17 +99,11 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
             >
               <FieldLabel
                 onClick={() => setSelection(AUTOMATIC)}
-                className={cn(
-                  FIELD_CHOICE_CLASS_NAME,
+                className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+                style={activeRowStyle(
+                  WEEK_START_ACCENT,
                   selection === AUTOMATIC
-                    ? "border bg-card/50"
-                    : "border-border bg-card"
                 )}
-                style={
-                  selection === AUTOMATIC
-                    ? { borderColor: WEEK_START_ACCENT }
-                    : undefined
-                }
               >
                 <FieldMedia
                   icon={CalendarRangeIcon}
@@ -128,15 +123,12 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
                   }
                   className={cn(
                     FIELD_CHOICE_CLASS_NAME,
-                    selection === String(option.value)
-                      ? "border bg-card/50"
-                      : "border-border bg-card"
+                    "border-border bg-card"
                   )}
-                  style={
+                  style={activeRowStyle(
+                    WEEK_START_ACCENT,
                     selection === String(option.value)
-                      ? { borderColor: WEEK_START_ACCENT }
-                      : undefined
-                  }
+                  )}
                 >
                   <FieldMedia
                     icon={CalendarRangeIcon}

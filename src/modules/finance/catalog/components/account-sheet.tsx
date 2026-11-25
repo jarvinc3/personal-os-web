@@ -58,6 +58,7 @@ import {
   FieldError,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
@@ -84,6 +85,8 @@ import {
   type AccountFormValues,
 } from "@/src/modules/finance/catalog/lib/account-form"
 import { resolveAccountFormReset } from "@/src/modules/finance/catalog/lib/account-form-session"
+
+const MODULE_ACCENT = getModule("finance").accent
 
 const TYPE_OPTIONS = FINANCE_ACCOUNT_TYPES.map((value) => ({
   value,
@@ -559,16 +562,9 @@ export function AccountSheet({
                       <Field
                         variant="card"
                         orientation="horizontal"
-                        style={
-                          field.value
-                            ? { borderColor: getModule("finance").accent }
-                            : undefined
-                        }
+                        style={activeRowStyle(MODULE_ACCENT, field.value)}
                       >
-                        <FieldMedia
-                          icon={Star}
-                          color={getModule("finance").accent}
-                        />
+                        <FieldMedia icon={Star} color={MODULE_ACCENT} />
                         <FieldContent>
                           <FieldLabel htmlFor={field.name}>
                             Cuenta predeterminada

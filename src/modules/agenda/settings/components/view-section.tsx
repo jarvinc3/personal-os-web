@@ -4,10 +4,10 @@ import type { AgendaModuleFormValues } from "@/src/modules/agenda/settings/lib/a
 import {
   FIELD_CHOICE_CLASS_NAME,
   FieldContent,
-  FieldDescription,
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
@@ -67,12 +67,8 @@ export function AgendaViewSection({
               onClick={() =>
                 setValue("defaultView", o.value, { shouldDirty: true })
               }
-              className={cn(
-                FIELD_CHOICE_CLASS_NAME,
-                defaultView === o.value
-                  ? "border bg-card/50"
-                  : "border-border bg-card"
-              )}
+              className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+              style={activeRowStyle(MODULE_ACCENT, defaultView === o.value)}
             >
               <FieldMedia icon={CalendarDays} color={MODULE_ACCENT} />
               <FieldContent>

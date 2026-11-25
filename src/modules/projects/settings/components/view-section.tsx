@@ -7,6 +7,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -57,12 +58,8 @@ export function ProjectsViewSection({
             onClick={() =>
               setValue("defaultView", option.value, { shouldDirty: true })
             }
-            className={cn(
-              FIELD_CHOICE_CLASS_NAME,
-              defaultView === option.value
-                ? "border bg-card/50"
-                : "border-border bg-card"
-            )}
+            className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+            style={activeRowStyle(MODULE_ACCENT, defaultView === option.value)}
           >
             <FieldMedia icon={option.icon} color={MODULE_ACCENT} />
             <FieldContent>

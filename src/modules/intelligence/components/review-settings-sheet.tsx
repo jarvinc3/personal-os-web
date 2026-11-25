@@ -8,6 +8,7 @@ import {
   FieldDescription,
   FieldLabel,
   FieldMedia,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
@@ -145,11 +146,10 @@ function ReviewSettingsSheetForm({
             <Field
               variant="card"
               orientation="horizontal"
-              style={
+              style={activeRowStyle(
+                SETTINGS_REGISTRY.ai.accent,
                 acceptVerifiedSenders
-                  ? { borderColor: SETTINGS_REGISTRY.ai.accent }
-                  : undefined
-              }
+              )}
             >
               <FieldMedia icon={ShieldCheckIcon} />
               <FieldContent>

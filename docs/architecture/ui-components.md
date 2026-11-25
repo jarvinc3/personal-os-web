@@ -200,7 +200,7 @@ Viven en `src/modules/finance/shared/components/forms/`. No copiarlos a otros m�
 
 - `FinanceDateField` → fecha
 - `FinanceMoneyField` → monto con teclado y calculadora; `FinanceCurrencyPickerSheet` → moneda con bandera; `ToggleGroup` → segmentos
-- Cuenta o tarjeta: `DestinationTrigger` + `DestinationPickerSheet`; institución: `InstitutionTrigger` + `InstitutionPickerSheet`; categoría: `CategoryTrigger` + `CategoryPickerSheet`; país: `CountryTrigger` + `CountryPickerSheet`. No se elige un catálogo largo en un `Select` inline.
+- Cuenta o tarjeta: `DestinationTrigger` + `DestinationPickerSheet`; institución: `InstitutionTrigger` + `InstitutionPickerSheet`; categoría: `CategoryTrigger` + `CategoryPickerSheet`; país: `CountryTrigger` + `CountryPickerSheet`. `DestinationPickerSheet` acepta `noneLabel` cuando la elección puede quedar vacía. No se elige un catálogo largo en un `Select` inline.
 - Cerrar un formulario con cambios sin guardar: `useDiscardChanges` (`src/modules/finance/shared/hooks/use-discard-changes.tsx`).
 - `Field` / `FieldLabel` / `FieldError` (`src/shared/components/ui/field.tsx`) → etiqueta y error en cualquier control con etiqueta, no solo en un formulario que envía
 - Campos de texto y select, en cualquier vista: icono líder del tipo de dato (`Field` + `InputGroup` con `InputGroupAddon`, `SelectTrigger` con `icon`). Placeholder solo como ejemplo o formato. Un catálogo largo abre hoja, no un `Select` inline. Estado binario en una fila: icono + `aria-label`, no la etiqueta cruda.

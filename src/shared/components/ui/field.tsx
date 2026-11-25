@@ -11,6 +11,11 @@ import type { LucideIcon } from "lucide-react"
 export const FIELD_CHOICE_CLASS_NAME =
   "flex w-full cursor-pointer flex-row items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all duration-100 ease-in-out hover:bg-card/70 active:scale-[0.99] active:bg-muted/80"
 
+/** Fondo tenue del acento en la fila activa de un switch o un radio. */
+export function activeRowStyle(accentColor: string, active: boolean) {
+  return active ? { backgroundColor: `${accentColor}1a` } : undefined
+}
+
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
     <fieldset

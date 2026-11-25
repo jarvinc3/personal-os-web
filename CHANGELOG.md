@@ -12,7 +12,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
-- Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. Las filas de switch resaltan al encender con el acento de su módulo y el fondo de comprobado, igual que las filas de elección. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
+- Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. Las filas de switch y las de elección resaltan con el fondo del acento de su módulo al 10 %, sin borde de color. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
 
 - Las rutas de Agenda, Proyectos y Salud componen `Empty` con el enlace a su ajuste, y las pilas de cards y el conocimiento componen `Skeleton`. Se retiran `ModuleComingSoon`, `CardSkeleton` y `KnowledgeListSkeleton`. Sin cambio visible ni de contrato (#419).
 
@@ -165,6 +165,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - El cliente deja de repetir los identificadores y las dependencias del vaciado: se retira `wipe-layers.ts` y la lista usa `GET /users/me/data/branches` con los conteos y lo que arrastra cada rama; las etiquetas, descripciones e iconos viven en un solo mapa de textos por identificador (#270).
 
 ### Corregido
+
+- La cuenta del ingreso fijo y la cuenta por defecto de Finanzas se eligen con el selector de instituciones y cuentas que usa el resto de la app, con una fila para dejarlas sin cuenta, en vez de una lista de cuentas dentro de Ajustes (#419).
 
 - Las hojas, diálogos, menús y tooltips vuelven a abrirse en toda la app: el portal monta en `document.body` cuando no hay un contenedor propio, en vez de quedarse esperando uno que nunca llega. La regresión venía de la resolución única del portal en #613.
 - La galería de Diálogos y sheets muestra solo el disparador de cada variante y abre el componente real al pulsarlo, a pantalla completa. Ya no aparecen abiertos en su recuadro: las hojas y el drawer se abren por ruta y el menú lateral móvil deja de abrirse solo.

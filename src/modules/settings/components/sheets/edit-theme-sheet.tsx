@@ -8,6 +8,7 @@ import {
   FieldLabel,
   FieldMedia,
   FieldTitle,
+  activeRowStyle,
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
@@ -96,9 +97,11 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
                   onClick={() => draft.change(option.value)}
                   className={cn(
                     FIELD_CHOICE_CLASS_NAME,
+                    "border-border bg-card"
+                  )}
+                  style={activeRowStyle(
+                    SETTINGS_REGISTRY.appearance.accent,
                     draft.value === option.value
-                      ? "border bg-card/50"
-                      : "border-border bg-card"
                   )}
                 >
                   <FieldMedia
