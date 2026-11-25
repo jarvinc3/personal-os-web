@@ -3,12 +3,8 @@ import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import {
-  CardSkeleton,
-  ListSkeleton,
-} from "@/src/shared/components/feedback/list-skeleton"
+import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-import { ModuleComingSoon } from "@/src/shared/components/feedback/module-coming-soon"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   EMPTY_COMPACT_CLASS_NAME,
@@ -170,25 +166,6 @@ export const estadosDemos: GalleryDemoMap = {
       ),
     },
   ],
-  "card-skeleton": [
-    {
-      label: "Alturas 16, 28 y 40",
-      code: `
-<div className="flex w-full flex-col gap-3">
-  <CardSkeleton height={16} />
-  <CardSkeleton height={28} />
-  <CardSkeleton height={40} />
-</div>
-`,
-      node: (
-        <div className="flex w-full flex-col gap-3">
-          <CardSkeleton height={16} />
-          <CardSkeleton height={28} />
-          <CardSkeleton height={40} />
-        </div>
-      ),
-    },
-  ],
   "loading-view": [
     {
       label: "Inline",
@@ -258,15 +235,6 @@ export const estadosDemos: GalleryDemoMap = {
           Cargando
         </Button>
       ),
-    },
-  ],
-  "module-coming-soon": [
-    {
-      label: "App activa sin sus pantallas",
-      code: `
-<ModuleComingSoon slug="agenda" />
-`,
-      node: <ModuleComingSoon slug="agenda" />,
     },
   ],
 }
@@ -403,13 +371,6 @@ export const estadosVariantDemos: GalleryVariantDemoMap = {
       },
     ],
   },
-  "card-skeleton": {
-    height: [
-      { label: "16", node: <CardSkeleton height={16} /> },
-      { label: "28", node: <CardSkeleton height={28} /> },
-      { label: "40", node: <CardSkeleton height={40} /> },
-    ],
-  },
   "loading-view": {
     variant: [
       {
@@ -472,12 +433,6 @@ export const estadosVariantDemos: GalleryVariantDemoMap = {
         label: "tamaño y color del contexto",
         node: <Spinner className="size-6 text-primary" />,
       },
-    ],
-  },
-  "module-coming-soon": {
-    slug: [
-      { label: "agenda", node: <ModuleComingSoon slug="agenda" /> },
-      { label: "health", node: <ModuleComingSoon slug="health" /> },
     ],
   },
 }

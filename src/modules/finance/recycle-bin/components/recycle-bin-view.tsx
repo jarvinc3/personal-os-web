@@ -13,7 +13,7 @@ import type {
   FinanceDeletedType,
 } from "@/src/modules/finance/shared/types/api"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
@@ -250,9 +250,18 @@ export function RecycleBinView() {
       pending={recycleBinQuery.isPending}
       pendingFallback={
         <div className="flex flex-col gap-2">
-          <CardSkeleton height={16} />
-          <CardSkeleton height={16} />
-          <CardSkeleton height={16} />
+          <Skeleton
+            className="h-16 border border-border bg-muted/40"
+            aria-hidden
+          />
+          <Skeleton
+            className="h-16 border border-border bg-muted/40"
+            aria-hidden
+          />
+          <Skeleton
+            className="h-16 border border-border bg-muted/40"
+            aria-hidden
+          />
         </div>
       }
       empty={archived.length === 0 && deleted.length === 0}

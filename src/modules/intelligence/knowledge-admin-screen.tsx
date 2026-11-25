@@ -2,7 +2,6 @@
 
 import { ApiError } from "@/src/config/api-client"
 import { KnowledgeItemRow } from "@/src/modules/intelligence/components/knowledge-item-row"
-import { KnowledgeListSkeleton } from "@/src/modules/intelligence/components/knowledge-list-skeleton"
 import {
   useKnowledgeAdminQueue,
   usePromoteKnowledge,
@@ -19,6 +18,7 @@ import type { KnowledgeItem } from "@/src/modules/intelligence/types/knowledge.t
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,7 +88,14 @@ export function KnowledgeAdminScreen() {
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4 pb-10 md:px-6">
       {roleQuery.isPending || (isAdmin && queueQuery.isPending) ? (
         <QueueSection>
-          <KnowledgeListSkeleton />
+          <div
+            className="flex flex-col gap-2 p-2"
+            aria-label="Cargando conocimiento"
+          >
+            <Skeleton className="h-16 w-full rounded-2xl" />
+            <Skeleton className="h-16 w-full rounded-2xl" />
+            <Skeleton className="h-16 w-full rounded-2xl" />
+          </div>
         </QueueSection>
       ) : forbidden ? (
         <QueueSection>

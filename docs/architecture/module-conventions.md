@@ -177,7 +177,7 @@ Un archivo se borra cuando la screen nueva lo reemplaza y ningún import lo usa.
 
 ## Settings vs módulo de producto
 
-`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `health`). Un módulo sin pantallas de producto no declara `ModuleAppNav`: su ruta monta `ModuleComingSoon`.
+`MODULE_REGISTRY` lista slugs backend (`finance`, `agenda`, `projects`, `health`). Un módulo sin pantallas de producto no declara `ModuleAppNav`: su ruta monta un `Empty` con el icono y el nombre del módulo y el enlace a su ajuste.
 
 | Slug                     | App routes                                    | Nav               |
 | ------------------------ | --------------------------------------------- | ----------------- |
@@ -220,4 +220,4 @@ Hoja (además):
 - Finance: `src/modules/finance/constants/nav.ts`, `components/layout/finance-layout.tsx`
 - Keep Awake (hoja): `KeepAwakeLayout`, `src/modules/keep-awake/keep-awake-screen.tsx`
 - Shell autenticado: `app/(app)/layout.tsx`
-- Placeholder: `src/shared/components/feedback/module-coming-soon.tsx`
+- Placeholder: `app/(app)/agenda/page.tsx`, `app/(app)/projects/page.tsx` y `app/(app)/health/page.tsx`

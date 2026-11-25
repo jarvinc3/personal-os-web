@@ -37,8 +37,8 @@ import {
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useSheetListEntity } from "@/src/modules/finance/shared/hooks/use-sheet-entity"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { prefetchFinanceCategories } from "@/src/modules/finance/shared/lib/finance-prefetch"
 import { buildInstitutionStackItems } from "@/src/modules/finance/shared/lib/institution-stack"
@@ -241,8 +241,14 @@ export function FinanceProductsList({
           pending={stackPending}
           pendingFallback={
             <div className="flex flex-col gap-3">
-              <CardSkeleton height={28} />
-              <CardSkeleton height={28} />
+              <Skeleton
+                className="h-28 border border-border bg-muted/40"
+                aria-hidden
+              />
+              <Skeleton
+                className="h-28 border border-border bg-muted/40"
+                aria-hidden
+              />
             </div>
           }
           empty={stackItems.length === 0}

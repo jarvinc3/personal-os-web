@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Las rutas de Agenda, Proyectos y Salud componen `Empty` con el enlace a su ajuste, y las pilas de cards y el conocimiento componen `Skeleton`. Se retiran `ModuleComingSoon`, `CardSkeleton` y `KnowledgeListSkeleton`. Sin cambio visible ni de contrato (#419).
+
 - El campo de monto de Finanzas compone `InputGroup` directamente, y el vacío y la carga de Notificaciones componen `Empty` y `Skeleton`. Se retiran los wrappers `FinanceAmountInput`, `NotificationEmptyState` y `NotificationListSkeleton`, cada uno con un solo uso. Sin cambio visible ni de contrato (#419).
 
 - Las hojas de producto componen `Drawer`, `SheetHeader`, `SheetBody` y su pie; los selectores abiertos desde una hoja se apilan como drawers anidados y el botón del agente queda solo en las hojas que ya declaran ayuda. Se retira el wrapper `BottomSheet` y sus fichas de galería (#418).

@@ -2,7 +2,6 @@
 
 import { KnowledgeDataActions } from "@/src/modules/intelligence/components/knowledge-data-actions"
 import { KnowledgeItemRow } from "@/src/modules/intelligence/components/knowledge-item-row"
-import { KnowledgeListSkeleton } from "@/src/modules/intelligence/components/knowledge-list-skeleton"
 import { useKnowledge } from "@/src/modules/intelligence/hooks/use-knowledge"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
@@ -13,6 +12,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { BrainCircuit, Globe, Mail } from "lucide-react"
 
@@ -33,7 +33,14 @@ export function KnowledgeExplorer() {
       ) : null}
 
       {knowledgeQuery.isPending ? (
-        <KnowledgeListSkeleton />
+        <div
+          className="flex flex-col gap-2 p-2"
+          aria-label="Cargando conocimiento"
+        >
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+          <Skeleton className="h-16 w-full rounded-2xl" />
+        </div>
       ) : knowledgeQuery.isError ? (
         <ErrorState
           message="No se pudo cargar tu conocimiento."
