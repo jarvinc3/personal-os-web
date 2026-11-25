@@ -1,5 +1,11 @@
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import {
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldMedia,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import { DayWheel } from "@/src/shared/components/forms/wheel-picker"
 import {
   SummaryGroup,
@@ -145,14 +151,23 @@ export function NotificationsSection({
               control={control}
               name={row.key}
               render={({ field }) => (
-                <SwitchFieldRow
-                  icon={row.icon}
-                  iconColor={MODULE_ACCENT}
-                  accentColor={MODULE_ACCENT}
-                  label={row.label}
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
+                <Field
+                  variant="card"
+                  orientation="horizontal"
+                  style={
+                    field.value ? { borderColor: MODULE_ACCENT } : undefined
+                  }
+                >
+                  <FieldMedia icon={row.icon} color={MODULE_ACCENT} />
+                  <FieldContent>
+                    <FieldLabel htmlFor={field.name}>{row.label}</FieldLabel>
+                  </FieldContent>
+                  <Switch
+                    id={field.name}
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </Field>
               )}
             />
           ))}

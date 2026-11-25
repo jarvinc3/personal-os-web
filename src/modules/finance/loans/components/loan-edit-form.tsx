@@ -20,7 +20,6 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -55,7 +54,12 @@ import {
   loanSchema,
   type LoanFormValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -497,7 +501,9 @@ export function LoanEditForm({
                     </FieldError>
                   ) : null}
                 </Field>
-                <FinanceHelpText>Vacío = sin tasa.</FinanceHelpText>
+                <FieldDescription className="text-xs">
+                  Vacío = sin tasa.
+                </FieldDescription>
               </div>
             )}
           />

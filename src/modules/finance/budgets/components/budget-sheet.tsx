@@ -8,10 +8,7 @@ import {
   FinanceDateField,
   formatFinanceDateLabel,
 } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSuggestionRow,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSuggestionRow } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryMultiTrigger } from "@/src/modules/finance/shared/components/pickers/category-multi-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
@@ -55,7 +52,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
@@ -439,10 +441,10 @@ export function BudgetSheet({
                   />
                 </>
               ) : (
-                <FinanceHelpText>
+                <FieldDescription className="text-xs">
                   {formatFinanceDateLabel(periodStart, display.locale)} —{" "}
                   {formatFinanceDateLabel(periodEnd, display.locale)}
-                </FinanceHelpText>
+                </FieldDescription>
               )}
             </SummarySection>
 

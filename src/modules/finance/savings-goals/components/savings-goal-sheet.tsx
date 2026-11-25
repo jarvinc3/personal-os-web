@@ -2,10 +2,7 @@
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSuggestionRow,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSuggestionRow } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -43,7 +40,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -205,12 +207,12 @@ export function SavingsGoalSheet({
           <SheetBody pending={pending}>
             <SummarySection title="Meta de ahorro" icon={PiggyBankIcon}>
               {goal ? (
-                <FinanceHelpText>
+                <FieldDescription className="text-xs">
                   {goal.isCompleted ? "Completada" : "En curso"}
                   {goal.isCompleted && goal.completedAt
                     ? ` · ${formatCalendarDate(goal.completedAt, display.locale)}`
                     : ""}
-                </FinanceHelpText>
+                </FieldDescription>
               ) : null}
               <Controller
                 control={control}
@@ -271,9 +273,9 @@ export function SavingsGoalSheet({
                   </Field>
                 )}
               />
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 Elige la cuenta donde guardas este dinero.
-              </FinanceHelpText>
+              </FieldDescription>
             </SummarySection>
 
             <SummarySection title="Progreso" icon={TargetIcon}>

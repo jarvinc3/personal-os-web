@@ -1,6 +1,15 @@
 "use client"
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { DEFAULT_USER_PREFERENCES } from "@/src/modules/settings/constants/user-settings-defaults"
 import { useAppearanceDraft } from "@/src/modules/settings/hooks/use-appearance-draft"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
@@ -10,7 +19,6 @@ import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.type
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Drawer,
@@ -83,16 +91,28 @@ export function EditThemeSheet({ open, onOpenChange }: SettingsSheetProps) {
               }}
             >
               {SETTINGS_REGISTRY.appearance.themeOptions.map((option) => (
-                <OptionRow
+                <FieldLabel
                   key={option.value}
-                  icon={option.icon}
-                  iconColor={SETTINGS_REGISTRY.appearance.accent}
-                  label={option.label}
-                  description={option.description}
-                  selected={draft.value === option.value}
-                  onPress={() => draft.change(option.value)}
-                  trailing={<RadioGroupItem value={option.value} />}
-                />
+                  onClick={() => draft.change(option.value)}
+                  className={cn(
+                    FIELD_CHOICE_CLASS_NAME,
+                    draft.value === option.value
+                      ? "border bg-card/50"
+                      : "border-border bg-card"
+                  )}
+                >
+                  <FieldMedia
+                    icon={option.icon}
+                    color={SETTINGS_REGISTRY.appearance.accent}
+                  />
+                  <FieldContent>
+                    <FieldTitle className="text-sm">{option.label}</FieldTitle>
+                    <FieldDescription className="text-xs text-muted-foreground">
+                      {option.description}
+                    </FieldDescription>
+                  </FieldContent>
+                  <RadioGroupItem value={option.value} />
+                </FieldLabel>
               ))}
             </RadioGroup>
           </SummarySection>

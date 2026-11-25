@@ -4,14 +4,6 @@ import { Button } from "@/src/shared/components/ui/button"
 import { CheckIcon, SparklesIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
-type FinanceHelpTextProps = {
-  children: ReactNode
-}
-
-export function FinanceHelpText({ children }: FinanceHelpTextProps) {
-  return <p className="text-xs text-muted-foreground">{children}</p>
-}
-
 type FinanceSuggestionRowProps = {
   children: ReactNode
   actionLabel?: string

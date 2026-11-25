@@ -5,7 +5,6 @@ import {
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -58,7 +57,12 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   SummaryItem,
@@ -287,9 +291,9 @@ export function CardPaymentSheet({
                 value={transactionDate}
                 onChange={setTransactionDate}
               />
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 El pago no cuenta como gasto: solo mueve dinero a la tarjeta.
-              </FinanceHelpText>
+              </FieldDescription>
             </SummarySection>
           </SheetBody>
           {!createMutation.isPending ? (

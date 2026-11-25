@@ -1,8 +1,15 @@
 "use client"
 
 import type { HealthModuleFormValues } from "@/src/modules/health/settings/lib/health-module-form"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -34,22 +41,32 @@ export function HealthUnitsSection({
           })
         }
       >
-        <OptionRow
-          icon={Ruler}
-          iconColor={MODULE_ACCENT}
-          label="Métrico"
-          selected={units === "metric"}
-          onPress={() => setValue("units", "metric", { shouldDirty: true })}
-          trailing={<RadioGroupItem value="metric" />}
-        />
-        <OptionRow
-          icon={Ruler}
-          iconColor={MODULE_ACCENT}
-          label="Imperial"
-          selected={units === "imperial"}
-          onPress={() => setValue("units", "imperial", { shouldDirty: true })}
-          trailing={<RadioGroupItem value="imperial" />}
-        />
+        <FieldLabel
+          onClick={() => setValue("units", "metric", { shouldDirty: true })}
+          className={cn(
+            FIELD_CHOICE_CLASS_NAME,
+            units === "metric" ? "border bg-card/50" : "border-border bg-card"
+          )}
+        >
+          <FieldMedia icon={Ruler} color={MODULE_ACCENT} />
+          <FieldContent>
+            <FieldTitle className="text-sm">Métrico</FieldTitle>
+          </FieldContent>
+          <RadioGroupItem value="metric" />
+        </FieldLabel>
+        <FieldLabel
+          onClick={() => setValue("units", "imperial", { shouldDirty: true })}
+          className={cn(
+            FIELD_CHOICE_CLASS_NAME,
+            units === "imperial" ? "border bg-card/50" : "border-border bg-card"
+          )}
+        >
+          <FieldMedia icon={Ruler} color={MODULE_ACCENT} />
+          <FieldContent>
+            <FieldTitle className="text-sm">Imperial</FieldTitle>
+          </FieldContent>
+          <RadioGroupItem value="imperial" />
+        </FieldLabel>
       </RadioGroup>
     </SummarySection>
   )

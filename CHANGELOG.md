@@ -12,6 +12,8 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
+
 - Las rutas de Agenda, Proyectos y Salud componen `Empty` con el enlace a su ajuste, y las pilas de cards y el conocimiento componen `Skeleton`. Se retiran `ModuleComingSoon`, `CardSkeleton` y `KnowledgeListSkeleton`. Sin cambio visible ni de contrato (#419).
 
 - El campo de monto de Finanzas compone `InputGroup` directamente, y el vacío y la carga de Notificaciones componen `Empty` y `Skeleton`. Se retiran los wrappers `FinanceAmountInput`, `NotificationEmptyState` y `NotificationListSkeleton`, cada uno con un solo uso. Sin cambio visible ni de contrato (#419).

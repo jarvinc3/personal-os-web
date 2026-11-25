@@ -16,7 +16,7 @@ Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField
 - Duración horas+minutos → `DurationWheels` (`HH:mm` de duración) dentro de `WheelField`. No usar `TimePairWheels` (incluye a. m./p. m.)
 - Fecha → `FinanceDateField` (ya es un `WheelField`). `DateWheels` solo vive dentro de ese panel
 - Un día del mes (o un rango corto de días) → `DayWheel` (ya es un `WheelField`). Varios días → `DayListField`. No un `Input` para escribir el número
-- Una elección exclusiva de dos a cinco opciones, sin descripción → `ChoiceGrid` (`accentColor` del módulo). Una lista larga sigue en filas `OptionRow`
+- Una elección exclusiva de dos a cinco opciones, sin descripción → `ChoiceGrid` (`accentColor` del módulo). Una lista larga sigue en filas de `FieldLabel` con `FieldMedia` y `RadioGroupItem`
 - Minutos: `minuteStep={1}` (00–59), `{5}` o `{10}` — no usar slots fijos de 15 min
 
 **Listas largas en sheets:** búsqueda que ignora mayúsculas y acentos, y un destello (`animate-search-flash`) en cada coincidencia. Un collapsible se abre en la búsqueda solo si coincide un hijo; si coincide el padre, sigue cerrado.
@@ -33,7 +33,7 @@ Toda rueda en una pantalla usa la misma fila que `FinanceDateField`: `WheelField
 
 **Campos:** en cualquier vista, un control donde se escribe o se elige un dato lleva icono líder. La etiqueta va arriba, pequeña y en muted; el error va pegado al campo con `FieldError`. Un catálogo largo se elige en una hoja desde una fila disparadora, no en un `Select` inline. Placeholder solo como ejemplo o formato; una búsqueda puede decir "Buscar". El detalle vive en `form-field-icons.mdc`, `input-placeholders.mdc`, `form-field-anatomy.mdc` y `form-picker-fields.mdc`. Lo que es solo del envío (barra, esquema, botón deshabilitado) sigue en las reglas `form-shell-*` y `form-submit-*`.
 
-Un switch (`SettingsRow` con `onSwitchChange`, `SwitchFieldRow`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. `Tabs` persiste el tab en la query para que Atrás lo recupere (`persist={false}` en un sheet que lo reinicia); el chip se desliza, el panel anima su presencia y un swipe horizontal cambia de tab. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
+Un switch (`SettingsRow` con `onSwitchChange`, o una fila `Field` con `variant="card"`) lleva icono a la izquierda del título; la descripción va debajo del título. Un estado binario se muestra con icono, no con la palabra. Módulo **hoja** (Keep Awake): hero + iconos + sheets — **no** `Tabs*` locales. Módulo **con secciones** (Finanzas): `ModuleSectionLayout` (rutas), no tabs inventadas dentro de una página. `Tabs` persiste el tab en la query para que Atrás lo recupere (`persist={false}` en un sheet que lo reinicia); el chip se desliza, el panel anima su presencia y un swipe horizontal cambia de tab. Ver `leaf-module-ux.mdc` y [module-conventions.md](docs/architecture/module-conventions.md).
 
 ```tsx
 <WheelField label="Hora" valueLabel="9:00 a. m." icon={ClockIcon}>

@@ -58,13 +58,21 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { Field } from "@/src/shared/components/ui/field"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
-import { SelectField } from "@/src/shared/components/forms/select-field"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/components/ui/select"
 import {
   ALL_MESSAGE_STATUSES,
   MESSAGE_STATUS_FILTERS,
@@ -137,6 +145,17 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
+
+const MESSAGE_STATUS_OPTIONS = [
+  {
+    value: ALL_MESSAGE_STATUSES,
+    label: "Todos los estados",
+  },
+  ...MESSAGE_STATUS_FILTERS.map((status) => ({
+    value: status,
+    label: MESSAGE_STATUS_LABELS[status],
+  })),
+]
 
 export function IntelligenceScreen() {
   return <IntelligenceScreenBody />
@@ -747,24 +766,40 @@ function IntelligenceScreenBody() {
                       />
                     </InputGroup>
                   </Field>
-                  <SelectField
-                    label="Estado del correo"
-                    value={messageStatus}
-                    onChange={(value) =>
-                      setMessageStatus(value as MessageStatusFilter)
-                    }
-                    icon={ListFilter}
-                    options={[
-                      {
-                        value: ALL_MESSAGE_STATUSES,
-                        label: "Todos los estados",
-                      },
-                      ...MESSAGE_STATUS_FILTERS.map((status) => ({
-                        value: status,
-                        label: MESSAGE_STATUS_LABELS[status],
-                      })),
-                    ]}
-                  />
+                  <Field className="flex flex-col gap-1">
+                    <FieldLabel
+                      htmlFor="message-status-select"
+                      className="text-sm text-muted-foreground"
+                    >
+                      Estado del correo
+                    </FieldLabel>
+                    <Select
+                      value={messageStatus}
+                      onValueChange={(next) =>
+                        setMessageStatus((next ?? "") as MessageStatusFilter)
+                      }
+                      items={MESSAGE_STATUS_OPTIONS}
+                      modal={false}
+                    >
+                      <SelectTrigger
+                        id="message-status-select"
+                        icon={ListFilter}
+                        className="w-full max-w-full cursor-pointer"
+                      >
+                        <SelectValue placeholder="Estado del correo" />
+                      </SelectTrigger>
+                      <SelectContent alignItemWithTrigger={false} side="bottom">
+                        <SelectGroup>
+                          <SelectLabel>Estado del correo</SelectLabel>
+                          {MESSAGE_STATUS_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </Field>
                   {messageFiltersActive ? (
                     <p className="px-1 text-xs leading-relaxed text-muted-foreground">
                       La búsqueda cubre todos los correos, no solo los cargados.

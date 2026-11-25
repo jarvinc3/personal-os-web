@@ -1,6 +1,5 @@
 "use client"
 
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -41,7 +40,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -259,14 +263,14 @@ export function LoanPaymentSheet({
                     </Alert>
                   ) : null}
                   {excessAsPrepayment && excess > 0 ? (
-                    <FinanceHelpText>
+                    <FieldDescription className="text-xs">
                       {`El excedente de ${formatFinanceMoney(excess, display)} abona al capital.`}
-                    </FinanceHelpText>
+                    </FieldDescription>
                   ) : null}
                   {parsedAmount > 0 && parsedAmount < dueTotal ? (
-                    <FinanceHelpText>
+                    <FieldDescription className="text-xs">
                       {`Pago parcial: quedarán ${formatFinanceMoney(dueTotal - parsedAmount, display)} de esta cuota.`}
-                    </FinanceHelpText>
+                    </FieldDescription>
                   ) : null}
                   <Field className="gap-1">
                     <FieldLabel className="text-sm text-muted-foreground">
@@ -291,9 +295,9 @@ export function LoanPaymentSheet({
                 </SummarySection>
               </>
             ) : (
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 Este préstamo no tiene cuotas pendientes.
-              </FinanceHelpText>
+              </FieldDescription>
             )}
           </SheetBody>
           {!payment.isPending ? (

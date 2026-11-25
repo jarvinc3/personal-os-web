@@ -45,7 +45,6 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Drawer,
@@ -54,10 +53,13 @@ import {
 } from "@/src/shared/components/ui/drawer"
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
+  FieldMedia,
 } from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { Label } from "@/src/shared/components/ui/label"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -554,14 +556,26 @@ export function AccountSheet({
                     control={control}
                     name="isDefaultForInstitution"
                     render={({ field }) => (
-                      <SwitchFieldRow
-                        icon={Star}
-                        iconColor={getModule("finance").accent}
-                        label="Cuenta predeterminada"
-                        description="Se usa cuando el correo del banco no trae dígitos de cuenta."
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Field variant="card" orientation="horizontal">
+                        <FieldMedia
+                          icon={Star}
+                          color={getModule("finance").accent}
+                        />
+                        <FieldContent>
+                          <FieldLabel htmlFor={field.name}>
+                            Cuenta predeterminada
+                          </FieldLabel>
+                          <FieldDescription className="text-xs">
+                            Se usa cuando el correo del banco no trae dígitos de
+                            cuenta.
+                          </FieldDescription>
+                        </FieldContent>
+                        <Switch
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </Field>
                     )}
                   />
                 </>

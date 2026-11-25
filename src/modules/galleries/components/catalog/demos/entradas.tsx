@@ -1,15 +1,12 @@
-import { useState } from "react"
 import Image from "next/image"
 import {
   BellIcon,
   FileTextIcon,
-  MailIcon,
   SearchIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react"
 
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import {
   Attachment,
   AttachmentAction,
@@ -34,9 +31,11 @@ import {
 } from "@/src/shared/components/ui/combobox"
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
+  FieldMedia,
 } from "@/src/shared/components/ui/field"
 import { Input } from "@/src/shared/components/ui/input"
 import {
@@ -68,38 +67,7 @@ import type {
 
 const DENSITIES = ["Cómoda", "Compacta", "Amplia"]
 const LABELS = ["Casa", "Trabajo", "Viaje"]
-
-function SwitchFieldRowDemo() {
-  const [notify, setNotify] = useState(true)
-  const [digest, setDigest] = useState(false)
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <SwitchFieldRow
-        label="Avisos"
-        description="Recibir un aviso al llegar un cobro"
-        icon={BellIcon}
-        checked={notify}
-        onCheckedChange={setNotify}
-      />
-      <SwitchFieldRow
-        label="Resumen semanal"
-        description="Correo con el resumen de la semana"
-        icon={MailIcon}
-        checked={digest}
-        onCheckedChange={setDigest}
-      />
-      <SwitchFieldRow
-        label="Avisos del sistema"
-        description="No se puede cambiar en este ejemplo"
-        icon={BellIcon}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-      />
-    </div>
-  )
-}
+const GALLERY_ACCENT = "#0f766e"
 
 export const entradasDemos: GalleryDemoMap = {
   input: [
@@ -343,41 +311,6 @@ export const entradasDemos: GalleryDemoMap = {
           </div>
         </div>
       ),
-    },
-  ],
-  "switch-field-row": [
-    {
-      label: "Encendido, apagado y deshabilitado",
-      code: `
-const [notify, setNotify] = useState(true)
-const [digest, setDigest] = useState(false)
-
-<div className="flex w-full flex-col gap-3">
-  <SwitchFieldRow
-    label="Avisos"
-    description="Recibir un aviso al llegar un cobro"
-    icon={BellIcon}
-    checked={notify}
-    onCheckedChange={setNotify}
-  />
-  <SwitchFieldRow
-    label="Resumen semanal"
-    description="Correo con el resumen de la semana"
-    icon={MailIcon}
-    checked={digest}
-    onCheckedChange={setDigest}
-  />
-  <SwitchFieldRow
-    label="Avisos del sistema"
-    description="No se puede cambiar en este ejemplo"
-    icon={BellIcon}
-    checked={false}
-    onCheckedChange={() => {}}
-    disabled
-  />
-</div>
-`,
-      node: <SwitchFieldRowDemo />,
     },
   ],
   "input-group": [
@@ -761,6 +694,36 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
         ),
       },
     ],
+    variant: [
+      {
+        label: "plain",
+        node: (
+          <Field className="w-full max-w-sm gap-1">
+            <FieldLabel htmlFor="variant-field-plain">Nombre</FieldLabel>
+            <Input id="variant-field-plain" placeholder="Mercado Central" />
+          </Field>
+        ),
+      },
+      {
+        label: "card",
+        node: (
+          <Field
+            variant="card"
+            orientation="horizontal"
+            className="w-full max-w-sm"
+          >
+            <FieldMedia icon={BellIcon} color={GALLERY_ACCENT} />
+            <FieldContent>
+              <FieldLabel htmlFor="variant-field-card">Avisos</FieldLabel>
+              <FieldDescription>
+                Recibir un aviso al llegar un cobro
+              </FieldDescription>
+            </FieldContent>
+            <Switch id="variant-field-card" defaultChecked />
+          </Field>
+        ),
+      },
+    ],
     states: [
       {
         label: "normal",
@@ -954,63 +917,6 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
             <Switch id="variant-switch-disabled" disabled />
             <Label htmlFor="variant-switch-disabled">No disponible</Label>
           </div>
-        ),
-      },
-    ],
-  },
-  "switch-field-row": {
-    states: [
-      {
-        label: "checked",
-        node: (
-          <SwitchFieldRow
-            label="Avisos"
-            description="Recibir un aviso al llegar un cobro"
-            icon={BellIcon}
-            checked
-            onCheckedChange={() => {}}
-          />
-        ),
-      },
-      {
-        label: "unchecked",
-        node: (
-          <SwitchFieldRow
-            label="Resumen semanal"
-            description="Correo con el resumen de la semana"
-            icon={MailIcon}
-            checked={false}
-            onCheckedChange={() => {}}
-          />
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <SwitchFieldRow
-            label="Avisos del sistema"
-            description="No se puede cambiar"
-            icon={BellIcon}
-            checked={false}
-            onCheckedChange={() => {}}
-            disabled
-          />
-        ),
-      },
-    ],
-    accentColor: [
-      {
-        label: "color del módulo cuando está activo",
-        node: (
-          <SwitchFieldRow
-            label="Avisos"
-            description="Recibir un aviso al llegar un cobro"
-            icon={BellIcon}
-            iconColor="#0f766e"
-            accentColor="#0f766e"
-            checked
-            onCheckedChange={() => {}}
-          />
         ),
       },
     ],

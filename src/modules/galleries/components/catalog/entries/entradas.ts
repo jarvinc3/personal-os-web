@@ -129,6 +129,7 @@ import { Label } from "@/src/shared/components/ui/label"
       "FieldSeparator",
       "FieldContent",
       "FieldTitle",
+      "FieldMedia",
     ],
     anatomy: [
       {
@@ -143,6 +144,7 @@ import { Label } from "@/src/shared/components/ui/label"
     ],
     variants: [
       { name: "orientation", values: "vertical, horizontal, responsive" },
+      { name: "variant", values: "plain, card" },
       { name: "states", values: "normal, invalid, disabled" },
     ],
     props: [
@@ -150,6 +152,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "orientation",
         type: '"vertical" | "horizontal" | "responsive"',
         description: "Etiqueta arriba o al lado del control.",
+      },
+      {
+        name: "variant",
+        type: '"plain" | "card"',
+        description: "Sin fondo o como tarjeta con borde, relleno y radio.",
       },
       {
         name: "data-invalid",
@@ -203,7 +210,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description: "Grupo de opciones exclusivas.",
     whenToUse: "Elegir una sola opción entre pocas, con el nombre de cada una.",
     whenNotToUse:
-      "Un catálogo largo o con descripciones: OptionRow en una hoja. Tampoco para un encendido: Switch.",
+      "Un catálogo largo o con descripciones: filas de elección con `FieldLabel`, `FieldMedia` y `RadioGroupItem` en una hoja. Tampoco para un encendido: Switch.",
     importPath: "@/src/shared/components/ui/radio-group",
     snippet: `import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group"
 
@@ -248,7 +255,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description: "Interruptor de encendido que aplica al instante.",
     whenToUse: "Un ajuste binario con efecto inmediato.",
     whenNotToUse:
-      "Una opción que se confirma al guardar: Checkbox. Tampoco dentro de una fila sin icono: SwitchFieldRow.",
+      'Una opción que se confirma al guardar: Checkbox. Tampoco dentro de una fila con icono: `Field` con `variant="card"`.',
     importPath: "@/src/shared/components/ui/switch",
     snippet: `import { Switch } from "@/src/shared/components/ui/switch"
 
@@ -271,51 +278,6 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "disabled",
         type: "boolean",
         description: "Bloquea el control.",
-      },
-    ],
-  },
-  {
-    id: "switch-field-row",
-    name: "SwitchFieldRow",
-    category: "entradas",
-    kind: "domain",
-    description:
-      "Fila de ajuste con icono, título, descripción y switch obligatorio.",
-    whenToUse:
-      "Un encendido binario dentro de un formulario o una sección de ajustes.",
-    whenNotToUse:
-      "Un ajuste que depende de otro: se oculta hasta que el padre se active.",
-    importPath: "@/src/shared/components/forms/switch-field-row",
-    snippet: `import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
-
-<SwitchFieldRow
-  label="Avisos"
-  description="Recibir un aviso al llegar un cobro"
-  icon={BellIcon}
-  checked={notify}
-  onCheckedChange={setNotify}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "SwitchFieldRow" }],
-    variants: [
-      { name: "states", values: "checked, unchecked, disabled" },
-      { name: "accentColor", values: "color del módulo cuando está activo" },
-    ],
-    props: [
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono obligatorio a la izquierda del título.",
-      },
-      {
-        name: "checked / onCheckedChange",
-        type: "boolean / (checked: boolean) => void",
-        description: "Estado y cambio.",
-      },
-      {
-        name: "disabled",
-        type: "boolean",
-        description: "Bloquea el switch y la fila.",
       },
     ],
   },
@@ -406,7 +368,9 @@ import { Label } from "@/src/shared/components/ui/label"
 } from "@/src/shared/components/ui/select"
 
 <Select defaultValue="comfortable">
-  <SelectTrigger><SelectValue placeholder="Elige" /></SelectTrigger>
+  <SelectTrigger icon={SlidersHorizontalIcon}>
+    <SelectValue placeholder="Elige" />
+  </SelectTrigger>
   <SelectContent>
     <SelectGroup>
       <SelectItem value="comfortable">Cómoda</SelectItem>
@@ -452,6 +416,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "items",
         type: "{ value, label }[]",
         description: "Etiquetas que muestra el disparador.",
+      },
+      {
+        name: "icon (trigger)",
+        type: "LucideIcon",
+        description: "Icono líder del dato dentro del SelectTrigger.",
       },
       {
         name: "disabled",

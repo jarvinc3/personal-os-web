@@ -5,17 +5,12 @@ import {
   ArrowUpRightIcon,
   CalendarDaysIcon,
   ClockIcon,
-  MoonIcon,
   PaletteIcon,
-  SlidersHorizontalIcon,
-  SunIcon,
 } from "lucide-react"
 
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 import { ColorPickerSwatch } from "@/src/shared/components/forms/color-picker"
 import { DayListField } from "@/src/shared/components/forms/day-list-field"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
-import { SelectField } from "@/src/shared/components/forms/select-field"
 import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { Button } from "@/src/shared/components/ui/button"
@@ -42,38 +37,6 @@ const MOVEMENT_KINDS = [
   { value: "income", label: "Ingreso", icon: ArrowUpRightIcon },
   { value: "transfer", label: "Transferencia", icon: ArrowLeftRightIcon },
 ] as const
-
-const DENSITIES = [
-  { value: "comoda", label: "Cómoda" },
-  { value: "compacta", label: "Compacta" },
-]
-
-function OptionRowDemo() {
-  const [theme, setTheme] = useState("claro")
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <OptionRow
-        label="Tema claro"
-        description="Siempre claro"
-        icon={SunIcon}
-        iconColor={GALLERY_ACCENT}
-        accentColor={GALLERY_ACCENT}
-        selected={theme === "claro"}
-        onPress={() => setTheme("claro")}
-      />
-      <OptionRow
-        label="Tema oscuro"
-        description="Sigue al sistema"
-        icon={MoonIcon}
-        iconColor={GALLERY_ACCENT}
-        accentColor={GALLERY_ACCENT}
-        selected={theme === "oscuro"}
-        onPress={() => setTheme("oscuro")}
-      />
-    </div>
-  )
-}
 
 function ChoiceGridDemo() {
   const [kind, setKind] = useState<MovementKind>("expense")
@@ -106,38 +69,6 @@ function ChoiceGridDemo() {
             </span>
           ),
         }))}
-      />
-    </div>
-  )
-}
-
-function SelectFieldDemo() {
-  const [density, setDensity] = useState("comoda")
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <SelectField
-        label="Densidad"
-        value={density}
-        onChange={setDensity}
-        icon={SlidersHorizontalIcon}
-        options={DENSITIES}
-      />
-      <SelectField
-        label="Densidad"
-        value=""
-        onChange={() => {}}
-        icon={SlidersHorizontalIcon}
-        options={DENSITIES}
-        error="Elige una densidad"
-      />
-      <SelectField
-        label="Densidad fija"
-        value="comoda"
-        onChange={() => {}}
-        icon={SlidersHorizontalIcon}
-        options={DENSITIES}
-        disabled
       />
     </div>
   )
@@ -197,36 +128,6 @@ function DayListFieldDemo() {
 }
 
 export const selectoresDemos: GalleryDemoMap = {
-  "option-row": [
-    {
-      label: "Normal y seleccionada",
-      code: `
-const [theme, setTheme] = useState("claro")
-
-<div className="flex w-full flex-col gap-3">
-  <OptionRow
-    label="Tema claro"
-    description="Siempre claro"
-    icon={SunIcon}
-    iconColor="#0f766e"
-    accentColor="#0f766e"
-    selected={theme === "claro"}
-    onPress={() => setTheme("claro")}
-  />
-  <OptionRow
-    label="Tema oscuro"
-    description="Sigue al sistema"
-    icon={MoonIcon}
-    iconColor="#0f766e"
-    accentColor="#0f766e"
-    selected={theme === "oscuro"}
-    onPress={() => setTheme("oscuro")}
-  />
-</div>
-`,
-      node: <OptionRowDemo />,
-    },
-  ],
   "choice-grid": [
     {
       label: "Tres opciones con icono y celdas con media",
@@ -270,46 +171,6 @@ const MOVEMENT_KINDS = [
 </div>
 `,
       node: <ChoiceGridDemo />,
-    },
-  ],
-  "select-field": [
-    {
-      label: "Normal, con error y deshabilitado",
-      code: `
-const [density, setDensity] = useState("comoda")
-
-const DENSITIES = [
-  { value: "comoda", label: "Cómoda" },
-  { value: "compacta", label: "Compacta" },
-]
-
-<div className="flex w-full flex-col gap-3">
-  <SelectField
-    label="Densidad"
-    value={density}
-    onChange={setDensity}
-    icon={SlidersHorizontalIcon}
-    options={DENSITIES}
-  />
-  <SelectField
-    label="Densidad"
-    value=""
-    onChange={() => {}}
-    icon={SlidersHorizontalIcon}
-    options={DENSITIES}
-    error="Elige una densidad"
-  />
-  <SelectField
-    label="Densidad fija"
-    value="comoda"
-    onChange={() => {}}
-    icon={SlidersHorizontalIcon}
-    options={DENSITIES}
-    disabled
-  />
-</div>
-`,
-      node: <SelectFieldDemo />,
     },
   ],
   "color-picker-swatch": [
@@ -390,62 +251,6 @@ const [days, setDays] = useState("1, 15")
 }
 
 export const selectoresVariantDemos: GalleryVariantDemoMap = {
-  "option-row": {
-    states: [
-      {
-        label: "normal",
-        node: (
-          <OptionRow
-            label="Tema claro"
-            description="Siempre claro"
-            icon={SunIcon}
-            iconColor={GALLERY_ACCENT}
-            accentColor={GALLERY_ACCENT}
-          />
-        ),
-      },
-      {
-        label: "selected",
-        node: (
-          <OptionRow
-            label="Tema claro"
-            description="Siempre claro"
-            icon={SunIcon}
-            iconColor={GALLERY_ACCENT}
-            accentColor={GALLERY_ACCENT}
-            selected
-          />
-        ),
-      },
-      {
-        label: "disabled por el padre",
-        node: (
-          <div aria-disabled="true" className="pointer-events-none opacity-50">
-            <OptionRow
-              label="Tema oscuro"
-              description="Sigue al sistema"
-              icon={MoonIcon}
-            />
-          </div>
-        ),
-      },
-    ],
-    accentColor: [
-      {
-        label: "color del módulo en el borde elegido",
-        node: (
-          <OptionRow
-            label="Tema claro"
-            description="Siempre claro"
-            icon={SunIcon}
-            iconColor={GALLERY_ACCENT}
-            accentColor={GALLERY_ACCENT}
-            selected
-          />
-        ),
-      },
-    ],
-  },
   "choice-grid": {
     columns: [
       {
@@ -561,65 +366,6 @@ export const selectoresVariantDemos: GalleryVariantDemoMap = {
             ariaLabel="Tipo de movimiento deshabilitado"
             accentColor={GALLERY_ACCENT}
             disabled
-          />
-        ),
-      },
-    ],
-  },
-  "select-field": {
-    states: [
-      {
-        label: "normal",
-        node: (
-          <SelectField
-            label="Densidad"
-            value="comoda"
-            onChange={() => {}}
-            icon={SlidersHorizontalIcon}
-            options={DENSITIES}
-          />
-        ),
-      },
-      {
-        label: "invalid",
-        node: (
-          <SelectField
-            label="Densidad"
-            value=""
-            onChange={() => {}}
-            icon={SlidersHorizontalIcon}
-            options={DENSITIES}
-            error="Elige una densidad"
-          />
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <SelectField
-            label="Densidad fija"
-            value="comoda"
-            onChange={() => {}}
-            icon={SlidersHorizontalIcon}
-            options={DENSITIES}
-            disabled
-          />
-        ),
-      },
-    ],
-    mark: [
-      {
-        label: "ReactNode opcional junto a cada opción",
-        node: (
-          <SelectField
-            label="Densidad"
-            value="comoda"
-            onChange={() => {}}
-            icon={SlidersHorizontalIcon}
-            options={DENSITIES.map((density) => ({
-              ...density,
-              mark: <MoonIcon className="size-3.5" />,
-            }))}
           />
         ),
       },

@@ -27,7 +27,6 @@ import {
 } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { InstitutionTrigger } from "@/src/modules/finance/shared/components/pickers/institution-picker"
@@ -54,8 +53,16 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
 import {
   SummaryItem,
   SummarySection,
@@ -147,20 +154,36 @@ export function LoanWizardWhoStep({
   const who = values.who ?? "BANK"
   return (
     <SummarySection title="¿Con quién es el préstamo?" icon={LandmarkIcon}>
-      <OptionRow
-        label="Un banco o financiera"
-        description="Usa tus instituciones"
-        icon={LandmarkIcon}
-        selected={who === "BANK"}
-        onPress={() => onSelectWho("BANK")}
-      />
-      <OptionRow
-        label="Una persona"
-        description="Familiar o amigo"
-        icon={UserIcon}
-        selected={who === "PERSON"}
-        onPress={() => onSelectWho("PERSON")}
-      />
+      <FieldLabel
+        onClick={() => onSelectWho("BANK")}
+        className={cn(
+          FIELD_CHOICE_CLASS_NAME,
+          who === "BANK" ? "border bg-card/50" : "border-border bg-card"
+        )}
+      >
+        <FieldMedia icon={LandmarkIcon} />
+        <FieldContent>
+          <FieldTitle className="text-sm">Un banco o financiera</FieldTitle>
+          <FieldDescription className="text-xs text-muted-foreground">
+            Usa tus instituciones
+          </FieldDescription>
+        </FieldContent>
+      </FieldLabel>
+      <FieldLabel
+        onClick={() => onSelectWho("PERSON")}
+        className={cn(
+          FIELD_CHOICE_CLASS_NAME,
+          who === "PERSON" ? "border bg-card/50" : "border-border bg-card"
+        )}
+      >
+        <FieldMedia icon={UserIcon} />
+        <FieldContent>
+          <FieldTitle className="text-sm">Una persona</FieldTitle>
+          <FieldDescription className="text-xs text-muted-foreground">
+            Familiar o amigo
+          </FieldDescription>
+        </FieldContent>
+      </FieldLabel>
       {who === "PERSON" ? (
         <Controller
           control={control}
@@ -222,9 +245,9 @@ export function LoanWizardInstitutionStep({
         />
         {error ? <FieldError>{error}</FieldError> : null}
       </Field>
-      <FinanceHelpText>
+      <FieldDescription className="text-xs">
         El nombre del prestamista se toma del banco.
-      </FinanceHelpText>
+      </FieldDescription>
     </SummarySection>
   )
 }
@@ -502,10 +525,10 @@ export function LoanWizardDetailsStep({
             </Field>
           )}
         />
-        <FinanceHelpText>
+        <FieldDescription className="text-xs">
           Si eliges dónde entró el dinero, el saldo de esa cuenta sube y no
           cuenta como ingreso.
-        </FinanceHelpText>
+        </FieldDescription>
       </SummarySection>
 
       <SummarySection title="Calendario" icon={CalendarIcon}>

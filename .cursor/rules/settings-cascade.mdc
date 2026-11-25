@@ -15,13 +15,19 @@ Una opción que solo aplica si otra está activa no se muestra apagada ni deshab
 - La validación de lo oculto no bloquea el envío. Se comprueba solo mientras el padre está activo.
 
 ```tsx
-<SwitchFieldRow
-  label="Tengo un ingreso fijo"
-  checked={enabled}
-  onCheckedChange={setEnabled}
-/>
+<Field
+  variant="card"
+  orientation="horizontal"
+  style={enabled ? { borderColor: accent } : undefined}
+>
+  <FieldMedia icon={HandCoins} color={accent} />
+  <FieldContent>
+    <FieldLabel htmlFor={id}>Tengo un ingreso fijo</FieldLabel>
+  </FieldContent>
+  <Switch id={id} checked={enabled} onCheckedChange={setEnabled} />
+</Field>
 {enabled ? (
-  <FormTextField label="Monto" value={amount} onChange={setAmount} />
+  <FinanceMoneyField label="Monto" amount={amount} onAmountChange={setAmount} />
 ) : null}
 ```
 

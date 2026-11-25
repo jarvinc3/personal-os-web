@@ -10,7 +10,23 @@ En cualquier vista, todo campo donde se escribe o elige un dato lleva un icono l
 
 ```tsx
 <FormTextField label="Nombre" icon={TypeIcon} value={name} onChange={setName} />
-<SelectField label="Padre" icon={FolderTreeIcon} value={parentId} onChange={setParentId} options={options} />
+<Field className="gap-1">
+  <FieldLabel htmlFor="padre">Padre</FieldLabel>
+  <Select value={parentId} onValueChange={setParentId} items={options}>
+    <SelectTrigger id="padre" icon={FolderTreeIcon} className="w-full">
+      <SelectValue placeholder="Padre" />
+    </SelectTrigger>
+    <SelectContent>
+      <SelectGroup>
+        {options.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectGroup>
+    </SelectContent>
+  </Select>
+</Field>
 ```
 
 Por defecto un campo no lleva placeholder; el icono y la etiqueta bastan. El caso que sí lo permite vive en [input-placeholders.mdc](./input-placeholders.mdc).

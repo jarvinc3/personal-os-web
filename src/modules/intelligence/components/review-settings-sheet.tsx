@@ -2,6 +2,14 @@
 
 import { useState } from "react"
 import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
+import {
   BrainCircuitIcon,
   CheckIcon,
   GaugeIcon,
@@ -11,7 +19,6 @@ import {
 
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import {
   WheelPicker,
@@ -134,13 +141,22 @@ function ReviewSettingsSheetForm({
                 </div>
               </WheelPickerWrapper>
             </WheelField>
-            <SwitchFieldRow
-              label="Aceptar remitentes verificados"
-              description="Los remitentes estables podrán pasar sin revisión manual."
-              checked={acceptVerifiedSenders}
-              onCheckedChange={setAcceptVerifiedSenders}
-              icon={ShieldCheckIcon}
-            />
+            <Field variant="card" orientation="horizontal">
+              <FieldMedia icon={ShieldCheckIcon} />
+              <FieldContent>
+                <FieldLabel htmlFor="review-verified-senders">
+                  Aceptar remitentes verificados
+                </FieldLabel>
+                <FieldDescription className="text-xs">
+                  Los remitentes estables podrán pasar sin revisión manual.
+                </FieldDescription>
+              </FieldContent>
+              <Switch
+                id="review-verified-senders"
+                checked={acceptVerifiedSenders}
+                onCheckedChange={setAcceptVerifiedSenders}
+              />
+            </Field>
             <p className="text-xs text-muted-foreground">
               Los correos HOLDOUT conservan el umbral fijo y no se autoaceptan
               por remitente.

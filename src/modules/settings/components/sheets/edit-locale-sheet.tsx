@@ -1,6 +1,15 @@
 "use client"
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   DEFAULT_LOCALE,
@@ -10,7 +19,6 @@ import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.type
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Drawer,
@@ -71,17 +79,30 @@ export function EditLocaleSheet({ open, onOpenChange }: SettingsSheetProps) {
               onValueChange={(value) => setLocale(value)}
             >
               {LOCALE_OPTIONS.map((option) => (
-                <OptionRow
+                <FieldLabel
                   key={option.value}
-                  icon={GlobeIcon}
-                  iconColor={LOCALE_ACCENT}
-                  accentColor={LOCALE_ACCENT}
-                  label={option.label}
-                  description={option.description}
-                  selected={locale === option.value}
-                  onPress={() => setLocale(option.value)}
-                  trailing={<RadioGroupItem value={option.value} />}
-                />
+                  onClick={() => setLocale(option.value)}
+                  className={cn(
+                    FIELD_CHOICE_CLASS_NAME,
+                    locale === option.value
+                      ? "border bg-card/50"
+                      : "border-border bg-card"
+                  )}
+                  style={
+                    locale === option.value
+                      ? { borderColor: LOCALE_ACCENT }
+                      : undefined
+                  }
+                >
+                  <FieldMedia icon={GlobeIcon} color={LOCALE_ACCENT} />
+                  <FieldContent>
+                    <FieldTitle className="text-sm">{option.label}</FieldTitle>
+                    <FieldDescription className="text-xs text-muted-foreground">
+                      {option.description}
+                    </FieldDescription>
+                  </FieldContent>
+                  <RadioGroupItem value={option.value} />
+                </FieldLabel>
               ))}
             </RadioGroup>
           </SummarySection>

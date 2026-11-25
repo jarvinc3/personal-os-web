@@ -6,6 +6,10 @@ import { cn } from "@/src/shared/lib/utils"
 
 import { Label } from "@/src/shared/components/ui/label"
 import { Separator } from "@/src/shared/components/ui/separator"
+import type { LucideIcon } from "lucide-react"
+
+export const FIELD_CHOICE_CLASS_NAME =
+  "flex w-full cursor-pointer flex-row items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all duration-100 ease-in-out hover:bg-card/70 active:scale-[0.99] active:bg-muted/80"
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (
@@ -62,9 +66,14 @@ const fieldVariants = cva(
         responsive:
           "flex-col *:w-full @md/field-group:flex-row @md/field-group:items-center @md/field-group:*:w-auto @md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:*:data-[slot=field-label]:flex-auto [&>.sr-only]:w-auto @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
       },
+      variant: {
+        plain: "",
+        card: "rounded-xl border border-border bg-card px-3 py-3 has-[>[data-slot=field-content]]:items-center",
+      },
     },
     defaultVariants: {
       orientation: "vertical",
+      variant: "plain",
     },
   }
 )
@@ -72,6 +81,7 @@ const fieldVariants = cva(
 function Field({
   className,
   orientation = "vertical",
+  variant,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
   return (
@@ -79,7 +89,7 @@ function Field({
       role="group"
       data-slot="field"
       data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
+      className={cn(fieldVariants({ orientation, variant }), className)}
       {...props}
     />
   )
@@ -95,6 +105,33 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
+  )
+}
+
+function FieldMedia({
+  className,
+  icon: Icon,
+  color,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  icon?: LucideIcon
+  /** Accent of the entity: tints the square and colors the icon. */
+  color?: string
+}) {
+  return (
+    <div
+      data-slot="field-media"
+      className={cn(
+        "flex size-9 shrink-0 items-center justify-center rounded-md",
+        className
+      )}
+      {...props}
+      style={{ backgroundColor: color ? `${color}1a` : undefined }}
+    >
+      {children ??
+        (Icon ? <Icon className="size-4.5" style={{ color }} /> : null)}
+    </div>
   )
 }
 
@@ -226,13 +263,14 @@ function FieldError({
 
 export {
   Field,
-  FieldLabel,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
+  FieldLabel,
   FieldLegend,
+  FieldMedia,
   FieldSeparator,
   FieldSet,
-  FieldContent,
   FieldTitle,
 }

@@ -2,55 +2,6 @@ import type { GalleryComponentMeta } from "@/src/modules/galleries/components/ca
 
 export const selectoresDocs: readonly GalleryComponentMeta[] = [
   {
-    id: "option-row",
-    name: "OptionRow",
-    category: "selectores",
-    kind: "domain",
-    description:
-      "Fila de una opción con icono, título, descripción y borde de acento al elegir.",
-    whenToUse:
-      "Una lista corta de opciones con descripción dentro de una hoja de selección.",
-    whenNotToUse:
-      "Una elección de dos a cinco sin descripción: ChoiceGrid. Un catálogo largo: filas de búsqueda en su hoja.",
-    importPath: "@/src/shared/components/forms/option-row",
-    snippet: `import { OptionRow } from "@/src/shared/components/forms/option-row"
-
-<OptionRow
-  label="Tema claro"
-  description="Siempre claro"
-  icon={SunIcon}
-  accentColor={accent}
-  selected={selected}
-  onPress={onPress}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "OptionRow" }],
-    variants: [
-      {
-        name: "states",
-        values: "normal, selected, hover, disabled por el padre",
-      },
-      { name: "accentColor", values: "color del módulo en el borde elegido" },
-    ],
-    props: [
-      {
-        name: "selected",
-        type: "boolean",
-        description: "Marca la opción con el borde de acento.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono de la opción.",
-      },
-      {
-        name: "trailing",
-        type: "ReactNode",
-        description: "Contenido a la derecha, como un check.",
-      },
-    ],
-  },
-  {
     id: "choice-grid",
     name: "ChoiceGrid",
     category: "selectores",
@@ -60,7 +11,7 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
     whenToUse:
       "Un tipo de movimiento, un avatar o un filtro de dos a cinco opciones.",
     whenNotToUse:
-      "Opciones con descripción o un catálogo largo: OptionRow en su hoja.",
+      "Opciones con descripción o un catálogo largo: filas de elección con `FieldLabel` y `RadioGroupItem` en su hoja.",
     importPath: "@/src/shared/components/forms/choice-grid",
     snippet: `import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
 
@@ -93,50 +44,6 @@ export const selectoresDocs: readonly GalleryComponentMeta[] = [
         name: "accentColor",
         type: "string",
         description: "Color del módulo en el borde y el icono elegido.",
-      },
-    ],
-  },
-  {
-    id: "select-field",
-    name: "SelectField",
-    category: "selectores",
-    kind: "domain",
-    description:
-      "Select con etiqueta, icono líder y error, listo para un formulario.",
-    whenToUse: "Un catálogo corto dentro de un formulario.",
-    whenNotToUse:
-      "Un catálogo largo: hoja de selección. Una elección con descripción: OptionRow.",
-    importPath: "@/src/shared/components/forms/select-field",
-    snippet: `import { SelectField } from "@/src/shared/components/forms/select-field"
-
-<SelectField
-  label="Densidad"
-  value={density}
-  onChange={setDensity}
-  icon={SlidersHorizontalIcon}
-  options={options}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "SelectField" }],
-    variants: [
-      { name: "states", values: "normal, invalid, disabled" },
-      { name: "mark", values: "ReactNode opcional junto a cada opción" },
-    ],
-    props: [
-      {
-        name: "options",
-        type: "{ value, label, mark? }[]",
-        description: "Opciones del catálogo.",
-      },
-      {
-        name: "error",
-        type: "string",
-        description: "Error bajo el select.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono líder del dato.",
       },
     ],
   },

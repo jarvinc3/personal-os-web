@@ -1,7 +1,6 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -35,7 +34,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
@@ -441,11 +445,11 @@ export function SavingsGoalContributionSheet({
                   </Field>
                 )}
               />
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 {isWithdrawal
                   ? "El retiro mueve el dinero a la cuenta elegida. No cuenta como ingreso ni gasto."
                   : "El origen es la cuenta de donde sale el dinero; la cuenta de la meta es donde queda apartado, y el aporte no lo gasta: sigue en su saldo."}
-              </FinanceHelpText>
+              </FieldDescription>
             </SummarySection>
           </SheetBody>
           {!pending ? (

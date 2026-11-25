@@ -1,7 +1,6 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -37,7 +36,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -380,11 +384,11 @@ export function ReceivablePaymentSheet({
                   />
                 )}
               />
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 {outstandingLabel
                   ? `Queda por cobrar ${outstandingLabel}. El cobro crea un ingreso en la cuenta elegida.`
                   : "El cobro crea un ingreso en la cuenta elegida."}
-              </FinanceHelpText>
+              </FieldDescription>
             </SummarySection>
           </SheetBody>
           {!pending ? (

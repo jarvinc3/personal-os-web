@@ -1,4 +1,13 @@
 import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
+import {
   EMPTY_COMPACT_CLASS_NAME,
   Empty,
   EmptyHeader,
@@ -7,7 +16,6 @@ import {
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { Wallet } from "lucide-react"
 
@@ -30,14 +38,19 @@ export function AccountChoiceList({
 }: AccountChoiceListProps) {
   return (
     <>
-      <OptionRow
-        icon={Wallet}
-        iconColor={MODULE_ACCENT}
-        accentColor={MODULE_ACCENT}
-        label={noneLabel}
-        selected={selectedId === ""}
-        onPress={() => onSelect("")}
-      />
+      <FieldLabel
+        onClick={() => onSelect("")}
+        className={cn(
+          FIELD_CHOICE_CLASS_NAME,
+          selectedId === "" ? "border bg-card/50" : "border-border bg-card"
+        )}
+        style={selectedId === "" ? { borderColor: MODULE_ACCENT } : undefined}
+      >
+        <FieldMedia icon={Wallet} color={MODULE_ACCENT} />
+        <FieldContent>
+          <FieldTitle className="text-sm">{noneLabel}</FieldTitle>
+        </FieldContent>
+      </FieldLabel>
       {accounts.map((account) => (
         <AccountProductRow
           key={account.id}

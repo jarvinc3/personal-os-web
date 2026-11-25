@@ -1,5 +1,12 @@
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import { DayListField } from "@/src/shared/components/forms/day-list-field"
 import {
   SummaryGroup,
@@ -45,15 +52,26 @@ export function FixedIncomeSection({
         control={control}
         name="fixedIncomeEnabled"
         render={({ field }) => (
-          <SwitchFieldRow
-            icon={HandCoins}
-            iconColor={MODULE_ACCENT}
-            accentColor={MODULE_ACCENT}
-            label="Tengo un ingreso fijo"
-            description="Se usa como monto sugerido cuando llega una nómina sin cifra."
-            checked={field.value}
-            onCheckedChange={field.onChange}
-          />
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
+            <FieldMedia icon={HandCoins} color={MODULE_ACCENT} />
+            <FieldContent>
+              <FieldLabel htmlFor={field.name}>
+                Tengo un ingreso fijo
+              </FieldLabel>
+              <FieldDescription className="text-xs">
+                Se usa como monto sugerido cuando llega una nómina sin cifra.
+              </FieldDescription>
+            </FieldContent>
+            <Switch
+              id={field.name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          </Field>
         )}
       />
       {fixedIncomeEnabled ? (

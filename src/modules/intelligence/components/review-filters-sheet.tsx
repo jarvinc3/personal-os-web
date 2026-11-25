@@ -23,7 +23,15 @@ import {
 } from "@/src/modules/intelligence/review-labels"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldMedia,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import {
   InputGroup,
   InputGroupAddon,
@@ -33,8 +41,15 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
-import { SelectField } from "@/src/shared/components/forms/select-field"
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/shared/components/ui/select"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { DateWheels } from "@/src/shared/components/forms/wheel-picker"
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
@@ -173,29 +188,80 @@ function ReviewFiltersSheetForm({
           <div className="flex flex-col gap-4">
             <SummarySection title="Cola" icon={InboxIcon}>
               {filters.tab === "reviewed" ? (
-                <SelectField
-                  label="Estado"
-                  icon={CheckIcon}
-                  value={draft.status}
-                  onChange={(value) =>
+                <Field className="flex flex-col gap-1">
+                  <FieldLabel
+                    htmlFor="review-status-select"
+                    className="text-sm text-muted-foreground"
+                  >
+                    Estado
+                  </FieldLabel>
+                  <Select
+                    value={draft.status}
+                    onValueChange={(next) =>
+                      patchDraft({
+                        status: (next ?? "") as ReviewQueueFilters["status"],
+                      })
+                    }
+                    items={STATUS_OPTIONS}
+                    modal={false}
+                  >
+                    <SelectTrigger
+                      id="review-status-select"
+                      icon={CheckIcon}
+                      className="w-full max-w-full cursor-pointer"
+                    >
+                      <SelectValue placeholder="Estado" />
+                    </SelectTrigger>
+                    <SelectContent alignItemWithTrigger={false} side="bottom">
+                      <SelectGroup>
+                        <SelectLabel>Estado</SelectLabel>
+                        {STATUS_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              ) : null}
+              <Field className="flex flex-col gap-1">
+                <FieldLabel
+                  htmlFor="review-partition-select"
+                  className="text-sm text-muted-foreground"
+                >
+                  Conjunto
+                </FieldLabel>
+                <Select
+                  value={draft.partition}
+                  onValueChange={(next) =>
                     patchDraft({
-                      status: value as ReviewQueueFilters["status"],
+                      partition: (next ??
+                        "") as ReviewQueueFilters["partition"],
                     })
                   }
-                  options={STATUS_OPTIONS}
-                />
-              ) : null}
-              <SelectField
-                label="Conjunto"
-                icon={Layers3Icon}
-                value={draft.partition}
-                onChange={(value) =>
-                  patchDraft({
-                    partition: value as ReviewQueueFilters["partition"],
-                  })
-                }
-                options={PARTITION_OPTIONS}
-              />
+                  items={PARTITION_OPTIONS}
+                  modal={false}
+                >
+                  <SelectTrigger
+                    id="review-partition-select"
+                    icon={Layers3Icon}
+                    className="w-full max-w-full cursor-pointer"
+                  >
+                    <SelectValue placeholder="Conjunto" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={false} side="bottom">
+                    <SelectGroup>
+                      <SelectLabel>Conjunto</SelectLabel>
+                      {PARTITION_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
               <Field className="gap-1">
                 <FieldLabel>Orden</FieldLabel>
                 <ToggleGroup
@@ -289,26 +355,79 @@ function ReviewFiltersSheetForm({
             </SummarySection>
 
             <SummarySection title="Clasificación" icon={TagsIcon}>
-              <SelectField
-                label="Tipo semántico"
-                icon={TagsIcon}
-                value={draft.semanticType}
-                onChange={(value) =>
-                  patchDraft({
-                    semanticType: value as ReviewQueueFilters["semanticType"],
-                  })
-                }
-                options={SEMANTIC_TYPE_OPTIONS}
-              />
-              <SelectField
-                label="Dominio"
-                icon={Layers3Icon}
-                value={draft.route}
-                onChange={(value) =>
-                  patchDraft({ route: value as ReviewQueueFilters["route"] })
-                }
-                options={ROUTE_OPTIONS}
-              />
+              <Field className="flex flex-col gap-1">
+                <FieldLabel
+                  htmlFor="review-semantic-select"
+                  className="text-sm text-muted-foreground"
+                >
+                  Tipo semántico
+                </FieldLabel>
+                <Select
+                  value={draft.semanticType}
+                  onValueChange={(next) =>
+                    patchDraft({
+                      semanticType: (next ??
+                        "") as ReviewQueueFilters["semanticType"],
+                    })
+                  }
+                  items={SEMANTIC_TYPE_OPTIONS}
+                  modal={false}
+                >
+                  <SelectTrigger
+                    id="review-semantic-select"
+                    icon={TagsIcon}
+                    className="w-full max-w-full cursor-pointer"
+                  >
+                    <SelectValue placeholder="Tipo semántico" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={false} side="bottom">
+                    <SelectGroup>
+                      <SelectLabel>Tipo semántico</SelectLabel>
+                      {SEMANTIC_TYPE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field className="flex flex-col gap-1">
+                <FieldLabel
+                  htmlFor="review-route-select"
+                  className="text-sm text-muted-foreground"
+                >
+                  Dominio
+                </FieldLabel>
+                <Select
+                  value={draft.route}
+                  onValueChange={(next) =>
+                    patchDraft({
+                      route: (next ?? "") as ReviewQueueFilters["route"],
+                    })
+                  }
+                  items={ROUTE_OPTIONS}
+                  modal={false}
+                >
+                  <SelectTrigger
+                    id="review-route-select"
+                    icon={Layers3Icon}
+                    className="w-full max-w-full cursor-pointer"
+                  >
+                    <SelectValue placeholder="Dominio" />
+                  </SelectTrigger>
+                  <SelectContent alignItemWithTrigger={false} side="bottom">
+                    <SelectGroup>
+                      <SelectLabel>Dominio</SelectLabel>
+                      {ROUTE_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </Field>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field
                   data-invalid={confidenceError ? true : undefined}
@@ -369,13 +488,22 @@ function ReviewFiltersSheetForm({
                   ) : null}
                 </Field>
               </div>
-              <SwitchFieldRow
-                label="Solo inciertos"
-                description="Muestra correos con baja confianza o sin predicción."
-                checked={draft.uncertain}
-                onCheckedChange={(uncertain) => patchDraft({ uncertain })}
-                icon={CircleHelpIcon}
-              />
+              <Field variant="card" orientation="horizontal">
+                <FieldMedia icon={CircleHelpIcon} />
+                <FieldContent>
+                  <FieldLabel htmlFor="review-uncertain">
+                    Solo inciertos
+                  </FieldLabel>
+                  <FieldDescription className="text-xs">
+                    Muestra correos con baja confianza o sin predicción.
+                  </FieldDescription>
+                </FieldContent>
+                <Switch
+                  id="review-uncertain"
+                  checked={draft.uncertain}
+                  onCheckedChange={(uncertain) => patchDraft({ uncertain })}
+                />
+              </Field>
             </SummarySection>
 
             <Button type="button" variant="outline" onClick={clearDraft}>

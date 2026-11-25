@@ -1,7 +1,6 @@
 "use client"
 
 import { apiGet } from "@/src/config/api-client"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -40,7 +39,12 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -188,9 +192,9 @@ export function LoanPrepaymentSheet({
                   Reducir cuota
                 </Button>
               </div>
-              <FinanceHelpText>
+              <FieldDescription className="text-xs">
                 {PREPAYMENT_MODE_EXPLANATION[mode]}
-              </FinanceHelpText>
+              </FieldDescription>
               <Field className="gap-1">
                 <FieldLabel className="text-sm text-muted-foreground">
                   Cuenta de origen
@@ -212,12 +216,14 @@ export function LoanPrepaymentSheet({
                 ) : null}
               </Field>
               {previewLines.map((line) => (
-                <FinanceHelpText key={line}>{line}</FinanceHelpText>
+                <FieldDescription key={line} className="text-xs">
+                  {line}
+                </FieldDescription>
               ))}
               {penalty > 0 ? (
-                <FinanceHelpText>
+                <FieldDescription className="text-xs">
                   {`Penalidad estimada ${formatFinanceMoney(penalty, display)}`}
-                </FinanceHelpText>
+                </FieldDescription>
               ) : null}
             </SummarySection>
           </SheetBody>

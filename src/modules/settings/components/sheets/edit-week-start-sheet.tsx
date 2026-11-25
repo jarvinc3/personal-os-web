@@ -1,6 +1,15 @@
 "use client"
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   DEFAULT_LOCALE,
@@ -16,7 +25,6 @@ import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.type
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Drawer,
@@ -88,30 +96,58 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
               value={selection}
               onValueChange={(value) => setSelection(value as Selection)}
             >
-              <OptionRow
-                icon={CalendarRangeIcon}
-                iconColor={WEEK_START_ACCENT}
-                accentColor={WEEK_START_ACCENT}
-                label="Según la región"
-                description={`${weekStartsOnLabel(automaticDay)} en ${localeLabel(locale)}.`}
-                selected={selection === AUTOMATIC}
-                onPress={() => setSelection(AUTOMATIC)}
-                trailing={<RadioGroupItem value={AUTOMATIC} />}
-              />
-              {WEEK_STARTS_ON_OPTIONS.map((option) => (
-                <OptionRow
-                  key={option.value}
+              <FieldLabel
+                onClick={() => setSelection(AUTOMATIC)}
+                className={cn(
+                  FIELD_CHOICE_CLASS_NAME,
+                  selection === AUTOMATIC
+                    ? "border bg-card/50"
+                    : "border-border bg-card"
+                )}
+                style={
+                  selection === AUTOMATIC
+                    ? { borderColor: WEEK_START_ACCENT }
+                    : undefined
+                }
+              >
+                <FieldMedia
                   icon={CalendarRangeIcon}
-                  iconColor={WEEK_START_ACCENT}
-                  accentColor={WEEK_START_ACCENT}
-                  label={option.label}
-                  description={`La semana empieza el ${option.label.toLowerCase()}.`}
-                  selected={selection === String(option.value)}
-                  onPress={() =>
+                  color={WEEK_START_ACCENT}
+                />
+                <FieldContent>
+                  <FieldTitle className="text-sm">Según la región</FieldTitle>
+                  <FieldDescription className="text-xs text-muted-foreground">{`${weekStartsOnLabel(automaticDay)} en ${localeLabel(locale)}.`}</FieldDescription>
+                </FieldContent>
+                <RadioGroupItem value={AUTOMATIC} />
+              </FieldLabel>
+              {WEEK_STARTS_ON_OPTIONS.map((option) => (
+                <FieldLabel
+                  key={option.value}
+                  onClick={() =>
                     setSelection(String(option.value) as Selection)
                   }
-                  trailing={<RadioGroupItem value={String(option.value)} />}
-                />
+                  className={cn(
+                    FIELD_CHOICE_CLASS_NAME,
+                    selection === String(option.value)
+                      ? "border bg-card/50"
+                      : "border-border bg-card"
+                  )}
+                  style={
+                    selection === String(option.value)
+                      ? { borderColor: WEEK_START_ACCENT }
+                      : undefined
+                  }
+                >
+                  <FieldMedia
+                    icon={CalendarRangeIcon}
+                    color={WEEK_START_ACCENT}
+                  />
+                  <FieldContent>
+                    <FieldTitle className="text-sm">{option.label}</FieldTitle>
+                    <FieldDescription className="text-xs text-muted-foreground">{`La semana empieza el ${option.label.toLowerCase()}.`}</FieldDescription>
+                  </FieldContent>
+                  <RadioGroupItem value={String(option.value)} />
+                </FieldLabel>
               ))}
             </RadioGroup>
           </SummarySection>
