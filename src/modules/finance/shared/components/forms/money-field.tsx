@@ -2,8 +2,10 @@
 
 import { CurrencyTriggerLabel } from "@/src/modules/finance/shared/components/currency-flag"
 import { AmountCalculatorSheet } from "@/src/modules/finance/shared/components/forms/amount-calculator-sheet"
-import { FinanceAmountInput } from "@/src/modules/finance/shared/components/forms/form-blocks"
-import { narrowCurrencySymbol } from "@/src/modules/finance/shared/lib/money"
+import {
+  narrowCurrencySymbol,
+  sanitizeAmountInput,
+} from "@/src/modules/finance/shared/lib/money"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   Field,
@@ -11,7 +13,13 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/src/shared/components/ui/field"
-import { InputGroupButton } from "@/src/shared/components/ui/input-group"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from "@/src/shared/components/ui/input-group"
 import { cn } from "@/src/shared/lib/utils"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { CalculatorIcon, KeyboardIcon } from "lucide-react"
@@ -73,6 +81,9 @@ export function FinanceMoneyField({
   const activeEntryMode = entryMode ?? localEntryMode
   const usingCalculator = activeEntryMode === "calculator"
   const showsCurrencyButton = Boolean(onCurrencyPress)
+  const amountSymbol = currency
+    ? narrowCurrencySymbol(currency)?.trim() || null
+    : null
   const inputRef = useRef<HTMLInputElement>(null)
 
   useImperativeHandle(
@@ -118,17 +129,34 @@ export function FinanceMoneyField({
           <FieldLabel className="text-sm text-muted-foreground">
             {label}
           </FieldLabel>
-          <FinanceAmountInput
-            prefix={currency ? narrowCurrencySymbol(currency) : null}
-            value={amount}
-            onChange={onAmountChange}
-            onBlur={onAmountBlur}
-            error={amountError}
-            disabled={disabled}
-            readOnly={usingCalculator}
-            onReadOnlyActivate={openCalculator}
-            inputRef={inputRef}
-            trailing={
+          <InputGroup className="h-14 rounded-2xl">
+            {amountSymbol ? (
+              <InputGroupAddon align="inline-start" className="pl-4">
+                <InputGroupText className="text-3xl font-semibold tabular-nums">
+                  {amountSymbol}
+                </InputGroupText>
+              </InputGroupAddon>
+            ) : null}
+            <InputGroupInput
+              inputMode={usingCalculator ? "none" : "decimal"}
+              autoComplete="off"
+              readOnly={usingCalculator}
+              ref={inputRef}
+              className={cn(
+                "px-4 text-3xl font-semibold tabular-nums",
+                usingCalculator && "cursor-pointer"
+              )}
+              value={amount}
+              onChange={(event) =>
+                onAmountChange(sanitizeAmountInput(event.target.value))
+              }
+              onBlur={onAmountBlur}
+              onClick={usingCalculator ? openCalculator : undefined}
+              placeholder="0.00"
+              disabled={disabled}
+              aria-invalid={amountError ? true : undefined}
+            />
+            <InputGroupAddon align="inline-end">
               <InputGroupButton
                 size="icon-sm"
                 disabled={disabled}
@@ -141,8 +169,8 @@ export function FinanceMoneyField({
               >
                 {usingCalculator ? <CalculatorIcon /> : <KeyboardIcon />}
               </InputGroupButton>
-            }
-          />
+            </InputGroupAddon>
+          </InputGroup>
           {amountError ? <FieldError>{amountError}</FieldError> : null}
         </Field>
 
