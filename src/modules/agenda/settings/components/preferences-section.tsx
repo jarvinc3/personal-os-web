@@ -28,7 +28,11 @@ export function AgendaPreferencesSection({
         control={control}
         name="workingHoursEnabled"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={Briefcase} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>Horario laboral</FieldLabel>
@@ -45,7 +49,11 @@ export function AgendaPreferencesSection({
         control={control}
         name="eventReminders"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={Bell} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>
@@ -64,7 +72,11 @@ export function AgendaPreferencesSection({
         control={control}
         name="dailyAgenda"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={CalendarCheck} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>Agenda diaria</FieldLabel>

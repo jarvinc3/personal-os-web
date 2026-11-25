@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings"
 import {
   Field,
   FieldContent,
@@ -141,7 +142,15 @@ function ReviewSettingsSheetForm({
                 </div>
               </WheelPickerWrapper>
             </WheelField>
-            <Field variant="card" orientation="horizontal">
+            <Field
+              variant="card"
+              orientation="horizontal"
+              style={
+                acceptVerifiedSenders
+                  ? { borderColor: SETTINGS_REGISTRY.ai.accent }
+                  : undefined
+              }
+            >
               <FieldMedia icon={ShieldCheckIcon} />
               <FieldContent>
                 <FieldLabel htmlFor="review-verified-senders">

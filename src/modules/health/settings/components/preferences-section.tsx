@@ -28,7 +28,11 @@ export function HealthPreferencesSection({
         control={control}
         name="hideSensitiveMetrics"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={EyeOff} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>
@@ -47,7 +51,11 @@ export function HealthPreferencesSection({
         control={control}
         name="goalReminders"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={Target} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>
@@ -66,7 +74,11 @@ export function HealthPreferencesSection({
         control={control}
         name="weeklySummary"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={CalendarDays} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>Resumen semanal</FieldLabel>

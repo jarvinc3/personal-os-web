@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { SETTINGS_REGISTRY } from "@/src/modules/settings"
 import {
   ArrowDownWideNarrowIcon,
   ArrowUpNarrowWideIcon,
@@ -488,7 +489,15 @@ function ReviewFiltersSheetForm({
                   ) : null}
                 </Field>
               </div>
-              <Field variant="card" orientation="horizontal">
+              <Field
+                variant="card"
+                orientation="horizontal"
+                style={
+                  draft.uncertain
+                    ? { borderColor: SETTINGS_REGISTRY.ai.accent }
+                    : undefined
+                }
+              >
                 <FieldMedia icon={CircleHelpIcon} />
                 <FieldContent>
                   <FieldLabel htmlFor="review-uncertain">

@@ -68,7 +68,7 @@ const fieldVariants = cva(
       },
       variant: {
         plain: "",
-        card: "rounded-xl border border-border bg-card px-3 py-3 has-[>[data-slot=field-content]]:items-center",
+        card: "rounded-xl border border-border bg-card px-3 py-3 has-data-checked:bg-input/30 has-[>[data-slot=field-content]]:items-center",
       },
     },
     defaultVariants: {

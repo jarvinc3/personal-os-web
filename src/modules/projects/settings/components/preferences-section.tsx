@@ -28,7 +28,11 @@ export function ProjectsPreferencesSection({
         control={control}
         name="showArchived"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={Archive} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>Mostrar archivados</FieldLabel>
@@ -45,7 +49,11 @@ export function ProjectsPreferencesSection({
         control={control}
         name="dueDateReminders"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={Bell} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>
@@ -64,7 +72,11 @@ export function ProjectsPreferencesSection({
         control={control}
         name="statusChanges"
         render={({ field }) => (
-          <Field variant="card" orientation="horizontal">
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={field.value ? { borderColor: MODULE_ACCENT } : undefined}
+          >
             <FieldMedia icon={ArrowRightLeft} color={MODULE_ACCENT} />
             <FieldContent>
               <FieldLabel htmlFor={field.name}>Cambios de estado</FieldLabel>

@@ -556,7 +556,15 @@ export function AccountSheet({
                     control={control}
                     name="isDefaultForInstitution"
                     render={({ field }) => (
-                      <Field variant="card" orientation="horizontal">
+                      <Field
+                        variant="card"
+                        orientation="horizontal"
+                        style={
+                          field.value
+                            ? { borderColor: getModule("finance").accent }
+                            : undefined
+                        }
+                      >
                         <FieldMedia
                           icon={Star}
                           color={getModule("finance").accent}
