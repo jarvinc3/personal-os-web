@@ -38,6 +38,24 @@ export function WealthScreen() {
   )
 }
 
+function WealthLoadingSkeleton() {
+  return (
+    <div
+      className="mx-auto flex w-full max-w-3xl flex-col gap-4 pb-8"
+      aria-hidden
+    >
+      <Skeleton className="h-32 w-full rounded-3xl" />
+      <div className="flex flex-col gap-3 rounded-3xl border border-border bg-muted/40 p-3">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-3 w-40" />
+        <Skeleton className="mt-1 h-3 w-20" />
+        <Skeleton className="h-14 w-full rounded-2xl" />
+        <Skeleton className="h-14 w-full rounded-2xl" />
+      </div>
+    </div>
+  )
+}
+
 function WealthScreenBody() {
   const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
@@ -65,21 +83,7 @@ function WealthScreenBody() {
   )
 
   if (balanceSheetQuery.isPending && !balanceSheet) {
-    return (
-      <div
-        className="mx-auto flex w-full max-w-3xl flex-col gap-4 pb-8"
-        aria-hidden
-      >
-        <Skeleton className="h-32 w-full rounded-3xl" />
-        <div className="flex flex-col gap-3 rounded-3xl border border-border bg-muted/40 p-3">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-3 w-40" />
-          <Skeleton className="mt-1 h-3 w-20" />
-          <Skeleton className="h-14 w-full rounded-2xl" />
-          <Skeleton className="h-14 w-full rounded-2xl" />
-        </div>
-      </div>
-    )
+    return <WealthLoadingSkeleton />
   }
 
   if (balanceSheetQuery.isError && !balanceSheet) {
