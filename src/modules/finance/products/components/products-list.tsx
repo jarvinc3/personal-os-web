@@ -54,13 +54,23 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   Building2Icon,
+  ChevronRightIcon,
   LandmarkIcon,
   PlusIcon,
   StoreIcon,
@@ -317,15 +327,25 @@ export function FinanceProductsList({
             )
           }}
         >
-          <SummaryItem
-            title="Cargos bancarios"
-            description="Ajustes al conciliar cuentas y tarjetas"
-            icon={LandmarkIcon}
-            href={APP_ROUTES.app.financeBankCharges}
-            showChevron
-            isLast={false}
-            className="px-3"
-          />
+          <Item
+            variant="default"
+            className={"px-3"}
+            render={<Link href={APP_ROUTES.app.financeBankCharges} />}
+          >
+            <ItemMedia variant="icon">
+              <LandmarkIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Cargos bancarios"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {"Ajustes al conciliar cuentas y tarjetas"}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+              <LinkPendingOverlay />
+            </ItemActions>
+          </Item>
         </div>
 
         <div
@@ -336,36 +356,66 @@ export function FinanceProductsList({
             void prefetchFinanceCategories(queryClient)
           }}
         >
-          <SummaryItem
-            title="Categorías"
-            description="Organiza gastos e ingresos"
-            icon={TagsIcon}
-            href={APP_ROUTES.app.financeCategories}
-            showChevron
-            isLast={false}
-            className="px-3"
-          />
+          <Item
+            variant="default"
+            className={"px-3"}
+            render={<Link href={APP_ROUTES.app.financeCategories} />}
+          >
+            <ItemMedia variant="icon">
+              <TagsIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Categorías"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {"Organiza gastos e ingresos"}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+              <LinkPendingOverlay />
+            </ItemActions>
+          </Item>
         </div>
 
-        <SummaryItem
-          title="Comercios"
-          description="Quién recibe tu dinero y cuánto"
-          icon={StoreIcon}
-          href={APP_ROUTES.app.financeMerchants}
-          showChevron
-          isLast={false}
-          className="px-3"
-        />
+        <Item
+          variant="default"
+          className={"px-3"}
+          render={<Link href={APP_ROUTES.app.financeMerchants} />}
+        >
+          <ItemMedia variant="icon">
+            <StoreIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Comercios"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Quién recibe tu dinero y cuánto"}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
 
-        <SummaryItem
-          title="Papelera de reciclaje"
-          description="Restaura lo archivado o eliminado"
-          icon={Trash2Icon}
-          href={APP_ROUTES.app.financeRecycleBin}
-          showChevron
-          isLast
-          className="px-3"
-        />
+        <Item
+          variant="default"
+          className={"px-3"}
+          render={<Link href={APP_ROUTES.app.financeRecycleBin} />}
+        >
+          <ItemMedia variant="icon">
+            <Trash2Icon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Papelera de reciclaje"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Restaura lo archivado o eliminado"}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
       </div>
 
       <ExpandableFab

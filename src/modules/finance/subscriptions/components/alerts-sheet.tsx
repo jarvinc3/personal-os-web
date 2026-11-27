@@ -1,8 +1,6 @@
 "use client"
 
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
-import type { NoticeTone } from "@/src/modules/finance/shared/components/notice-card"
 import {
   useDismissAllSubscriptionAlerts,
   useSubscription,
@@ -25,6 +23,14 @@ import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
+import {
+  ALERT_SOFT_TONE_CLASS_NAME,
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+  type AlertSoftTone,
+} from "@/src/shared/components/ui/alert"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -57,7 +63,7 @@ import { useRouter } from "next/navigation"
 
 type AlertNotice = {
   icon: LucideIcon
-  tone: NoticeTone
+  tone: AlertSoftTone
 }
 
 const ALERT_NOTICE: Record<FinanceSubscriptionAlertKind, AlertNotice> = {
@@ -65,7 +71,7 @@ const ALERT_NOTICE: Record<FinanceSubscriptionAlertKind, AlertNotice> = {
   AMOUNT_MISMATCH: { icon: TriangleAlertIcon, tone: "warning" },
   TRIAL_ENDING: { icon: ClockIcon, tone: "info" },
   ANNUAL_RENEWAL: { icon: CalendarClockIcon, tone: "info" },
-  MISSED_CHARGE: { icon: CircleAlertIcon, tone: "danger" },
+  MISSED_CHARGE: { icon: CircleAlertIcon, tone: "destructive" },
 }
 
 type AlertsSheetProps = {
@@ -216,19 +222,10 @@ function SubscriptionAlertNotice({
   const view = subscriptionAlertView({ alert, display })
   const notice = ALERT_NOTICE[alert.kind]
   const subscription = subscriptionQuery.data ?? null
+  const NoticeIcon = notice.icon
 
   return (
-    <NoticeCard
-      icon={notice.icon}
-      tone={notice.tone}
-      title={view.title}
-      description={view.description}
-      trailing={
-        view.badge ? (
-          <Badge variant={view.badgeVariant}>{view.badge}</Badge>
-        ) : null
-      }
-    >
+    <div className="flex flex-col gap-2">
       {subscription ? (
         <SubscriptionCard
           subscription={subscription}
@@ -239,6 +236,16 @@ function SubscriptionAlertNotice({
           onPress={onReview}
         />
       ) : null}
-    </NoticeCard>
+      <Alert className={ALERT_SOFT_TONE_CLASS_NAME[notice.tone]}>
+        <NoticeIcon aria-hidden="true" />
+        <AlertTitle>{view.title}</AlertTitle>
+        <AlertDescription>{view.description}</AlertDescription>
+        {view.badge ? (
+          <AlertAction>
+            <Badge variant={view.badgeVariant}>{view.badge}</Badge>
+          </AlertAction>
+        ) : null}
+      </Alert>
+    </div>
   )
 }

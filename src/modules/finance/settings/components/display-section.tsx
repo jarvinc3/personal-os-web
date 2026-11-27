@@ -8,8 +8,17 @@ import {
 } from "@/src/shared/components/ui/field"
 import { Switch } from "@/src/shared/components/ui/switch"
 import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
+import {
   SummaryGroup,
-  SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -21,6 +30,7 @@ import {
   CalendarDays,
   CalendarRange,
   ChartBarIcon,
+  ChevronRightIcon,
   Coins,
   DollarSign,
   ScanEyeIcon,
@@ -51,28 +61,58 @@ export function DisplaySection({ control, baseCurrency }: DisplaySectionProps) {
   return (
     <>
       <SummarySection title="Moneda" icon={DollarSign}>
-        <SummaryItem
-          href={APP_ROUTES.app.settingsFinanceCurrencies}
-          icon={DollarSign}
-          accentColor={MODULE_ACCENT}
-          title="Moneda principal"
-          description="Monedas y tasas del ledger."
-          value={baseCurrency}
-          showChevron
-          isLast
-        />
+        <Item
+          variant="default"
+          render={<Link href={APP_ROUTES.app.settingsFinanceCurrencies} />}
+        >
+          <ItemMedia
+            variant="icon"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${MODULE_ACCENT} 18%, transparent)`,
+            }}
+          >
+            <DollarSign style={{ color: MODULE_ACCENT }} />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Moneda principal"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Monedas y tasas del ledger."}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {baseCurrency}
+            </span>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
       </SummarySection>
 
       <SummarySection title="Inicio de semana" icon={CalendarCog}>
-        <SummaryItem
-          href={APP_ROUTES.app.settingsRegional}
-          icon={CalendarCog}
-          accentColor={MODULE_ACCENT}
-          title="Primer día de la semana"
-          description="Se configura en Preferencias › Región."
-          showChevron
-          isLast
-        />
+        <Item
+          variant="default"
+          render={<Link href={APP_ROUTES.app.settingsRegional} />}
+        >
+          <ItemMedia
+            variant="icon"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${MODULE_ACCENT} 18%, transparent)`,
+            }}
+          >
+            <CalendarCog style={{ color: MODULE_ACCENT }} />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Primer día de la semana"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Se configura en Preferencias › Región."}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
       </SummarySection>
 
       <SummarySection title="Período del panel" icon={ChartBarIcon}>

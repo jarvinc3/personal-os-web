@@ -56,7 +56,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -322,24 +329,34 @@ function ReceivableDetailScreenBody({
           {payments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
               {payments.map((payment, index) => (
-                <SummaryItem
+                <Item
                   key={payment.id}
-                  title={formatFinanceMoney(payment.amount, money)}
-                  description={[
-                    formatCalendarDate(payment.paidAt, display.locale),
-                    payment.account?.name ?? "Cuenta eliminada",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  trailing={
-                    payment.transactionId ? (
+                  variant="plain"
+                  className={cn(
+                    index !== payments.length - 1 && "border-b border-border/60"
+                  )}
+                >
+                  <ItemContent>
+                    <ItemTitle>
+                      {formatFinanceMoney(payment.amount, money)}
+                    </ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {[
+                        formatCalendarDate(payment.paidAt, display.locale),
+                        payment.account?.name ?? "Cuenta eliminada",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    {payment.transactionId ? (
                       <Badge variant="secondary">Ingreso</Badge>
                     ) : (
                       <Badge variant="secondary">Saldo inicial</Badge>
-                    )
-                  }
-                  isLast={index === payments.length - 1}
-                />
+                    )}
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

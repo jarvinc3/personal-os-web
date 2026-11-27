@@ -13,16 +13,26 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
     whenNotToUse:
       "Un grupo de ajustes con etiqueta corta: Card con su fila de Item. En pantallas de producto no se importa Card para armar el bloque por fuera.",
     importPath: "@/src/shared/components/data-display/summary",
-    snippet: `import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+    snippet: `import { SummarySection } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 <SummarySection title="Resumen del mes" icon={LandmarkIcon}>
-  <SummaryItem title="Movimientos" value="12" />
+  <Item variant="plain">
+    <ItemContent>
+      <ItemTitle>Movimientos</ItemTitle>
+    </ItemContent>
+    <ItemActions>
+      <span className="text-sm font-semibold tabular-nums">12</span>
+    </ItemActions>
+  </Item>
 </SummarySection>`,
     subcomponents: [],
-    anatomy: [{ name: "SummarySection", children: [{ name: "SummaryItem" }] }],
+    anatomy: [{ name: "SummarySection", children: [{ name: "Item" }] }],
     variants: [
       { name: "collapsible", values: "false, true con defaultOpen" },
       { name: "color", values: "acento del módulo en icono y fondo" },

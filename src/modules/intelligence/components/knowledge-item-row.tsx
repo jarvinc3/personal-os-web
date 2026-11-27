@@ -10,7 +10,15 @@ import type {
   KnowledgeState,
   KnowledgeType,
 } from "@/src/modules/intelligence/types/knowledge.types"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { cn } from "@/src/shared/lib/utils"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { Badge } from "@/src/shared/components/ui/badge"
 import {
   BrainCircuit,
@@ -69,16 +77,25 @@ export function KnowledgeItemRow({
   const stateBadge = showState ? (
     <KnowledgeStateBadge state={item.state} />
   ) : null
+  const KnowledgeIcon = TYPE_ICONS[item.knowledgeType] ?? BrainCircuit
 
   return (
-    <SummaryItem
-      title={knowledgeTitle(item)}
-      description={knowledgeDescription(item)}
-      icon={TYPE_ICONS[item.knowledgeType] ?? BrainCircuit}
-      trailing={trailing ?? stateBadge}
-      wrapTitle
-      wrapDescription
-      isLast={isLast}
-    />
+    <Item
+      variant="plain"
+      className={cn(!isLast && "border-b border-border/60")}
+    >
+      <ItemMedia variant="icon">
+        <KnowledgeIcon />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="line-clamp-2 break-words">
+          {knowledgeTitle(item)}
+        </ItemTitle>
+        <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+          {knowledgeDescription(item)}
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>{trailing ?? stateBadge}</ItemActions>
+    </Item>
   )
 }

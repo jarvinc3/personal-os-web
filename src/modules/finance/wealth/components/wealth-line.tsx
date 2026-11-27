@@ -1,6 +1,9 @@
 "use client"
 
 import { GlossaryHelpButton } from "@/src/modules/help"
+import Link from "next/link"
+import { cn } from "@/src/shared/lib/utils"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { LoanProgressCard } from "@/src/modules/finance/loans"
 import { ReceivableCard } from "@/src/modules/finance/receivables"
 import {
@@ -18,7 +21,14 @@ import type {
   FinanceLoan,
   FinanceReceivable,
 } from "@/src/modules/finance/shared/types/entities"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   BanknoteIcon,
   CreditCardIcon,
@@ -211,6 +221,7 @@ export function WealthLine({
   const hasDrift = line.hasDrift || drift !== null
   const status = lineStatus({ line, drift, display })
   const href = wealthLineHref(line)
+  const LineIcon = LINE_ICON[line.kind]
   const card = lineCard({ line, display, href, onPress })
 
   if (!card) {
@@ -218,20 +229,31 @@ export function WealthLine({
       ? `${line.description} · ${status}`
       : status
     return (
-      <SummaryItem
-        title={line.name}
-        description={description}
-        icon={LINE_ICON[line.kind]}
-        value={formatFinanceMoney(line.balance, {
-          ...display,
-          currency: line.currency,
-        })}
-        href={href ?? undefined}
-        isLast={isLast}
-        trailing={
+      <Item
+        variant={href ? "default" : "plain"}
+        className={cn(!href && !isLast && "border-b border-border/60")}
+        render={href ? <Link href={href} /> : undefined}
+      >
+        <ItemMedia variant="icon">
+          <LineIcon />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{line.name}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {description}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <span className="text-sm font-semibold tabular-nums">
+            {formatFinanceMoney(line.balance, {
+              ...display,
+              currency: line.currency,
+            })}
+          </span>
           <LineMarks hasDrift={hasDrift} reconciliation={line.reconciliation} />
-        }
-      />
+          {href ? <LinkPendingOverlay /> : null}
+        </ItemActions>
+      </Item>
     )
   }
 

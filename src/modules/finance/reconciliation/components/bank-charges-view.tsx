@@ -18,12 +18,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Building2Icon, LandmarkIcon, TagsIcon } from "lucide-react"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 
 type BankChargesViewProps = {
   enabled: boolean
@@ -116,29 +120,50 @@ export function BankChargesView({
 
           <SummarySection title="Por categoría" icon={TagsIcon}>
             {charges.byKind.map((entry, index) => (
-              <SummaryItem
+              <Item
                 key={entry.kind}
-                title={FINANCE_RECONCILIATION_KIND_LABEL[entry.kind]}
-                value={formatFinanceMoney(moneyMagnitude(entry.total), display)}
-                isLast={index === charges.byKind.length - 1}
-                className="px-3"
-              />
+                variant="plain"
+                className={cn(
+                  "px-3",
+                  !(index === charges.byKind.length - 1) &&
+                    "border-b border-border/60"
+                )}
+              >
+                <ItemContent>
+                  <ItemTitle>
+                    {FINANCE_RECONCILIATION_KIND_LABEL[entry.kind]}
+                  </ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {formatFinanceMoney(moneyMagnitude(entry.total), display)}
+                  </span>
+                </ItemActions>
+              </Item>
             ))}
           </SummarySection>
 
           {charges.byInstitution.length > 0 ? (
             <SummarySection title="Por banco" icon={Building2Icon}>
               {charges.byInstitution.map((entry, index) => (
-                <SummaryItem
+                <Item
                   key={entry.name}
-                  title={entry.name}
-                  value={formatFinanceMoney(
-                    moneyMagnitude(entry.total),
-                    display
+                  variant="plain"
+                  className={cn(
+                    "px-3",
+                    !(index === charges.byInstitution.length - 1) &&
+                      "border-b border-border/60"
                   )}
-                  isLast={index === charges.byInstitution.length - 1}
-                  className="px-3"
-                />
+                >
+                  <ItemContent>
+                    <ItemTitle>{entry.name}</ItemTitle>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {formatFinanceMoney(moneyMagnitude(entry.total), display)}
+                    </span>
+                  </ItemActions>
+                </Item>
               ))}
             </SummarySection>
           ) : null}

@@ -6,7 +6,6 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { DetailHeader } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import {
   SummaryGroup,
-  SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -16,6 +15,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 import type {
   GalleryDemoMap,
@@ -57,7 +63,21 @@ export const encabezadosDemos: GalleryDemoMap = {
     collapsible
     right={<Badge variant="secondary">6</Badge>}
   >
-    <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+    <Item
+      variant="plain"
+    >
+      <ItemMedia variant="icon">
+        <TagsIcon />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>{"Fijas"}</ItemTitle>
+      </ItemContent>
+      <ItemActions>
+        <span className="text-sm font-semibold tabular-nums">
+          {"3"}
+        </span>
+      </ItemActions>
+    </Item>
   </SummarySection>
 </div>
 `,
@@ -92,7 +112,19 @@ export const encabezadosDemos: GalleryDemoMap = {
             collapsible
             right={<Badge variant="secondary">6</Badge>}
           >
-            <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+            <Item variant="plain">
+              <ItemMedia variant="icon">
+                <TagsIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Fijas"}</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {"3"}
+                </span>
+              </ItemActions>
+            </Item>
           </SummarySection>
         </div>
       ),
@@ -106,12 +138,21 @@ export const encabezadosDemos: GalleryDemoMap = {
   title="Saldo inicial"
   description="Antes de los movimientos de este mes"
 >
-  <SummaryItem
-    title="Movimientos del mes"
-    value="DOP $8,000.00"
-    icon={TagsIcon}
-    isLast
-  />
+  <Item
+    variant="plain"
+  >
+    <ItemMedia variant="icon">
+      <TagsIcon />
+    </ItemMedia>
+    <ItemContent>
+      <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+    </ItemContent>
+    <ItemActions>
+      <span className="text-sm font-semibold tabular-nums">
+        {"DOP $8,000.00"}
+      </span>
+    </ItemActions>
+  </Item>
 </SummaryGroup>
 `,
       node: (
@@ -119,12 +160,19 @@ export const encabezadosDemos: GalleryDemoMap = {
           title="Saldo inicial"
           description="Antes de los movimientos de este mes"
         >
-          <SummaryItem
-            title="Movimientos del mes"
-            value="DOP $8,000.00"
-            icon={TagsIcon}
-            isLast
-          />
+          <Item variant="plain">
+            <ItemMedia variant="icon">
+              <TagsIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {"DOP $8,000.00"}
+              </span>
+            </ItemActions>
+          </Item>
         </SummaryGroup>
       ),
     },
@@ -262,7 +310,19 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
               defaultOpen
               right={<Badge variant="secondary">6</Badge>}
             >
-              <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Fijas"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"3"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummarySection>
           </div>
         ),
@@ -296,12 +356,19 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
         node: (
           <div className="w-full max-w-sm">
             <SummaryGroup title="Saldo inicial">
-              <SummaryItem
-                title="Movimientos del mes"
-                value="DOP $8,000.00"
-                icon={TagsIcon}
-                isLast
-              />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"DOP $8,000.00"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummaryGroup>
           </div>
         ),
@@ -314,12 +381,19 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
               title="Saldo inicial"
               description="Antes de los movimientos de este mes"
             >
-              <SummaryItem
-                title="Movimientos del mes"
-                value="DOP $8,000.00"
-                icon={TagsIcon}
-                isLast
-              />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"DOP $8,000.00"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummaryGroup>
           </div>
         ),

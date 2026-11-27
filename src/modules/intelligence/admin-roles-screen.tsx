@@ -26,10 +26,16 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { cn } from "@/src/shared/lib/utils"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   AlertCircle,
@@ -96,13 +102,25 @@ export function AdminRolesScreen() {
           </Empty>
         ) : (
           rolesQuery.data.map((account, index) => (
-            <SummaryItem
+            <Item
               key={account.id}
-              title={accountName(account)}
-              description={`${account.email} · ${ROLE_LABELS[account.role]}`}
-              icon={UserRound}
-              isLast={index === rolesQuery.data!.length - 1}
-              trailing={
+              variant="plain"
+              className={cn(
+                "pr-3",
+                index !== rolesQuery.data!.length - 1 &&
+                  "border-b border-border/60"
+              )}
+            >
+              <ItemMedia variant="icon">
+                <UserRound />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{accountName(account)}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {`${account.email} · ${ROLE_LABELS[account.role]}`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
                 <div className="flex flex-col items-end gap-1">
                   <label className="sr-only" htmlFor={`role-${account.id}`}>
                     Rol para {account.email}
@@ -131,9 +149,8 @@ export function AdminRolesScreen() {
                     ))}
                   </select>
                 </div>
-              }
-              className="pr-3"
-            />
+              </ItemActions>
+            </Item>
           ))
         )}
         <p className="px-2 text-xs leading-relaxed text-muted-foreground">

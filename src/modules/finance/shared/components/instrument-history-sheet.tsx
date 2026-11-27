@@ -35,8 +35,16 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { HistoryIcon, Settings2Icon, XIcon } from "lucide-react"
 import { instantToZonedWallTime } from "@/src/shared/lib/zoned-time"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
@@ -111,18 +119,33 @@ export function InstrumentHistorySheet({
                         currency: item.currency ?? display.currency,
                       })
                 return (
-                  <SummaryItem
+                  <Item
                     key={item.id}
-                    title={instrumentHistoryLabel(item)}
-                    description={formatFinanceDateTimeLabel(
-                      instantToZonedWallTime(item.at, timeZone),
-                      display.locale
+                    variant="plain"
+                    className={cn(
+                      "px-3",
+                      !(index === items.length - 1) &&
+                        "border-b border-border/60"
                     )}
-                    icon={Settings2Icon}
-                    value={transition ?? amount ?? undefined}
-                    isLast={index === items.length - 1}
-                    className="px-3"
-                  />
+                  >
+                    <ItemMedia variant="icon">
+                      <Settings2Icon />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{instrumentHistoryLabel(item)}</ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {formatFinanceDateTimeLabel(
+                          instantToZonedWallTime(item.at, timeZone),
+                          display.locale
+                        )}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <span className="text-sm font-semibold tabular-nums">
+                        {transition ?? amount ?? undefined}
+                      </span>
+                    </ItemActions>
+                  </Item>
                 )
               })}
             </div>

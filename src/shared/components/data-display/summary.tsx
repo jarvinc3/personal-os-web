@@ -1,10 +1,8 @@
 "use client"
 
-import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
-import { ChevronDownIcon, ChevronRightIcon, LucideIcon } from "lucide-react"
-import Link from "next/link"
-import { ComponentProps, ReactNode } from "react"
-import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import { ChevronDownIcon, LucideIcon } from "lucide-react"
+import { ReactNode } from "react"
+import { cn } from "@/src/shared/lib/utils"
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,39 +20,6 @@ type SummarySectionProps = {
   collapsible?: boolean
   defaultOpen?: boolean
 }
-
-type SummaryItemBaseProps = {
-  title: ReactNode
-  /** Wraps the title up to two lines instead of cutting it on the first one. */
-  wrapTitle?: boolean
-  description?: ReactNode
-  /** Wraps the description on as many lines as it needs instead of cutting it. */
-  wrapDescription?: boolean
-  value?: ReactNode
-  icon?: LucideIcon
-  leading?: ReactNode
-  accentColor?: string
-  /** Tint the whole row with accentColor. Off by default so other lists stay unchanged. */
-  tintRow?: boolean
-  trailing?: ReactNode
-  showChevron?: boolean
-  isLast?: boolean
-  disabled?: boolean
-  className?: string
-  leadingClassName?: string
-}
-
-type SummaryItemLinkProps = SummaryItemBaseProps & {
-  href: ComponentProps<typeof Link>["href"]
-  onPress?: never
-}
-
-type SummaryItemActionProps = SummaryItemBaseProps & {
-  href?: never
-  onPress?: () => void
-}
-
-export type SummaryItemProps = SummaryItemLinkProps | SummaryItemActionProps
 
 export function SummarySection({
   title,
@@ -168,158 +133,6 @@ export function SummaryGroup({
         </p>
       ) : null}
       {children}
-    </div>
-  )
-}
-
-export function SummaryItem({
-  title,
-  wrapTitle = false,
-  description,
-  wrapDescription = false,
-  value,
-  icon: Icon,
-  leading,
-  accentColor,
-  tintRow = false,
-  trailing,
-  showChevron,
-  isLast = false,
-  disabled = false,
-  className,
-  leadingClassName,
-  ...props
-}: SummaryItemProps) {
-  const href = disabled ? undefined : "href" in props ? props.href : undefined
-  const onPress = disabled
-    ? undefined
-    : "onPress" in props
-      ? props.onPress
-      : undefined
-  const isInteractive = Boolean(href ?? onPress)
-  const chevronVisible = disabled ? false : (showChevron ?? Boolean(onPress))
-  const showLeading = Boolean(leading) || Boolean(Icon)
-
-  const tintStyle =
-    tintRow && accentColor
-      ? {
-          backgroundColor: `color-mix(in srgb, ${accentColor} 32%, transparent)`,
-        }
-      : undefined
-
-  const rowClassName = cn(
-    "flex w-full items-center gap-3 p-2 text-left transition-all duration-200",
-    !isInteractive && !isLast && "border-b border-border/60",
-    isInteractive &&
-      "rounded-2xl border border-border bg-card/50 hover:bg-muted/50",
-    onPress && "cursor-pointer",
-    !isInteractive && disabled && "opacity-50",
-    className
-  )
-  const shellClassName = cn(
-    PRESSABLE_CLASS,
-    "flex w-full items-stretch overflow-hidden rounded-2xl"
-  )
-
-  const main = (
-    <>
-      {showLeading ? (
-        <span
-          className={cn(
-            "flex shrink-0 items-center justify-center rounded-full bg-muted",
-            leadingClassName,
-            leading ? "h-10 w-max min-w-10 px-1" : "size-10"
-          )}
-          style={
-            accentColor
-              ? {
-                  backgroundColor: `color-mix(in srgb, ${accentColor} 18%, transparent)`,
-                }
-              : undefined
-          }
-        >
-          {leading ??
-            (Icon ? (
-              <Icon
-                className="size-5"
-                style={accentColor ? { color: accentColor } : undefined}
-              />
-            ) : null)}
-        </span>
-      ) : null}
-      <span className="min-w-0 flex-1">
-        <span
-          className={cn(
-            "block text-sm font-medium",
-            wrapTitle ? "line-clamp-2 break-words" : "truncate"
-          )}
-        >
-          {title}
-        </span>
-        {description ? (
-          <span
-            className={cn(
-              "block text-xs text-muted-foreground",
-              wrapDescription ? "break-words whitespace-normal" : "truncate"
-            )}
-          >
-            {description}
-          </span>
-        ) : null}
-      </span>
-      {value ? (
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
-          {value}
-        </span>
-      ) : null}
-      {chevronVisible ? (
-        <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
-      ) : null}
-    </>
-  )
-
-  if (href) {
-    return (
-      <div className={shellClassName} style={tintStyle}>
-        <Link
-          href={href}
-          className={cn(rowClassName, "relative min-w-0 flex-1")}
-        >
-          {main}
-          <LinkPendingOverlay />
-        </Link>
-        {trailing ? (
-          <div className="flex shrink-0 items-center pr-2">{trailing}</div>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (onPress) {
-    return (
-      <div className={shellClassName} style={tintStyle}>
-        <button
-          type="button"
-          className={cn(rowClassName, "min-w-0 flex-1")}
-          onClick={onPress}
-        >
-          {main}
-        </button>
-        {trailing ? (
-          <div className="flex shrink-0 items-center pr-2">{trailing}</div>
-        ) : null}
-      </div>
-    )
-  }
-
-  return (
-    <div
-      className={rowClassName}
-      style={tintStyle}
-      aria-disabled={disabled || undefined}
-    >
-      {main}
-      {trailing}
     </div>
   )
 }

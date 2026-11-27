@@ -26,7 +26,12 @@ import { TransactionTransferDetails } from "@/src/modules/finance/transactions/c
 import { transactionTypeLabel } from "@/src/modules/finance/transactions/lib/transaction-detail"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { Card } from "@/src/shared/components/ui/card"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 type TransactionDetailFactsProps = {
   transaction: FinanceTransaction
@@ -55,6 +60,40 @@ export function TransactionDetailFacts({
   const merchantCategory = merchant?.categoryId
     ? (categories.find((item) => item.id === merchant.categoryId) ?? null)
     : null
+  const amountLabel = formatFinanceMoney(tx.amount, {
+    ...display,
+    currency: tx.currency,
+  })
+  const signedAmount =
+    tx.type === "ADJUSTMENT"
+      ? `${movementSign(tx) ?? ""} ${amountLabel}`.trim()
+      : amountLabel
+  const facts = [
+    { key: "amount", title: "Monto", value: signedAmount },
+    ...(isTransferTransaction(tx) && tx.transferToAmount
+      ? [
+          {
+            key: "received",
+            title: "Monto recibido",
+            value: formatFinanceMoney(tx.transferToAmount, {
+              ...display,
+              currency: tx.transferToCurrency ?? tx.currency,
+            }),
+          },
+        ]
+      : []),
+    {
+      key: "base",
+      title: "En moneda base",
+      value: formatFinanceMoney(tx.amountBaseCurrency, display),
+    },
+    { key: "type", title: "Tipo", value: transactionTypeLabel(tx.type) },
+    {
+      key: "status",
+      title: "Estado",
+      value: FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status,
+    },
+  ]
 
   return (
     <section className="flex flex-col gap-2">
@@ -62,51 +101,22 @@ export function TransactionDetailFacts({
         Detalle
       </h2>
       <Card className="gap-0 bg-card p-1">
-        <SummaryItem
-          title="Monto"
-          value={
-            tx.type === "ADJUSTMENT"
-              ? `${movementSign(tx) ?? ""} ${formatFinanceMoney(tx.amount, {
-                  ...display,
-                  currency: tx.currency,
-                })}`.trim()
-              : formatFinanceMoney(tx.amount, {
-                  ...display,
-                  currency: tx.currency,
-                })
-          }
-          isLast={false}
-          className="px-3"
-        />
-        {isTransferTransaction(tx) && tx.transferToAmount ? (
-          <SummaryItem
-            title="Monto recibido"
-            value={formatFinanceMoney(tx.transferToAmount, {
-              ...display,
-              currency: tx.transferToCurrency ?? tx.currency,
-            })}
-            isLast={false}
-            className="px-3"
-          />
-        ) : null}
-        <SummaryItem
-          title="En moneda base"
-          value={formatFinanceMoney(tx.amountBaseCurrency, display)}
-          isLast={false}
-          className="px-3"
-        />
-        <SummaryItem
-          title="Tipo"
-          value={transactionTypeLabel(tx.type)}
-          isLast={false}
-          className="px-3"
-        />
-        <SummaryItem
-          title="Estado"
-          value={FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status}
-          isLast={false}
-          className="px-3"
-        />
+        {facts.map(({ key, title, value }) => (
+          <Item
+            key={key}
+            variant="plain"
+            className="border-b border-border/60 px-3 py-2"
+          >
+            <ItemContent>
+              <ItemTitle>{title}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {value}
+              </span>
+            </ItemActions>
+          </Item>
+        ))}
         {isTransferTransaction(tx) ? (
           <TransactionTransferDetails
             transaction={tx}
@@ -126,12 +136,19 @@ export function TransactionDetailFacts({
                 className="px-3"
               />
             ) : (
-              <SummaryItem
-                title="Categoría"
-                value="Sin categoría"
-                isLast={false}
-                className="px-3"
-              />
+              <Item
+                variant="plain"
+                className="border-b border-border/60 px-3 py-2"
+              >
+                <ItemContent>
+                  <ItemTitle>Categoría</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    Sin categoría
+                  </span>
+                </ItemActions>
+              </Item>
             )}
             {account ? (
               <AccountProductRow
@@ -140,12 +157,19 @@ export function TransactionDetailFacts({
                 variant="compact"
               />
             ) : tx.accountName ? (
-              <SummaryItem
-                title="Cuenta"
-                value={tx.accountName}
-                isLast={false}
-                className="px-3"
-              />
+              <Item
+                variant="plain"
+                className="border-b border-border/60 px-3 py-2"
+              >
+                <ItemContent>
+                  <ItemTitle>Cuenta</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {tx.accountName}
+                  </span>
+                </ItemActions>
+              </Item>
             ) : null}
             {card ? (
               <CardProductRow
@@ -155,12 +179,19 @@ export function TransactionDetailFacts({
                 variant="compact"
               />
             ) : tx.cardName ? (
-              <SummaryItem
-                title="Tarjeta"
-                value={tx.cardName}
-                isLast={false}
-                className="px-3"
-              />
+              <Item
+                variant="plain"
+                className="border-b border-border/60 px-3 py-2"
+              >
+                <ItemContent>
+                  <ItemTitle>Tarjeta</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {tx.cardName}
+                  </span>
+                </ItemActions>
+              </Item>
             ) : null}
             {merchant ? (
               <MerchantCard
@@ -171,21 +202,32 @@ export function TransactionDetailFacts({
                 href={APP_ROUTES.app.financeMerchant(merchant.id)}
               />
             ) : (
-              <SummaryItem
-                title="Comercio"
-                value={tx.merchant ?? tx.merchantName ?? "Sin comercio"}
-                isLast={false}
-                className="px-3"
-              />
+              <Item
+                variant="plain"
+                className="border-b border-border/60 px-3 py-2"
+              >
+                <ItemContent>
+                  <ItemTitle>Comercio</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {tx.merchant ?? tx.merchantName ?? "Sin comercio"}
+                  </span>
+                </ItemActions>
+              </Item>
             )}
           </>
         )}
-        <SummaryItem
-          title="Descripción"
-          value={tx.description ?? "—"}
-          isLast
-          className="px-3"
-        />
+        <Item variant="plain" className="px-3 py-2">
+          <ItemContent>
+            <ItemTitle>Descripción</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {tx.description ?? "—"}
+            </span>
+          </ItemActions>
+        </Item>
       </Card>
     </section>
   )

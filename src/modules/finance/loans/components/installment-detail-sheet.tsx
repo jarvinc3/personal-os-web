@@ -21,7 +21,12 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { cn } from "@/src/shared/lib/utils"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { HandCoinsIcon, ReceiptIcon, XIcon } from "lucide-react"
@@ -76,12 +81,22 @@ export function InstallmentDetailSheet({
                   { title: "Mora", value: installment.lateFee },
                   { title: "Pagado", value: installment.paidAmount },
                 ].map((row, index, rows) => (
-                  <SummaryItem
+                  <Item
                     key={row.title}
-                    title={row.title}
-                    value={formatFinanceMoney(row.value, display)}
-                    isLast={index === rows.length - 1}
-                  />
+                    variant="plain"
+                    className={cn(
+                      index !== rows.length - 1 && "border-b border-border/60"
+                    )}
+                  >
+                    <ItemContent>
+                      <ItemTitle>{row.title}</ItemTitle>
+                    </ItemContent>
+                    <ItemActions>
+                      <span className="text-sm font-semibold tabular-nums">
+                        {formatFinanceMoney(row.value, display)}
+                      </span>
+                    </ItemActions>
+                  </Item>
                 ))}
               </div>
 

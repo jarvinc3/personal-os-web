@@ -44,10 +44,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
   Alert,
   AlertDescription,
@@ -63,11 +60,20 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  ChevronRightIcon,
   InfoIcon,
   ListFilterIcon,
   MailSearchIcon,
@@ -238,15 +244,29 @@ function ProductProposalsScreenBody() {
         ) : null}
       </SummarySection>
 
-      <SummaryItem
-        title="Estado"
-        description="Filtra las propuestas"
-        value={PROPOSAL_STATUS_LABEL[status]}
-        icon={ListFilterIcon}
-        onPress={() => filtersSheet.setOpen(true)}
-        showChevron
-        className="px-3"
-      />
+      <Item
+        variant="default"
+        className={"px-3"}
+        render={
+          <button type="button" onClick={() => filtersSheet.setOpen(true)} />
+        }
+      >
+        <ItemMedia variant="icon">
+          <ListFilterIcon />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{"Estado"}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {"Filtra las propuestas"}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <span className="text-sm font-semibold tabular-nums">
+            {PROPOSAL_STATUS_LABEL[status]}
+          </span>
+          <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+        </ItemActions>
+      </Item>
 
       {proposalsQuery.isError && !unavailable ? (
         <ErrorState

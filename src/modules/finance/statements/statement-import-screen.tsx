@@ -41,7 +41,13 @@ import {
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -324,13 +330,22 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
         {matched.length === 0 ? null : (
           <div className="rounded-2xl border border-border bg-card">
             {matched.map((line) => (
-              <SummaryItem
+              <Item
                 key={line.id}
-                title={line.description}
-                description={formatCalendarDate(line.date, display.locale)}
-                value={lineDisplay(display, line)}
-                trailing={
-                  applied ? undefined : (
+                variant="plain"
+                className="border-b border-border/60"
+              >
+                <ItemContent>
+                  <ItemTitle>{line.description}</ItemTitle>
+                  <ItemDescription className="truncate text-xs">
+                    {formatCalendarDate(line.date, display.locale)}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {lineDisplay(display, line)}
+                  </span>
+                  {applied ? null : (
                     <Checkbox
                       checked={line.decision === "MATCH"}
                       onCheckedChange={(value) =>
@@ -338,9 +353,9 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
                       }
                       aria-label={`Mantener ${line.description}`}
                     />
-                  )
-                }
-              />
+                  )}
+                </ItemActions>
+              </Item>
             ))}
           </div>
         )}
@@ -354,18 +369,27 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
         {missing.length === 0 ? null : (
           <div className="rounded-2xl border border-border bg-card">
             {missing.map((line) => (
-              <SummaryItem
+              <Item
                 key={line.id}
-                title={line.description}
-                description={[
-                  formatCalendarDate(line.date, display.locale),
-                  line.categoryName,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                value={lineDisplay(display, line)}
-                trailing={
-                  applied ? undefined : (
+                variant="plain"
+                className="border-b border-border/60"
+              >
+                <ItemContent>
+                  <ItemTitle>{line.description}</ItemTitle>
+                  <ItemDescription className="truncate text-xs">
+                    {[
+                      formatCalendarDate(line.date, display.locale),
+                      line.categoryName,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {lineDisplay(display, line)}
+                  </span>
+                  {applied ? null : (
                     <Checkbox
                       checked={line.decision === "CREATE"}
                       onCheckedChange={(value) =>
@@ -373,9 +397,9 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
                       }
                       aria-label={`Crear ${line.description}`}
                     />
-                  )
-                }
-              />
+                  )}
+                </ItemActions>
+              </Item>
             ))}
           </div>
         )}

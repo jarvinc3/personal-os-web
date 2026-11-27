@@ -17,10 +17,7 @@ import {
 import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/components/subscription-price-chart"
 import { useMemo } from "react"
 import { LineChartIcon } from "lucide-react"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
@@ -30,6 +27,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 
 type SubscriptionPriceTabProps = {
   subscription: FinanceSubscription
@@ -116,25 +121,36 @@ export function SubscriptionPriceTab({
         <SubscriptionPriceChart series={priceHistory.series} display={money} />
         <div className="flex flex-col">
           {priceHistory.changes.map((change, index) => (
-            <SummaryItem
+            <Item
               key={change.date}
-              title={formatCalendarDate(change.date, money.locale)}
-              description={
-                change.previousAmount === null
-                  ? "Inicio"
-                  : `Detectado en el cobro${
-                      change.percent === null
-                        ? ""
-                        : ` · ${change.percent > 0 ? "+" : ""}${change.percent}%`
-                    }`
-              }
-              value={
-                change.previousAmount === null
-                  ? formatFinanceMoney(change.amount, money)
-                  : `${formatFinanceMoney(change.previousAmount, money)} → ${formatFinanceMoney(change.amount, money)}`
-              }
-              isLast={index === priceHistory.changes.length - 1}
-            />
+              variant="plain"
+              className={cn(
+                !(index === priceHistory.changes.length - 1) &&
+                  "border-b border-border/60"
+              )}
+            >
+              <ItemContent>
+                <ItemTitle>
+                  {formatCalendarDate(change.date, money.locale)}
+                </ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {change.previousAmount === null
+                    ? "Inicio"
+                    : `Detectado en el cobro${
+                        change.percent === null
+                          ? ""
+                          : ` · ${change.percent > 0 ? "+" : ""}${change.percent}%`
+                      }`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {change.previousAmount === null
+                    ? formatFinanceMoney(change.amount, money)
+                    : `${formatFinanceMoney(change.previousAmount, money)} → ${formatFinanceMoney(change.amount, money)}`}
+                </span>
+              </ItemActions>
+            </Item>
           ))}
         </div>
       </AsyncRegion>

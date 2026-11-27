@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, Pencil } from "lucide-react"
+import { ChevronRightIcon, Mail, Pencil } from "lucide-react"
 
 import { shortMessageId } from "@/src/modules/intelligence/message-id"
 import {
@@ -12,7 +12,14 @@ import type {
   AiReviewStatus,
   AiReviewVerification,
 } from "@/src/modules/intelligence/types/intelligence.types"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import { formatDateTime } from "@/src/shared/lib/date-format"
@@ -61,31 +68,43 @@ export function ReviewQueueRow({
       ? "Sin dato"
       : `${Math.round(message.confidence * 100)} %`
   return (
-    <SummaryItem
-      title={message.subject || "(sin asunto)"}
-      wrapTitle
-      description={
-        <span className="flex flex-col gap-0.5">
-          <span>
-            {message.fromAddress} ·{" "}
-            {formatDateTime(message.receivedAt, formatLocale)} · #
-            {shortMessageId(message.id)}
-          </span>
-          <span>
-            Tipo semántico: {semanticType} · Confianza: {confidence}
-          </span>
-          {verification ? (
-            <span className="text-foreground">
-              {describeReviewVerification(verification, formatLocale)}
+    <div className="flex w-full items-stretch overflow-hidden rounded-2xl">
+      <Item
+        render={
+          <button type="button" onClick={() => onOpenMessage(message.id)} />
+        }
+        className="min-w-0 flex-1"
+      >
+        <ItemMedia variant="icon">
+          <Mail />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle className="line-clamp-2 break-words">
+            {message.subject || "(sin asunto)"}
+          </ItemTitle>
+          <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+            <span className="flex flex-col gap-0.5">
+              <span>
+                {message.fromAddress} ·{" "}
+                {formatDateTime(message.receivedAt, formatLocale)} · #
+                {shortMessageId(message.id)}
+              </span>
+              <span>
+                Tipo semántico: {semanticType} · Confianza: {confidence}
+              </span>
+              {verification ? (
+                <span className="text-foreground">
+                  {describeReviewVerification(verification, formatLocale)}
+                </span>
+              ) : null}
             </span>
-          ) : null}
-        </span>
-      }
-      wrapDescription
-      icon={Mail}
-      onPress={() => onOpenMessage(message.id)}
-      showChevron
-      trailing={
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+        </ItemActions>
+      </Item>
+      <div className="flex shrink-0 items-center pr-2">
         <div className="flex flex-col items-end gap-2">
           {reviewed ? (
             <Badge variant={REVIEW_STATUS_BADGE[message.status]}>
@@ -108,8 +127,8 @@ export function ReviewQueueRow({
             </Button>
           )}
         </div>
-      }
-    />
+      </div>
+    </div>
   )
 }
 

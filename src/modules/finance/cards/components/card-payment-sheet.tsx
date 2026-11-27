@@ -64,10 +64,14 @@ import {
   FieldLabel,
 } from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -357,25 +361,41 @@ export function CardPaymentSheet({
           {pendingDuplicate ? (
             <div className="flex flex-col gap-2">
               <div className="flex flex-col">
-                <SummaryItem
-                  title="Monto"
-                  icon={CoinsIcon}
-                  value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
-                    ...display,
-                    currency: pendingDuplicate.candidate.currency ?? "",
-                  })}
-                />
-                <SummaryItem
-                  title="Fecha"
-                  icon={CalendarIcon}
-                  value={
-                    cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
-                      timeZone,
-                      locale: formatLocale,
-                    }) ?? "—"
-                  }
-                  isLast
-                />
+                <Item variant="plain" className="border-b border-border/60">
+                  <ItemMedia variant="icon">
+                    <CoinsIcon />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>Monto</ItemTitle>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {formatFinanceMoney(pendingDuplicate.candidate.amount, {
+                        ...display,
+                        currency: pendingDuplicate.candidate.currency ?? "",
+                      })}
+                    </span>
+                  </ItemActions>
+                </Item>
+                <Item variant="plain">
+                  <ItemMedia variant="icon">
+                    <CalendarIcon />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>Fecha</ItemTitle>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {cardPaymentDuplicateDateLabel(
+                        pendingDuplicate.candidate,
+                        {
+                          timeZone,
+                          locale: formatLocale,
+                        }
+                      ) ?? "—"}
+                    </span>
+                  </ItemActions>
+                </Item>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="px-1 text-xs text-muted-foreground">

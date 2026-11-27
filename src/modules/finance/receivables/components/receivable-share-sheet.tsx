@@ -49,10 +49,13 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
@@ -222,12 +225,23 @@ export function ReceivableShareSheet({
 
             <SummarySection title="Cobros" icon={HandshakeIcon}>
               {lines.map((line, index) => (
-                <SummaryItem
+                <Item
                   key={line.id}
-                  title={line.concept}
-                  value={line.pendingLabel}
-                  isLast={index === lines.length - 1}
-                />
+                  variant="plain"
+                  className={cn(
+                    "px-2",
+                    index !== lines.length - 1 && "border-b border-border/60"
+                  )}
+                >
+                  <ItemContent>
+                    <ItemTitle>{line.concept}</ItemTitle>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {line.pendingLabel}
+                    </span>
+                  </ItemActions>
+                </Item>
               ))}
               <div className="flex items-end justify-between gap-3 border-t border-border/60 px-2 pt-2">
                 <span className="text-sm font-medium text-muted-foreground">

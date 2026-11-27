@@ -10,8 +10,6 @@ import {
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
-import { GALLERY_ACCENT } from "@/src/modules/galleries/components/mock/values"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   Accordion,
   AccordionContent,
@@ -248,89 +246,6 @@ export const listasDemos: GalleryDemoMap = {
           <Marker variant="border">
             <MarkerContent>Importado del correo</MarkerContent>
           </Marker>
-        </div>
-      ),
-    },
-  ],
-  "summary-item": [
-    {
-      label: "Enlace, acción, valor, tinte y deshabilitada",
-      code: `
-<div className="flex w-full flex-col gap-3">
-  <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-    <SummaryItem
-      title="Exportar los datos"
-      description="Copia de seguridad"
-      value="JSON"
-      icon={FileTextIcon}
-      href={APP_ROUTES.app.settingsAppearance}
-    />
-    <SummaryItem
-      title="Movimientos sin categoría"
-      description="Doce pendientes"
-      value="12"
-      icon={InboxIcon}
-      onPress={() => simulatedTap("Abrir movimientos")}
-    />
-  </div>
-  <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-    <SummaryItem
-      title="Prioridad alta"
-      value="3"
-      icon={BellIcon}
-      accentColor={"#0f766e"}
-      tintRow
-      isLast
-    />
-  </div>
-  <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-    <SummaryItem
-      title="Elemento archivado"
-      description="No se puede abrir"
-      icon={FileTextIcon}
-      disabled
-      isLast
-    />
-  </div>
-</div>
-`,
-      node: (
-        <div className="flex w-full flex-col gap-3">
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Exportar los datos"
-              description="Copia de seguridad"
-              value="JSON"
-              icon={FileTextIcon}
-              href={APP_ROUTES.app.settingsAppearance}
-            />
-            <SummaryItem
-              title="Movimientos sin categoría"
-              description="Doce pendientes"
-              value="12"
-              icon={InboxIcon}
-              onPress={() => simulatedTap("Abrir movimientos")}
-            />
-          </div>
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Prioridad alta"
-              value="3"
-              icon={BellIcon}
-              accentColor={GALLERY_ACCENT}
-              tintRow
-              isLast
-            />
-          </div>
-          <div className="flex flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Elemento archivado"
-              description="No se puede abrir"
-              icon={FileTextIcon}
-              disabled
-              isLast
-            />
-          </div>
         </div>
       ),
     },
@@ -639,98 +554,6 @@ export const listasVariantDemos: GalleryVariantDemoMap = {
           <Marker variant="border" className="max-w-sm">
             <MarkerContent>Importado del correo</MarkerContent>
           </Marker>
-        ),
-      },
-    ],
-  },
-  "summary-item": {
-    "href / onPress": [
-      {
-        label: "enlace con pending",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Exportar los datos"
-              description="Copia de seguridad"
-              value="JSON"
-              icon={FileTextIcon}
-              href={APP_ROUTES.app.settingsAppearance}
-            />
-          </div>
-        ),
-      },
-      {
-        label: "acción sin overlay",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Movimientos sin categoría"
-              description="Doce pendientes"
-              value="12"
-              icon={InboxIcon}
-              isLast
-              onPress={() => simulatedTap("Abrir movimientos")}
-            />
-          </div>
-        ),
-      },
-    ],
-    tintRow: [
-      {
-        label: "true con accentColor",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Prioridad alta"
-              value="3"
-              icon={BellIcon}
-              accentColor={GALLERY_ACCENT}
-              tintRow
-              isLast
-            />
-          </div>
-        ),
-      },
-      {
-        label: "false por defecto",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Prioridad alta"
-              value="3"
-              icon={BellIcon}
-              isLast
-            />
-          </div>
-        ),
-      },
-    ],
-    states: [
-      {
-        label: "normal",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Exportar los datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </div>
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <div className="flex w-full max-w-sm flex-col rounded-2xl border border-border bg-card p-2">
-            <SummaryItem
-              title="Elemento archivado"
-              description="No se puede abrir"
-              icon={FileTextIcon}
-              isLast
-              disabled
-            />
-          </div>
         ),
       },
     ],

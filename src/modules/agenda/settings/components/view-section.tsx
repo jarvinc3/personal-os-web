@@ -11,17 +11,24 @@ import {
 } from "@/src/shared/components/ui/field"
 import { cn } from "@/src/shared/lib/utils"
 import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@/src/shared/components/ui/radio-group"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
-import { CalendarCog, CalendarDays } from "lucide-react"
+import { CalendarCog, CalendarDays, ChevronRightIcon } from "lucide-react"
 import { useWatch, type Control, type UseFormSetValue } from "react-hook-form"
 
 const MODULE_ACCENT = getModule("agenda").accent
@@ -80,15 +87,29 @@ export function AgendaViewSection({
         </RadioGroup>
       </SummarySection>
       <SummarySection title="Semana inicia" icon={CalendarCog}>
-        <SummaryItem
-          href={APP_ROUTES.app.settingsRegional}
-          icon={CalendarCog}
-          accentColor={MODULE_ACCENT}
-          title="Primer día de la semana"
-          description="Se configura en Preferencias › Región."
-          showChevron
-          isLast
-        />
+        <Item
+          variant="default"
+          render={<Link href={APP_ROUTES.app.settingsRegional} />}
+        >
+          <ItemMedia
+            variant="icon"
+            style={{
+              backgroundColor: `color-mix(in srgb, ${MODULE_ACCENT} 18%, transparent)`,
+            }}
+          >
+            <CalendarCog style={{ color: MODULE_ACCENT }} />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Primer día de la semana"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Se configura en Preferencias › Región."}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
       </SummarySection>
     </>
   )

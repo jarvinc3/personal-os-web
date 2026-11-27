@@ -26,7 +26,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { Card } from "@/src/shared/components/ui/card"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -177,20 +185,30 @@ export function RecycleBinView() {
 
   function renderArchived(record: FinanceArchivedRecord, isLast: boolean) {
     const branded = isBrandedRecordType(record.type)
+    const RecordIcon = archivedIcon(record.type)
     return (
-      <SummaryItem
+      <Item
         key={`${record.type}-${record.id}`}
-        title={record.label}
-        description={ARCHIVED_TYPE_LABEL[record.type]}
-        icon={archivedIcon(record.type)}
-        leading={
-          branded ? (
+        variant="plain"
+        className={cn("px-3", !isLast && "border-b border-border/60")}
+      >
+        {branded ? (
+          <ItemMedia className="h-10 w-max min-w-10 rounded-full px-1">
             <BrandLogo name={record.label} logoUrl={record.logoUrl} size={36} />
-          ) : undefined
-        }
-        isLast={isLast}
-        className="px-3"
-        trailing={
+          </ItemMedia>
+        ) : null}
+        {!branded && RecordIcon ? (
+          <ItemMedia variant="icon">
+            <RecordIcon />
+          </ItemMedia>
+        ) : null}
+        <ItemContent>
+          <ItemTitle>{record.label}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {ARCHIVED_TYPE_LABEL[record.type]}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
           <Button
             type="button"
             variant="outline"
@@ -201,8 +219,8 @@ export function RecycleBinView() {
             <RotateCcwIcon className="size-4 shrink-0" />
             Restaurar
           </Button>
-        }
-      />
+        </ItemActions>
+      </Item>
     )
   }
 
@@ -210,26 +228,36 @@ export function RecycleBinView() {
     const typeLabel = DELETED_TYPE_LABEL[record.type]
     const slowRestore = record.sizeBytes > LARGE_SNAPSHOT_BYTES
     const branded = isBrandedRecordType(record.type)
+    const RecordIcon = deletedIcon(record.type)
     return (
-      <SummaryItem
+      <Item
         key={`${record.type}-${record.id}`}
-        title={record.label ?? typeLabel}
-        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt, formatLocale)}${
-          slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
-        }`}
-        icon={deletedIcon(record.type)}
-        leading={
-          branded ? (
+        variant="plain"
+        className={cn("px-3", !isLast && "border-b border-border/60")}
+      >
+        {branded ? (
+          <ItemMedia className="h-10 w-max min-w-10 rounded-full px-1">
             <BrandLogo
               name={record.label ?? typeLabel}
               logoUrl={record.logoUrl}
               size={36}
             />
-          ) : undefined
-        }
-        isLast={isLast}
-        className="px-3"
-        trailing={
+          </ItemMedia>
+        ) : null}
+        {!branded && RecordIcon ? (
+          <ItemMedia variant="icon">
+            <RecordIcon />
+          </ItemMedia>
+        ) : null}
+        <ItemContent>
+          <ItemTitle>{record.label ?? typeLabel}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {`${typeLabel} · ${formatCalendarDate(record.deletedAt, formatLocale)}${
+              slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
+            }`}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
           <Button
             type="button"
             variant="outline"
@@ -240,8 +268,8 @@ export function RecycleBinView() {
             <RotateCcwIcon className="size-4 shrink-0" />
             Restaurar
           </Button>
-        }
-      />
+        </ItemActions>
+      </Item>
     )
   }
 

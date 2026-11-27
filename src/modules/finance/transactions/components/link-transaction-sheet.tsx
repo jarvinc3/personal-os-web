@@ -28,16 +28,22 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
-import { ChevronLeftIcon, XIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 const LINK_TABS = {
@@ -119,24 +125,39 @@ export function LinkTransactionSheet({
         <>
           {installments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
-              {installments.map((installment, index) => (
-                <SummaryItem
+              {installments.map((installment) => (
+                <Item
                   key={installment.id}
-                  title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)}`}
-                  value={formatFinanceMoney(installment.amount, {
-                    ...display,
-                    currency: selectedLoan.currency,
-                  })}
-                  onPress={() =>
-                    submit({
-                      kind: "LOAN_INSTALLMENT",
-                      loanId: selectedLoan.id,
-                      installmentId: installment.id,
-                    })
+                  variant="default"
+                  render={
+                    <button
+                      type="button"
+                      onClick={() =>
+                        submit({
+                          kind: "LOAN_INSTALLMENT",
+                          loanId: selectedLoan.id,
+                          installmentId: installment.id,
+                        })
+                      }
+                    />
                   }
-                  isLast={index === installments.length - 1}
-                />
+                >
+                  <ItemContent>
+                    <ItemTitle>{`Cuota ${installment.installmentNo}`}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {`Vence ${formatCalendarDate(installment.dueDate, display.locale)}`}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {formatFinanceMoney(installment.amount, {
+                        ...display,
+                        currency: selectedLoan.currency,
+                      })}
+                    </span>
+                    <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

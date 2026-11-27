@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  ChevronRightIcon,
   HistoryIcon,
   MessageSquareTextIcon,
   PlusIcon,
@@ -11,7 +12,6 @@ import {
 import { useAgentConversations } from "@/src/modules/intelligence/hooks/use-agent-chat"
 import type { AgentConversationSummary } from "@/src/modules/intelligence/types/agent-chat.types"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
@@ -31,6 +31,14 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import { cn } from "@/src/shared/lib/utils"
 
@@ -97,22 +105,38 @@ export function AgentChatHistorySheet({
           ) : (
             <div className="flex flex-col gap-1 pb-2">
               {items.map((conversation) => (
-                <SummaryItem
+                <Item
                   key={conversation.id}
-                  title={conversation.title}
-                  description={formatDateTime(conversation.updatedAt, locale)}
-                  value={
-                    conversation.messageCount === 1
-                      ? "1 mensaje"
-                      : `${conversation.messageCount} mensajes`
-                  }
-                  icon={MessageSquareTextIcon}
-                  onPress={() => onSelect(conversation)}
+                  variant="default"
                   className={cn(
                     conversation.id === activeConversationId &&
                       "border-primary/40 ring-2 ring-primary/20"
                   )}
-                />
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => onSelect(conversation)}
+                    />
+                  }
+                >
+                  <ItemMedia variant="icon">
+                    <MessageSquareTextIcon />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{conversation.title}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {formatDateTime(conversation.updatedAt, locale)}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {conversation.messageCount === 1
+                        ? "1 mensaje"
+                        : `${conversation.messageCount} mensajes`}
+                    </span>
+                    <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
               ))}
               <InfiniteListSentinel
                 hasNextPage={

@@ -95,8 +95,7 @@ import { InboxIcon } from "lucide-react"
       "Línea corta de contexto con icono, separador o borde inferior.",
     whenToUse:
       "Una nota de estado dentro de una lista o entre dos grupos de filas.",
-    whenNotToUse:
-      "Una fila con título y valor: SummaryItem. Un aviso: Alert o NoticeCard.",
+    whenNotToUse: "Una fila con título y valor: `Item`. Un aviso: `Alert`.",
     importPath: "@/src/shared/components/ui/marker",
     snippet: `import {
   Marker,
@@ -126,61 +125,6 @@ import { InboxIcon } from "lucide-react"
         name: "render",
         type: "RenderProp",
         description: "Convierte el marker en un enlace o botón.",
-      },
-    ],
-  },
-  {
-    id: "summary-item",
-    name: "SummaryItem",
-    category: "listas",
-    kind: "domain",
-    description:
-      "Fila canónica de una lista: media circular, título, descripción, valor y chevron.",
-    whenToUse:
-      "Una fila dentro de SummarySection o de una Card con ItemGroup, con href o onPress.",
-    whenNotToUse:
-      "Una entidad de Finanzas: su card. Un grupo sin sección: no envuelvas la fila en un div de borde a mano.",
-    importPath: "@/src/shared/components/data-display/summary",
-    snippet: `import { SummaryItem } from "@/src/shared/components/data-display/summary"
-import { FileTextIcon } from "lucide-react"
-
-<SummaryItem
-  title="Exportar los datos"
-  description="Copia de seguridad"
-  value="JSON"
-  icon={FileTextIcon}
-  href={href}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "SummaryItem" }],
-    variants: [
-      {
-        name: "href / onPress",
-        values: "enlace con pending o acción sin overlay",
-      },
-      { name: "tintRow", values: "true con accentColor, false por defecto" },
-      { name: "states", values: "normal, hover, disabled" },
-    ],
-    props: [
-      {
-        name: "href",
-        type: "Link href",
-        description: "Abre otra vista con LinkPendingOverlay.",
-      },
-      {
-        name: "onPress",
-        type: "() => void",
-        description: "Acción local de la fila; no pinta overlay.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono dentro de la media circular.",
-      },
-      {
-        name: "value",
-        type: "ReactNode",
-        description: "Valor a la derecha, normalmente tabular-nums.",
       },
     ],
   },

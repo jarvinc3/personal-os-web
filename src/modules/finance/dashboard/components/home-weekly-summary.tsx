@@ -13,14 +13,18 @@ import { FINANCE_BUDGET_PAGE_SIZE } from "@/src/modules/finance/shared/lib/budge
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { formatDayMonth } from "@/src/shared/lib/date-format"
 
 import { CalendarDaysIcon } from "lucide-react"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -99,12 +103,23 @@ export function FinanceHomeWeeklySummary() {
         const budget = budgets.find((item) => item.id === risk.id)
         if (!budget) {
           return (
-            <SummaryItem
+            <Item
               key={risk.id}
-              title={risk.name}
-              description={`${Math.round(risk.pctUsed)}% del presupuesto`}
-              value={formatFinanceMoney(risk.limit, display)}
-            />
+              variant="plain"
+              className={"border-b border-border/60"}
+            >
+              <ItemContent>
+                <ItemTitle>{risk.name}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {`${Math.round(risk.pctUsed)}% del presupuesto`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatFinanceMoney(risk.limit, display)}
+                </span>
+              </ItemActions>
+            </Item>
           )
         }
         return (
@@ -121,12 +136,23 @@ export function FinanceHomeWeeklySummary() {
         const loan = loans.find((item) => item.id === installment.loanId)
         if (!loan) {
           return (
-            <SummaryItem
+            <Item
               key={installment.loanId}
-              title={installment.lenderName}
-              description={`Cuota · ${formatShortDate(installment.dueDate, formatLocale)}`}
-              value={formatFinanceMoney(installment.amount, display)}
-            />
+              variant="plain"
+              className={"border-b border-border/60"}
+            >
+              <ItemContent>
+                <ItemTitle>{installment.lenderName}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {`Cuota · ${formatShortDate(installment.dueDate, formatLocale)}`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatFinanceMoney(installment.amount, display)}
+                </span>
+              </ItemActions>
+            </Item>
           )
         }
         return (
@@ -143,12 +169,23 @@ export function FinanceHomeWeeklySummary() {
         const card = cards.find((item) => item.id === dueCard.cardId)
         if (!card) {
           return (
-            <SummaryItem
+            <Item
               key={dueCard.cardId}
-              title={dueCard.name}
-              description={`Vence el día ${dueCard.dueDay}`}
-              value={dueCard.lastFour ? `…${dueCard.lastFour}` : undefined}
-            />
+              variant="plain"
+              className={"border-b border-border/60"}
+            >
+              <ItemContent>
+                <ItemTitle>{dueCard.name}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {`Vence el día ${dueCard.dueDay}`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {dueCard.lastFour ? `…${dueCard.lastFour}` : undefined}
+                </span>
+              </ItemActions>
+            </Item>
           )
         }
         return (
@@ -164,11 +201,19 @@ export function FinanceHomeWeeklySummary() {
       })}
 
       {summary.pendingEmails > 0 ? (
-        <SummaryItem
-          title="Correos por revisar"
-          description="Movimientos de banco sin confirmar"
-          value={String(summary.pendingEmails)}
-        />
+        <Item variant="plain" className={"border-b border-border/60"}>
+          <ItemContent>
+            <ItemTitle>{"Correos por revisar"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {"Movimientos de banco sin confirmar"}
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {String(summary.pendingEmails)}
+            </span>
+          </ItemActions>
+        </Item>
       ) : null}
     </SummarySection>
   )

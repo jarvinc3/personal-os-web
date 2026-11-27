@@ -29,7 +29,6 @@ import type { AiEmailMessageDetail } from "@/src/modules/intelligence/types/inte
 import type { EmailSignal } from "@/src/modules/intelligence/types/signal.types"
 import {
   SummaryGroup,
-  SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
@@ -42,6 +41,15 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { formatDateTime } from "@/src/shared/lib/date-format"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
@@ -157,50 +165,103 @@ function SignalDetail({
 
   return (
     <>
-      <SummaryItem
-        title={signalTypeLabel(signal.type)}
-        description={`Detectada ${formatDateTime(signal.detectedAt, formatLocale)} · ${formatSignalConfidence(signal.confidence)}`}
-        value={signalStatusLabel(signal.status)}
-        icon={ShieldCheck}
-        isLast={!routes.length && !hasEvidence}
-      />
+      <Item
+        variant="plain"
+        className={cn(
+          !(!routes.length && !hasEvidence) && "border-b border-border/60"
+        )}
+      >
+        <ItemMedia variant="icon">
+          <ShieldCheck />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{signalTypeLabel(signal.type)}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {`Detectada ${formatDateTime(signal.detectedAt, formatLocale)} · ${formatSignalConfidence(signal.confidence)}`}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <span className="text-sm font-semibold tabular-nums">
+            {signalStatusLabel(signal.status)}
+          </span>
+        </ItemActions>
+      </Item>
       {routes.map((route, index) => (
-        <SummaryItem
+        <Item
           key={route.route}
-          title={route.title}
-          description={route.description}
-          icon={RouteIcon}
-          isLast={index === routes.length - 1 && !hasEvidence}
-        />
+          variant="plain"
+          className={cn(
+            !(index === routes.length - 1 && !hasEvidence) &&
+              "border-b border-border/60"
+          )}
+        >
+          <ItemMedia variant="icon">
+            <RouteIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{route.title}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {route.description}
+            </ItemDescription>
+          </ItemContent>
+        </Item>
       ))}
       {hasEvidence ? (
         <SummaryGroup title="Evidencia usada">
-          <SummaryItem
-            title="Remitente"
-            description={message.fromAddress}
-            wrapDescription
-            icon={UserRound}
-          />
-          <SummaryItem
-            title="Asunto"
-            description={message.subject}
-            wrapDescription
-            icon={Mail}
-          />
-          <SummaryItem
-            title="Fecha del correo"
-            description={formatDateTime(message.receivedAt, formatLocale)}
-            icon={CalendarDays}
-          />
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <UserRound />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Remitente"}</ItemTitle>
+              <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                {message.fromAddress}
+              </ItemDescription>
+            </ItemContent>
+          </Item>
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <Mail />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Asunto"}</ItemTitle>
+              <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                {message.subject}
+              </ItemDescription>
+            </ItemContent>
+          </Item>
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <CalendarDays />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Fecha del correo"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {formatDateTime(message.receivedAt, formatLocale)}
+              </ItemDescription>
+            </ItemContent>
+          </Item>
           {signal.evidence.map((evidence, index) => (
-            <SummaryItem
+            <Item
               key={`${evidence.sourceType}-${evidence.sourceId}`}
-              title={evidenceSourceLabel(evidence.sourceType)}
-              description={`Regla: ${evidenceRuleLabel(evidence)}`}
-              wrapDescription
-              icon={FileSearch}
-              isLast={index === signal.evidence.length - 1}
-            />
+              variant="plain"
+              className={cn(
+                !(index === signal.evidence.length - 1) &&
+                  "border-b border-border/60"
+              )}
+            >
+              <ItemMedia variant="icon">
+                <FileSearch />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>
+                  {evidenceSourceLabel(evidence.sourceType)}
+                </ItemTitle>
+                <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                  {`Regla: ${evidenceRuleLabel(evidence)}`}
+                </ItemDescription>
+              </ItemContent>
+            </Item>
           ))}
         </SummaryGroup>
       ) : null}

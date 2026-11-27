@@ -35,7 +35,7 @@ En Finanzas el molde es:
 - `PlanningProgressCard` → `href` (la usan presupuestos, metas, cobros y `LoanProgressCard`).
 - `LoanProgressCard` → `href`.
 - `AccountProductRow` y `CardProductRow` → `href`; `onPress` queda para seleccionar dentro de un sheet.
-- `SummaryItem` → `href`; con `onPress` **no** hay overlay. No conviertas a `onPress` una fila que solo navega.
+- Una fila `Item` con `render={<Link … />}` lleva `LinkPendingOverlay`; con `render={<button … />}` **no**. No conviertas a `onPress` una fila que solo navega.
 - `InstitutionWalletCard` → pending propio con `usePendingNavigation` (por el gesto de arrastre).
 
 Si el click además hace algo local (cerrar un buscador, guardar un borrador), usa `usePendingNavigation` y pinta el pending en ese control: no cambies a `href` para no perder el efecto.

@@ -64,11 +64,15 @@ import {
   FieldTitle,
   activeRowStyle,
 } from "@/src/shared/components/ui/field"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { cn } from "@/src/shared/lib/utils"
 import { getModule } from "@/src/shared/constants/module-registry"
 
@@ -630,47 +634,86 @@ export function LoanWizardReviewStep({
   return (
     <>
       <SummarySection title="Revisa" icon={SparklesIcon}>
-        <SummaryItem
-          title="Pendiente"
-          icon={WalletIcon}
-          value={formatFinanceMoney(String(plan.outstandingBalance), money)}
-          isLast={false}
-        />
-        <SummaryItem
-          title="Cuota"
-          icon={ArrowDownCircleIcon}
-          value={formatFinanceMoney(String(plan.installmentAmount), money)}
-          isLast={false}
-        />
+        <Item variant="plain" className={"border-b border-border/60"}>
+          <ItemMedia variant="icon">
+            <WalletIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Pendiente"}</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {formatFinanceMoney(String(plan.outstandingBalance), money)}
+            </span>
+          </ItemActions>
+        </Item>
+        <Item variant="plain" className={"border-b border-border/60"}>
+          <ItemMedia variant="icon">
+            <ArrowDownCircleIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Cuota"}</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {formatFinanceMoney(String(plan.installmentAmount), money)}
+            </span>
+          </ItemActions>
+        </Item>
         {plan.lastInstallmentAmount !== plan.installmentAmount ? (
-          <SummaryItem
-            title="Última cuota"
-            icon={ArrowDownCircleIcon}
-            value={formatFinanceMoney(
-              String(plan.lastInstallmentAmount),
-              money
-            )}
-            isLast={false}
-          />
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <ArrowDownCircleIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Última cuota"}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {formatFinanceMoney(String(plan.lastInstallmentAmount), money)}
+              </span>
+            </ItemActions>
+          </Item>
         ) : null}
-        <SummaryItem
-          title="Cuotas"
-          icon={HashIcon}
-          value={`${plan.paidPeriods} / ${values.periods}`}
-          isLast={false}
-        />
-        <SummaryItem
-          title="Próximo pago"
-          icon={CalendarIcon}
-          value={format(plan.nextDueDate, "d MMM yyyy")}
-          isLast={false}
-        />
-        <SummaryItem
-          title="Intereses"
-          icon={PercentIcon}
-          value={formatFinanceMoney(String(plan.totalInterest), money)}
-          isLast
-        />
+        <Item variant="plain" className={"border-b border-border/60"}>
+          <ItemMedia variant="icon">
+            <HashIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Cuotas"}</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {`${plan.paidPeriods} / ${values.periods}`}
+            </span>
+          </ItemActions>
+        </Item>
+        <Item variant="plain" className={"border-b border-border/60"}>
+          <ItemMedia variant="icon">
+            <CalendarIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Próximo pago"}</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {format(plan.nextDueDate, "d MMM yyyy")}
+            </span>
+          </ItemActions>
+        </Item>
+        <Item variant="plain">
+          <ItemMedia variant="icon">
+            <PercentIcon />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Intereses"}</ItemTitle>
+          </ItemContent>
+          <ItemActions>
+            <span className="text-sm font-semibold tabular-nums">
+              {formatFinanceMoney(String(plan.totalInterest), money)}
+            </span>
+          </ItemActions>
+        </Item>
       </SummarySection>
 
       <SummarySection

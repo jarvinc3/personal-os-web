@@ -70,9 +70,14 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -327,12 +332,19 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
       <div className="mx-4 mt-3">
         <SummarySection title="Préstamo" icon={LandmarkIcon}>
-          <SummaryItem
-            title="Prestamista"
-            icon={LandmarkIcon}
-            value={institution?.name ?? loan.lenderName}
-            isLast={false}
-          />
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <LandmarkIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Prestamista"}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {institution?.name ?? loan.lenderName}
+              </span>
+            </ItemActions>
+          </Item>
           {paymentAccount ? (
             <AccountProductRow
               account={paymentAccount}
@@ -340,12 +352,19 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               variant="compact"
             />
           ) : (
-            <SummaryItem
-              title="Se paga desde"
-              icon={WalletIcon}
-              value={loan.account?.name ?? "Sin cuenta de pago"}
-              isLast={false}
-            />
+            <Item variant="plain" className={"border-b border-border/60"}>
+              <ItemMedia variant="icon">
+                <WalletIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Se paga desde"}</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {loan.account?.name ?? "Sin cuenta de pago"}
+                </span>
+              </ItemActions>
+            </Item>
           )}
           {disbursementAccount ? (
             <AccountProductRow
@@ -354,17 +373,24 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               variant="compact"
             />
           ) : (
-            <SummaryItem
-              title="Desembolso"
-              icon={HandCoinsIcon}
-              value={loan.disbursementAccount?.name ?? "Sin cuenta"}
-              description={
-                loan.disbursementAccount
-                  ? undefined
-                  : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."
-              }
-              isLast
-            />
+            <Item variant="plain">
+              <ItemMedia variant="icon">
+                <HandCoinsIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Desembolso"}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {loan.disbursementAccount
+                    ? undefined
+                    : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {loan.disbursementAccount?.name ?? "Sin cuenta"}
+                </span>
+              </ItemActions>
+            </Item>
           )}
         </SummarySection>
       </div>
@@ -425,14 +451,30 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
           {installments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
               {installments.map((installment, index) => (
-                <SummaryItem
+                <Item
                   key={installment.id}
-                  title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
-                  wrapDescription
-                  value={formatFinanceMoney(installment.amount, money)}
-                  onPress={() => installmentSheet.setOpen(true, installment.id)}
-                  trailing={
+                  className="px-3"
+                  render={
+                    <button
+                      type="button"
+                      onClick={() =>
+                        installmentSheet.setOpen(true, installment.id)
+                      }
+                    />
+                  }
+                >
+                  <ItemContent>
+                    <ItemTitle>
+                      {`Cuota ${installment.installmentNo}`}
+                    </ItemTitle>
+                    <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                      {`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {formatFinanceMoney(installment.amount, money)}
+                    </span>
                     <Badge
                       variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
                     >
@@ -442,9 +484,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                         ]
                       }
                     </Badge>
-                  }
-                  isLast={index === installments.length - 1}
-                />
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

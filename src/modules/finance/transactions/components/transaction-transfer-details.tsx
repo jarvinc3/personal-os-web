@@ -8,12 +8,30 @@ import type {
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { transferDirectionLabel } from "@/src/modules/finance/shared/lib/transactions-query"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 import {
   crossCurrencyRate,
   transferRateLabel,
 } from "@/src/modules/finance/transactions/lib/transfer-fx"
+
+function TransferFact({ title, value }: { title: string; value: string }) {
+  return (
+    <Item variant="plain" className="border-b border-border/60 px-3 py-2">
+      <ItemContent>
+        <ItemTitle>{title}</ItemTitle>
+      </ItemContent>
+      <ItemActions>
+        <span className="text-sm font-semibold tabular-nums">{value}</span>
+      </ItemActions>
+    </Item>
+  )
+}
 
 type TransactionTransferDetailsProps = {
   transaction: FinanceTransaction
@@ -60,11 +78,9 @@ export function TransactionTransferDetails({
           variant="compact"
         />
       ) : (
-        <SummaryItem
+        <TransferFact
           title="Origen"
           value={transaction.accountName ?? transaction.cardName ?? "—"}
-          isLast={false}
-          className="px-3"
         />
       )}
       {destinationCard ? (
@@ -81,29 +97,20 @@ export function TransactionTransferDetails({
           variant="compact"
         />
       ) : (
-        <SummaryItem
+        <TransferFact
           title="Destino"
           value={
             transaction.transferToAccountName ??
             transaction.transferToCardName ??
             "—"
           }
-          isLast={false}
-          className="px-3"
         />
       )}
-      <SummaryItem
-        title="Ruta"
-        value={transferDirectionLabel(transaction)}
-        isLast={false}
-        className="px-3"
-      />
+      <TransferFact title="Ruta" value={transferDirectionLabel(transaction)} />
       {crossRate ? (
-        <SummaryItem
+        <TransferFact
           title={transaction.transferEstimated ? "Tasa estimada" : "Tasa"}
           value={transferRateLabel({ ...crossRate, locale: formatLocale })}
-          isLast={false}
-          className="px-3"
         />
       ) : null}
       {transaction.transferEstimated ? (

@@ -10,10 +10,7 @@ import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import type { FinanceSubscriptionPaymentSource } from "@/src/modules/finance/shared/types/entities"
 import { BanknoteArrowDownIcon, HandCoinsIcon } from "lucide-react"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
@@ -23,6 +20,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 
@@ -98,22 +104,35 @@ export function SubscriptionPaymentsTab({
           </Empty>
         }
       >
-        {payments.map((payment, index) => (
-          <SummaryItem
+        {payments.map((payment) => (
+          <Item
             key={payment.id}
-            title={formatFinanceMoney(payment.amount, {
-              ...display,
-              currency: payment.currency,
-            })}
-            description={`${formatCalendarDate(payment.paidAt, display.locale)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
-            href={
-              payment.transaction
-                ? APP_ROUTES.app.financeTransaction(payment.transaction.id)
-                : undefined
+            variant={payment.transaction ? "default" : "plain"}
+            render={
+              payment.transaction ? (
+                <Link
+                  href={APP_ROUTES.app.financeTransaction(
+                    payment.transaction.id
+                  )}
+                />
+              ) : undefined
             }
-            showChevron={Boolean(payment.transaction)}
-            isLast={index === payments.length - 1}
-          />
+          >
+            <ItemContent>
+              <ItemTitle>
+                {formatFinanceMoney(payment.amount, {
+                  ...display,
+                  currency: payment.currency,
+                })}
+              </ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {`${formatCalendarDate(payment.paidAt, display.locale)} · ${PAYMENT_SOURCE_LABEL[payment.source]}`}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <LinkPendingOverlay />
+            </ItemActions>
+          </Item>
         ))}
       </AsyncRegion>
       <InfiniteListSentinel

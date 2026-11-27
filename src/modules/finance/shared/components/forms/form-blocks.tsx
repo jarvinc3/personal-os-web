@@ -1,5 +1,11 @@
 "use client"
 
+import {
+  ALERT_SOFT_TONE_CLASS_NAME,
+  Alert,
+  AlertAction,
+  AlertDescription,
+} from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { CheckIcon, SparklesIcon } from "lucide-react"
 import type { ReactNode } from "react"
@@ -16,21 +22,23 @@ export function FinanceSuggestionRow({
   onAction,
 }: FinanceSuggestionRowProps) {
   return (
-    <div className="flex items-center gap-2 rounded-2xl bg-success/10 px-3 py-2 text-sm">
-      <SparklesIcon className="size-4 shrink-0 text-success" />
-      <span className="min-w-0 flex-1">{children}</span>
+    <Alert className={ALERT_SOFT_TONE_CLASS_NAME.success}>
+      <SparklesIcon aria-hidden="true" />
+      <AlertDescription>{children}</AlertDescription>
       {actionLabel && onAction ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="shrink-0 text-success"
-          onClick={onAction}
-        >
-          <CheckIcon className="size-4 shrink-0" />
-          {actionLabel}
-        </Button>
+        <AlertAction>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="shrink-0 text-success"
+            onClick={onAction}
+          >
+            <CheckIcon className="size-4 shrink-0" />
+            {actionLabel}
+          </Button>
+        </AlertAction>
       ) : null}
-    </div>
+    </Alert>
   )
 }
