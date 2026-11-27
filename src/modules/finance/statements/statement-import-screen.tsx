@@ -49,6 +49,7 @@ import {
   ItemTitle,
 } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { CheckCircleIcon, FileWarningIcon, XIcon } from "lucide-react"
@@ -178,11 +179,13 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
     locale: formatLocale,
   }
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
+
   usePageHeader(
     {
       variant: "secondary",
       title: "Estado de cuenta",
-      onBack: () => router.push(APP_ROUTES.app.financeProducts),
+      onBack: handleBack,
     },
     [router]
   )

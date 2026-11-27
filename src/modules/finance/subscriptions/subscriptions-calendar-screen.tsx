@@ -40,10 +40,11 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, CalendarOffIcon, TagsIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
@@ -60,7 +61,6 @@ export function SubscriptionsCalendarScreen() {
 }
 
 function SubscriptionsCalendarBody() {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(today))
@@ -73,10 +73,12 @@ function SubscriptionsCalendarBody() {
     locale: formatLocale,
   }
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeSubscriptions)
+
   usePageHeader({
     variant: "secondary",
     title: "Calendario",
-    onBack: () => router.back(),
+    onBack: handleBack,
   })
 
   const parsedMonth = useMemo(() => parseMonthKey(month), [month])

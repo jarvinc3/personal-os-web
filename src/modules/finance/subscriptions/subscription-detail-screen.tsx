@@ -52,6 +52,7 @@ import {
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -127,14 +128,16 @@ function SubscriptionDetailBody({
     [subscription, openEditSheet]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeSubscriptions)
+
   usePageHeader(
     {
       variant: "secondary",
       title: subscription?.name ?? "Suscripción",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
     },
-    [router, subscription?.name, headerActions]
+    [handleBack, subscription?.name, headerActions]
   )
 
   async function runStatusAction(

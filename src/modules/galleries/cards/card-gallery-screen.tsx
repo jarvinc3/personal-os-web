@@ -1,11 +1,9 @@
 "use client"
 
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-
 import { CARD_GALLERY_ENTITIES } from "@/src/modules/galleries/cards/entities"
 import { cardGalleryVariants } from "@/src/modules/galleries/cards/variants/registry"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ChevronRightIcon, LayoutGridIcon } from "lucide-react"
@@ -22,10 +20,7 @@ import Link from "next/link"
 
 /** Lista de entidades de la galería /settings/appearance/cards (#272). */
 export function CardGalleryScreen() {
-  const router = useRouter()
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearance)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.settingsAppearance)
 
   usePageHeader(
     {
@@ -45,7 +40,7 @@ export function CardGalleryScreen() {
         real.
       </p>
       <SummarySection title="Entidades" icon={LayoutGridIcon}>
-        {CARD_GALLERY_ENTITIES.map((entity, index) => {
+        {CARD_GALLERY_ENTITIES.map((entity) => {
           const Icon = entity.icon
           const count = cardGalleryVariants(entity.slug).length
           return (

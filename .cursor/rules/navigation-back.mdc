@@ -1,0 +1,26 @@
+---
+description: A back control returns to the previous screen with its parent as fallback; never pushes a duplicate entry.
+globs: "**/*.{ts,tsx}"
+alwaysApply: true
+---
+
+# Volver
+
+Un control de volver usa `useBackTo(padre)` (`src/shared/hooks/use-back-to.ts`): vuelve por historial y, si la ruta se abrió directo por URL, navega al padre. No uses `router.push` para volver: añade una entrada nueva y el siguiente volver cae en la pantalla que acabas de dejar.
+
+- Ajustes: `SettingsSecondaryPage` vuelve siempre a `/settings`.
+- Galerías, listas y detalles: el padre que recibe el hook es solo el respaldo; el destino normal es la pantalla anterior.
+- Una acción que abre otra vista (guardar y salir, un enlace) sí usa `router.push` o `Link`, con su pending.
+- El botón de volver de un encabezado secundario no se implementa con `router.push` a una pantalla que el usuario ya visitó.
+
+```tsx
+const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
+
+usePageHeader({
+  variant: "secondary",
+  title: "Productos",
+  onBack: handleBack,
+})
+```
+
+Revisión rápida: busca `onBack` y `handleBack` con `router.push`. Si el control se llama volver, va por `useBackTo`; si la pantalla siempre vuelve al mismo padre, va con `push` a ese padre.

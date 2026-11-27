@@ -67,6 +67,7 @@ import { cn } from "@/src/shared/lib/utils"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -213,15 +214,17 @@ function ReceivableDetailScreenBody({
     [setOptionsOpen]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeReceivables)
+
   usePageHeader(
     {
       variant: "secondary",
       title: receivable?.debtorName ?? "Cobro",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: ACCENT_FALLBACK_COLOR,
     },
-    [router, receivable?.debtorName, headerActions]
+    [handleBack, receivable?.debtorName, headerActions]
   )
 
   if (receivablesQuery.isPending && !receivable) {

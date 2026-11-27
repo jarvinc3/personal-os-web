@@ -9,10 +9,9 @@ import { useTransaction } from "@/src/modules/finance/shared/hooks/use-transacti
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { isTransferTransaction } from "@/src/modules/finance/shared/lib/transactions-query"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { ArrowLeftRightIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback } from "react"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function TransferCreateScreen() {
@@ -24,16 +23,9 @@ export function TransferCreateScreen() {
 }
 
 function TransferCreateScreenBody() {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeTransactions)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeTransactions)
 
   usePageHeader(
     {
@@ -73,18 +65,11 @@ export function TransferEditScreen({ transactionId }: TransferEditScreenProps) {
 }
 
 function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const detailQuery = useTransaction(isEnabled, transactionId)
   const transfer = detailQuery.data ?? null
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeTransaction(transactionId))
-  }, [router, transactionId])
+  const handleBack = useBackTo(APP_ROUTES.app.financeTransaction(transactionId))
 
   usePageHeader(
     {

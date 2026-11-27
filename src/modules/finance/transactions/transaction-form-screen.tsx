@@ -10,6 +10,7 @@ import {
   internalReturnPath,
   parseTransactionFormType,
 } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -129,13 +130,7 @@ function TransactionFormScreenBody({
         ? "Nuevo ingreso"
         : "Nuevo gasto"
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeTransactions)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeTransactions)
 
   const handleCreated = useCallback(() => {
     router.push(returnTo ?? APP_ROUTES.app.financeTransactions)

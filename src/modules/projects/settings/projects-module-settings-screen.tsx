@@ -19,10 +19,6 @@ export function ProjectsModuleSettingsScreen() {
 function ProjectsModuleSettingsScreenBody() {
   const router = useRouter()
   const handleDone = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
     router.push(APP_ROUTES.app.settings)
   }, [router])
 

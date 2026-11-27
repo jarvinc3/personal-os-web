@@ -1,8 +1,7 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { ChevronRightIcon } from "lucide-react"
 
 import {
@@ -17,19 +16,17 @@ import { GallerySearchField } from "@/src/modules/galleries/components/gallery-s
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { ItemGroup } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 
 /** Índice con búsqueda de todos los componentes de la galería (#417, #597). */
 export function ComponentGalleryScreen() {
-  const router = useRouter()
   const [search, setSearch] = useState("")
   const matches = searchGalleryComponents(search)
   const groups = groupGalleryMatches(matches)
   const searching = search.trim().length > 0
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearance)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.settingsAppearance)
 
   const subtitle = searching
     ? `${matches.length} resultados`

@@ -79,6 +79,7 @@ import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
@@ -155,11 +156,13 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
     locale: formatLocale,
   }
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeMerchants)
+
   usePageHeader(
     {
       variant: "secondary",
       title: merchant?.name ?? "Comercio",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: merchant ? (
         <Button
           type="button"

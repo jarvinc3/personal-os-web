@@ -58,6 +58,7 @@ import {
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { TAB_QUERY_KEY } from "@/src/shared/hooks/use-tabs-behavior"
@@ -287,15 +288,17 @@ function TransactionDetailScreenBody({
     [setOpenOptionsSheet]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeTransactions)
+
   usePageHeader(
     {
       variant: "secondary",
       title: tx && isTransferTransaction(tx) ? "Transferencia" : "Movimiento",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: ACCENT_FALLBACK_COLOR,
     },
-    [router, tx, headerActions]
+    [handleBack, tx, headerActions]
   )
 
   if (detailQuery.isPending) {

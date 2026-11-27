@@ -81,6 +81,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -242,15 +243,17 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     [setOpenOptionsSheet]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeLoans)
+
   usePageHeader(
     {
       variant: "secondary",
       title: loanTitle,
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
     },
-    [router, loan?.id, loanTitle, accent, headerActions]
+    [handleBack, loan?.id, loanTitle, accent, headerActions]
   )
 
   if (loansQuery.isPending && !loan) {
@@ -450,7 +453,7 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         >
           {installments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
-              {installments.map((installment, index) => (
+              {installments.map((installment) => (
                 <Item
                   key={installment.id}
                   className="px-3"

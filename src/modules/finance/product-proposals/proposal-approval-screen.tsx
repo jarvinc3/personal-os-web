@@ -38,6 +38,7 @@ import { MissingRecord } from "@/src/modules/finance/shared/components/layout/mi
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -50,8 +51,7 @@ import {
   MailSearchIcon,
   WalletIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 type ProposalApprovalScreenProps = {
   proposalId: string
@@ -70,7 +70,6 @@ export function ProposalApprovalScreen({
 function ProposalApprovalScreenBody({
   proposalId,
 }: ProposalApprovalScreenProps) {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const proposalsQuery = useEmailProductProposals(isEnabled, "PENDING")
   const institutionsQuery = useInstitutions(isEnabled)
@@ -116,9 +115,7 @@ function ProposalApprovalScreenBody({
     locale: formatLocale,
   }
 
-  const backToList = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProductProposals)
-  }, [router])
+  const backToList = useBackTo(APP_ROUTES.app.financeProductProposals)
 
   usePageHeader(
     {

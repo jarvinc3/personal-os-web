@@ -68,6 +68,7 @@ import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -206,17 +207,17 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     }
   }
 
+  const handleBack = useBackTo(
+    card
+      ? APP_ROUTES.app.financeInstitution(card.institutionId)
+      : APP_ROUTES.app.financeProducts
+  )
+
   usePageHeader(
     {
       variant: "secondary",
       title: card?.institutionName || card?.name || "Tarjeta",
-      onBack: () => {
-        router.push(
-          card
-            ? APP_ROUTES.app.financeInstitution(card.institutionId)
-            : APP_ROUTES.app.financeProducts
-        )
-      },
+      onBack: handleBack,
       actions: (
         <>
           <Button
@@ -239,6 +240,7 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
       card?.color,
       card?.institutionId,
       setOpenOptionsSheet,
+      handleBack,
     ]
   )
 

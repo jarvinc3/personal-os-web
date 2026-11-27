@@ -1,8 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { ChevronRightIcon } from "lucide-react"
 
 import { ComponentDocTemplate } from "@/src/modules/galleries/components/component-doc-template"
@@ -13,6 +11,7 @@ import {
 } from "@/src/modules/galleries/components/sections"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 
 /** Página de documentación de un componente de la galería (#417). */
@@ -23,7 +22,6 @@ export function ComponentDocScreen({
   sectionId: ComponentGallerySectionId
   componentId: string
 }) {
-  const router = useRouter()
   const section = componentGallerySection(sectionId)
   const doc = galleryComponentInCategory(sectionId, componentId)
   if (!doc) {
@@ -32,9 +30,9 @@ export function ComponentDocScreen({
     )
   }
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearanceComponentSection(sectionId))
-  }, [router, sectionId])
+  const handleBack = useBackTo(
+    APP_ROUTES.app.settingsAppearanceComponentSection(sectionId)
+  )
 
   usePageHeader(
     {

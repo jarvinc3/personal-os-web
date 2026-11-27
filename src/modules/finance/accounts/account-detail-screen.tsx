@@ -75,6 +75,7 @@ import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -226,17 +227,17 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
     }
   }
 
+  const handleBack = useBackTo(
+    account?.institutionId
+      ? APP_ROUTES.app.financeInstitution(account.institutionId)
+      : APP_ROUTES.app.financeProducts
+  )
+
   usePageHeader(
     {
       variant: "secondary",
       title: account?.institutionName || account?.name || "Cuenta",
-      onBack: () => {
-        router.push(
-          account?.institutionId
-            ? APP_ROUTES.app.financeInstitution(account.institutionId)
-            : APP_ROUTES.app.financeProducts
-        )
-      },
+      onBack: handleBack,
       actions: (
         <>
           <Button
@@ -259,6 +260,7 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
       account?.institutionId,
       accent,
       setOpenOptionsSheet,
+      handleBack,
     ]
   )
 

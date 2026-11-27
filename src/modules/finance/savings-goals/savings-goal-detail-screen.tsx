@@ -65,6 +65,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -178,15 +179,17 @@ function SavingsGoalDetailScreenBody({
     [setOptionsOpen]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeSavingsGoals)
+
   usePageHeader(
     {
       variant: "secondary",
       title: goal?.name ?? "Meta",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
     },
-    [router, goal?.name, accent, headerActions]
+    [handleBack, goal?.name, accent, headerActions]
   )
 
   const deleteGoal = useDeleteSavingsGoal()

@@ -60,6 +60,7 @@ import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ACCENT_FALLBACK_COLOR } from "@/src/shared/lib/accent-gradient"
@@ -216,15 +217,17 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
     [setOptionsOpen]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeBudgets)
+
   usePageHeader(
     {
       variant: "secondary",
       title: budgetTitleText,
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
     },
-    [router, budgetTitleText, accent, headerActions]
+    [handleBack, budgetTitleText, accent, headerActions]
   )
 
   if (budgetQuery.isPending && !budget) {

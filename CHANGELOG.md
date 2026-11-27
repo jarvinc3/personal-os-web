@@ -10,6 +10,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
 
+### Corregido
+
+- El botón de volver del encabezado ya no cae en una pantalla que el usuario no espera: en Ajustes vuelve a `/settings` y en galerías, listas y detalles regresa por historial con su padre como respaldo (`useBackTo`). Los controles de volver dejan de empujar una entrada nueva al historial.
+
 ### Cambiado
 
 - Las filas de `SummaryItem` componen `Item` con `ItemMedia`, `ItemContent`, `ItemTitle`, `ItemDescription` y `ItemActions`, y se retira `SummaryItem` con su ficha de galería. `SummarySection` se mantiene como chrome del bloque. `FinanceSuggestionRow` y los avisos de suscripciones componen `Alert`, que gana el tono lavado (`ALERT_SOFT_TONE_CLASS_NAME`), y se retira `NoticeCard`. Sin cambio de contrato (#419).

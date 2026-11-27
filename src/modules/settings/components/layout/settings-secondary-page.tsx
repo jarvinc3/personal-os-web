@@ -34,10 +34,6 @@ export function SettingsSecondaryPage({
   const hasPendingActivation = Object.keys(pendingActivations).length > 0
 
   const leave = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
     router.push(APP_ROUTES.app.settings)
   }, [router])
 

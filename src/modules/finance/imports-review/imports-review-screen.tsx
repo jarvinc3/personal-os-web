@@ -23,10 +23,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { InfoIcon, MailSearchIcon, MailWarningIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 /** Cards que se montan de entrada; el resto entra al bajar. */
@@ -41,7 +41,6 @@ export function ImportsReviewScreen() {
 }
 
 function ImportsReviewScreenBody() {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const queueQuery = useImportReviewQueue(isEnabled)
   const items = queueQuery.data ?? []
@@ -55,9 +54,7 @@ function ImportsReviewScreenBody() {
     locale: formatLocale,
   }
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {

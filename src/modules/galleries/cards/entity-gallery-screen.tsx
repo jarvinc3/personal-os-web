@@ -1,8 +1,5 @@
 "use client"
 
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-
 import { cardGalleryEntity } from "@/src/modules/galleries/cards/entities"
 import type { CardGalleryEntitySlug } from "@/src/modules/galleries/cards/entities"
 import { GalleryTapProvider } from "@/src/modules/galleries/cards/gallery-tap"
@@ -10,6 +7,7 @@ import { GalleryVariantRow } from "@/src/modules/galleries/cards/variant-row"
 import { GALLERY_DISPLAY } from "@/src/modules/galleries/cards/mock/display"
 import { cardGalleryVariants } from "@/src/modules/galleries/cards/variants/registry"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   Empty,
@@ -19,13 +17,10 @@ import {
 
 /** Todas las variantes de una entidad, una por fila (#272). */
 export function EntityGalleryScreen({ slug }: { slug: CardGalleryEntitySlug }) {
-  const router = useRouter()
   const entity = cardGalleryEntity(slug)
   const variants = entity ? cardGalleryVariants(entity.slug) : []
   const title = entity?.name ?? "Entidad"
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearanceCards)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.settingsAppearanceCards)
 
   usePageHeader(
     {

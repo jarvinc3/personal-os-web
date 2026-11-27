@@ -69,6 +69,7 @@ import {
   ItemTitle,
 } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -82,7 +83,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 /** Propuestas que se montan de entrada; el resto entra al bajar. */
 const PROPOSALS_PAGE_SIZE = 12
@@ -151,9 +152,7 @@ function ProductProposalsScreenBody() {
     locale: formatLocale,
   }
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {
