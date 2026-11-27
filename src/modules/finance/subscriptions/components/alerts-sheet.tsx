@@ -1,7 +1,6 @@
 "use client"
 
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import type { NoticeTone } from "@/src/modules/finance/shared/components/notice-card"
 import {
@@ -34,6 +33,7 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -133,7 +133,13 @@ export function AlertsSheet({
               isRetrying={query.isFetching}
             />
           ) : null}
-          {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
+          {query.isPending && !query.data ? (
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : null}
           {!query.isPending && alerts.length === 0 ? (
             <Empty className="py-6">
               <EmptyHeader>

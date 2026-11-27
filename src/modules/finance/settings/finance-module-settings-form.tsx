@@ -18,12 +18,18 @@ import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
 import { Button } from "@/src/shared/components/ui/button"
+import { Card } from "@/src/shared/components/ui/card"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   Drawer,
   DrawerContent,
@@ -38,6 +44,7 @@ import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   ArrowLeftRight,
+  ChevronRightIcon,
   Bell,
   CalendarRange,
   Coins,
@@ -107,6 +114,30 @@ const FINANCE_SETTINGS_SHEETS = {
 >
 
 type FinanceSettingsSheetId = keyof typeof FINANCE_SETTINGS_SHEETS
+
+const ACCESS_ROWS = [
+  {
+    key: "categories",
+    label: "Categorías",
+    description: "Gestiona las categorías de movimientos.",
+    icon: Tags,
+    href: APP_ROUTES.app.financeCategories,
+  },
+  {
+    key: "currencies",
+    label: "Monedas",
+    description: "Monedas y tasas del ledger.",
+    icon: Coins,
+    href: APP_ROUTES.app.settingsFinanceCurrencies,
+  },
+  {
+    key: "reconciliation",
+    label: "Conciliación",
+    description: "Cierres y cargos bancarios.",
+    icon: Scale,
+    href: APP_ROUTES.app.financeBankCharges,
+  },
+]
 
 type SheetControl = ReturnType<typeof useSheetParam>
 
@@ -319,45 +350,101 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         disabled={updateMutation.isPending}
       />
 
-      <SettingsSection title="Accesos">
-        <SettingsRow
-          label="Categorías"
-          description="Gestiona las categorías de movimientos."
-          icon={Tags}
-          accentColor={MODULE_ACCENT}
-          onPress={() => router.push(APP_ROUTES.app.financeCategories)}
-        />
-        <SettingsRow
-          label="Monedas"
-          description="Monedas y tasas del ledger."
-          icon={Coins}
-          accentColor={MODULE_ACCENT}
-          onPress={() => router.push(APP_ROUTES.app.settingsFinanceCurrencies)}
-        />
-        <SettingsRow
-          label="Conciliación"
-          description="Cierres y cargos bancarios."
-          icon={Scale}
-          accentColor={MODULE_ACCENT}
-          onPress={() => router.push(APP_ROUTES.app.financeBankCharges)}
-          isLast
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Accesos
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            {ACCESS_ROWS.map(
+              ({ key, label, description, icon: Icon, href }) => (
+                <Item
+                  key={key}
+                  variant="plain"
+                  className="min-h-[52px] px-3 py-3"
+                  render={
+                    <button type="button" onClick={() => router.push(href)} />
+                  }
+                >
+                  <ItemMedia
+                    className="size-9 rounded-md"
+                    style={{ backgroundColor: `${MODULE_ACCENT}20` }}
+                  >
+                    <Icon
+                      className="size-4.5"
+                      style={{ color: MODULE_ACCENT }}
+                    />
+                  </ItemMedia>
+                  <ItemContent className="gap-0.5">
+                    <ItemTitle className="text-sm font-normal md:text-base">
+                      {label}
+                    </ItemTitle>
+                    <ItemDescription className="text-xs">
+                      {description}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
+              )
+            )}
+          </ItemGroup>
+        </Card>
+      </section>
 
-      <SettingsSection title="Configuración">
-        {sheetIds.map((id, index) => (
-          <SettingsRow
-            key={id}
-            label={FINANCE_SETTINGS_SHEETS[id].title}
-            description={FINANCE_SETTINGS_SHEETS[id].description}
-            value={describeSheet(id)}
-            icon={FINANCE_SETTINGS_SHEETS[id].icon}
-            accentColor={MODULE_ACCENT}
-            onPress={() => settingsSheets[id].setOpen(true)}
-            isLast={index === sheetIds.length - 1}
-          />
-        ))}
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Configuración
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            {sheetIds.map((id) => {
+              const sheet = FINANCE_SETTINGS_SHEETS[id]
+              const SheetIcon = sheet.icon
+              return (
+                <Item
+                  key={id}
+                  variant="plain"
+                  className="min-h-[52px] px-3 py-3"
+                  render={
+                    <button
+                      type="button"
+                      onClick={() => settingsSheets[id].setOpen(true)}
+                    />
+                  }
+                >
+                  <ItemMedia
+                    className="size-9 rounded-md"
+                    style={{ backgroundColor: `${MODULE_ACCENT}20` }}
+                  >
+                    <SheetIcon
+                      className="size-4.5"
+                      style={{ color: MODULE_ACCENT }}
+                    />
+                  </ItemMedia>
+                  <ItemContent className="gap-0.5">
+                    <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+                      <ItemTitle className="text-sm font-normal md:text-base">
+                        {sheet.title}
+                      </ItemTitle>
+                      <ItemDescription className="max-w-[90%] truncate text-xs md:text-right">
+                        {describeSheet(id)}
+                      </ItemDescription>
+                    </div>
+                    <ItemDescription className="text-xs">
+                      {sheet.description}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
+              )
+            })}
+          </ItemGroup>
+        </Card>
+      </section>
 
       <FinanceIntegritySettingsSection
         enabled={isModuleEnabled}
@@ -376,20 +463,52 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
           isRetrying={branchesQuery.isFetching}
         />
       ) : financeBranches.length > 0 ? (
-        <SettingsSection
-          title="Zona de peligro"
-          description="Borra solo las ramas de Finanzas que elijas. La cuenta y sus preferencias se conservan."
-        >
-          <SettingsRow
-            label="Vaciar datos de Finanzas"
-            description="Elige qué ramas vaciar: movimientos y saldos, productos, planificación, y comercios y categorías."
-            destructive
-            icon={Trash2}
-            accentColor={SETTINGS_REGISTRY.danger.accent}
-            onPress={() => wipeSheet.setOpen(true)}
-            isLast
-          />
-        </SettingsSection>
+        <section className="flex flex-col gap-2">
+          <div className="flex min-w-0 flex-col gap-0.5 px-1">
+            <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              Zona de peligro
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Borra solo las ramas de Finanzas que elijas. La cuenta y sus
+              preferencias se conservan.
+            </p>
+          </div>
+          <Card className="gap-0 bg-card p-1">
+            <ItemGroup className="gap-0">
+              <Item
+                variant="plain"
+                className="min-h-[52px] px-3 py-3"
+                render={
+                  <button
+                    type="button"
+                    onClick={() => wipeSheet.setOpen(true)}
+                  />
+                }
+              >
+                <ItemMedia
+                  className="size-9 rounded-md"
+                  style={{
+                    backgroundColor: `${SETTINGS_REGISTRY.danger.accent}20`,
+                  }}
+                >
+                  <Trash2 className="size-4.5 text-destructive" />
+                </ItemMedia>
+                <ItemContent className="gap-0.5">
+                  <ItemTitle className="text-sm font-normal text-destructive md:text-base">
+                    Vaciar datos de Finanzas
+                  </ItemTitle>
+                  <ItemDescription className="text-xs">
+                    Elige qué ramas vaciar: movimientos y saldos, productos,
+                    planificación, y comercios y categorías.
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+            </ItemGroup>
+          </Card>
+        </section>
       ) : null}
 
       <FinanceSettingsSheet

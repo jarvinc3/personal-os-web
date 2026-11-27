@@ -3,17 +3,27 @@
 import { useWebPushPermissions } from "@/src/modules/notifications/hooks/use-web-push-permissions"
 import { resolveDevicePushRow } from "@/src/modules/notifications/lib/device-push-row"
 import { SETTINGS_REGISTRY } from "@/src/modules/settings"
-import { SettingsRow } from "@/src/shared/components/settings/settings-section"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { cn } from "@/src/shared/lib/utils"
+import { ChevronRightIcon } from "lucide-react"
 import { useCallback } from "react"
 
 type DevicePushSettingsRowProps = {
-  isLast?: boolean
   accentColor?: string
 }
 
+const NOTIFICATIONS = SETTINGS_REGISTRY.notifications
+const DevicePushIcon = NOTIFICATIONS.rows.devicePush.icon
+
 export function DevicePushSettingsRow({
-  isLast,
   accentColor,
 }: DevicePushSettingsRowProps) {
   const {
@@ -96,16 +106,40 @@ export function DevicePushSettingsRow({
     }
   }
 
+  const accent = accentColor ?? NOTIFICATIONS.accent
+
   return (
-    <SettingsRow
-      label="Permisos de notificaciones"
-      value={row.value}
-      disabled={row.disabled}
-      showChevron={row.showChevron}
-      onPress={row.showChevron ? handlePress : undefined}
-      isLast={isLast}
-      accentColor={accentColor}
-      {...SETTINGS_REGISTRY.notifications.rows.devicePush}
-    />
+    <Item
+      variant="plain"
+      className={cn("min-h-[52px] px-3 py-3", row.disabled && "opacity-50")}
+      aria-disabled={row.disabled || undefined}
+      render={
+        row.showChevron && !row.disabled ? (
+          <button type="button" onClick={handlePress} />
+        ) : undefined
+      }
+    >
+      <ItemMedia
+        className="size-9 rounded-md"
+        style={{ backgroundColor: `${accent}20` }}
+      >
+        <DevicePushIcon className="size-4.5" style={{ color: accent }} />
+      </ItemMedia>
+      <ItemContent className="gap-0.5">
+        <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+          <ItemTitle className="text-sm font-normal md:text-base">
+            Permisos de notificaciones
+          </ItemTitle>
+          <ItemDescription className="max-w-[90%] truncate text-xs md:text-right">
+            {row.value}
+          </ItemDescription>
+        </div>
+      </ItemContent>
+      {row.showChevron ? (
+        <ItemActions>
+          <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+        </ItemActions>
+      ) : null}
+    </Item>
   )
 }

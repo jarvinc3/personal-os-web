@@ -52,7 +52,9 @@ export function ComponentSectionGalleryScreen({
 
   return (
     <div className="mx-auto flex max-w-2xl min-w-0 flex-col gap-4 p-4 pb-16 md:px-6">
-      <p className="text-sm text-muted-foreground">{section.description}</p>
+      <p className="sr-only text-sm text-muted-foreground">
+        {section.description}
+      </p>
       <GallerySearchField
         value={search}
         onValueChange={setSearch}

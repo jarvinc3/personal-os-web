@@ -12,7 +12,7 @@ export default async function FinanceSavingsGoalDetailPage({
 }: FinanceSavingsGoalDetailPageProps) {
   const { goalId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <SavingsGoalDetailScreen goalId={goalId} />
     </Suspense>
   )

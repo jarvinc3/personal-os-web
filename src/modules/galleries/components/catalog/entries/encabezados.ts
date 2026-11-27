@@ -11,7 +11,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
     whenToUse:
       "El chrome de cualquier bloque con título: listas, formularios, sheets y paneles.",
     whenNotToUse:
-      "Un grupo de ajustes con etiqueta corta: SettingsSection. En pantallas de producto no se usa Card en su lugar.",
+      "Un grupo de ajustes con etiqueta corta: Card con su fila de Item. En pantallas de producto no se importa Card para armar el bloque por fuera.",
     importPath: "@/src/shared/components/data-display/summary",
     snippet: `import {
   SummaryItem,
@@ -56,7 +56,7 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
     category: "encabezados",
     kind: "domain",
     description:
-      "Título corto con línea y descripción para agrupar varios controles dentro de una sección.",
+      "Etiqueta corta centrada entre dos líneas, con una descripción opcional, para agrupar varios controles dentro de una sección.",
     whenToUse:
       "Un subconcepto dentro de una sección, como el saldo inicial de un cálculo.",
     whenNotToUse: "Un bloque principal con icono: SummarySection.",
@@ -73,53 +73,12 @@ export const encabezadosDocs: readonly GalleryComponentMeta[] = [
       {
         name: "title",
         type: "string",
-        description: "Etiqueta corta con línea al lado.",
+        description: "Etiqueta corta entre las dos líneas del Marker.",
       },
       {
         name: "description",
         type: "string",
         description: "Contexto del grupo.",
-      },
-    ],
-  },
-  {
-    id: "settings-section",
-    name: "SettingsSection",
-    category: "encabezados",
-    kind: "domain",
-    description:
-      "Grupo con etiqueta corta en mayúsculas y una card opcional alrededor.",
-    whenToUse:
-      "Un grupo de ajustes o de filas con una etiqueta corta, sin icono en el encabezado.",
-    whenNotToUse:
-      "Un bloque de producto con título e icono: SummarySection. No armes un div con borde a mano.",
-    importPath: "@/src/shared/components/settings/settings-section",
-    snippet: `import { SettingsSection } from "@/src/shared/components/settings/settings-section"
-
-<SettingsSection title="Datos" description="Exporta o elimina tu información">
-  {rows}
-</SettingsSection>`,
-    subcomponents: [],
-    anatomy: [{ name: "SettingsSection" }],
-    variants: [
-      { name: "bare", values: "false (card propia), true (sin card)" },
-      { name: "headerTrailing", values: "acción a la derecha del título" },
-    ],
-    props: [
-      {
-        name: "title",
-        type: "string",
-        description: "Etiqueta corta en mayúsculas.",
-      },
-      {
-        name: "description",
-        type: "string",
-        description: "Texto secundario bajo la etiqueta.",
-      },
-      {
-        name: "bare",
-        type: "boolean",
-        description: "Quita la card para que el padre la ponga.",
       },
     ],
   },

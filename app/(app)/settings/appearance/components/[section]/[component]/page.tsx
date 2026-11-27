@@ -23,7 +23,7 @@ export default async function ComponentDocPage({
   }
 
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ComponentDocScreen sectionId={section} componentId={component} />
     </Suspense>
   )

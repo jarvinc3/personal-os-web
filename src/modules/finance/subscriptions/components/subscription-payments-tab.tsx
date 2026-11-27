@@ -3,7 +3,6 @@
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -16,6 +15,7 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -75,7 +75,13 @@ export function SubscriptionPaymentsTab({
       ) : null}
       <AsyncRegion
         pending={paymentsQuery.isPending && !paymentsQuery.data}
-        pendingFallback={<ListSkeleton rows={3} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={payments.length === 0}
         emptyFallback={
           <Empty className="py-8">

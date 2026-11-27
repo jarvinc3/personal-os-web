@@ -26,7 +26,6 @@ import {
   withSubscriptionDetailTab,
   type SubscriptionDetailTab,
 } from "@/src/modules/finance/subscriptions/lib/subscription-display"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Alert,
   AlertAction,
@@ -161,7 +160,11 @@ function SubscriptionDetailBody({
   })
 
   if (subscriptionQuery.isPending && !subscription) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!subscription) {

@@ -1,25 +1,11 @@
 "use client"
 
 import { Spinner } from "@/src/shared/components/ui/spinner"
-import { cn } from "@/src/shared/lib/utils"
 
-type LoadingViewProps = {
-  variant?: "screen" | "inline"
-  className?: string
-}
-
-export function LoadingView({
-  variant = "inline",
-  className,
-}: LoadingViewProps) {
+/** Fallback de Suspense de una ruta: la página todavía no tiene forma. */
+export function LoadingView() {
   return (
-    <div
-      className={cn(
-        "flex items-center justify-center",
-        variant === "screen" ? "min-h-screen w-full flex-1" : "py-8",
-        className
-      )}
-    >
+    <div className="flex min-h-screen w-full flex-1 items-center justify-center">
       <Spinner className="size-6" />
     </div>
   )

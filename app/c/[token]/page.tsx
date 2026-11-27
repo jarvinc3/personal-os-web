@@ -18,7 +18,7 @@ export default async function PublicReceivableSharePage({
 }: PublicReceivableSharePageProps) {
   const { token } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <PublicReceivableShareScreen token={token} />
     </Suspense>
   )

@@ -9,7 +9,6 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   Alert,
   AlertDescription,
@@ -28,6 +27,7 @@ import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { InfoIcon, MailSearchIcon, MailWarningIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useState } from "react"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 /** Cards que se montan de entrada; el resto entra al bajar. */
 const IMPORTS_PAGE_SIZE = 12
@@ -100,7 +100,13 @@ function ImportsReviewScreenBody() {
 
       <AsyncRegion
         pending={queueQuery.isPending && !queueQuery.data}
-        pendingFallback={<ListSkeleton rows={3} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={!queueQuery.isError && items.length === 0}
         emptyFallback={
           <Empty className="py-8">

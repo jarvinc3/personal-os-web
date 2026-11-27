@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useInstrumentHistory,
   type InstrumentHistoryTarget,
@@ -30,6 +29,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Drawer,
   DrawerContent,
@@ -78,7 +78,13 @@ export function InstrumentHistorySheet({
 
           <AsyncRegion
             pending={historyQuery.isPending && !historyQuery.data}
-            pendingFallback={<ListSkeleton />}
+            pendingFallback={
+              <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+                {Array.from({ length: 3 }, (_, index) => (
+                  <Skeleton key={index} className="h-12 w-full rounded-xl" />
+                ))}
+              </div>
+            }
             empty={items.length === 0}
             emptyFallback={
               <Empty className="py-8">

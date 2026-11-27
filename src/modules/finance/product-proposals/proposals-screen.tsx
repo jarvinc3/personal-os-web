@@ -33,7 +33,6 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,6 +62,7 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
@@ -258,7 +258,13 @@ function ProductProposalsScreenBody() {
 
       <AsyncRegion
         pending={proposalsQuery.isPending && !proposalsQuery.data}
-        pendingFallback={<ListSkeleton rows={3} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={proposals.length === 0}
         emptyFallback={
           <Empty className="py-8">

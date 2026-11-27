@@ -2,7 +2,6 @@
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -26,6 +25,7 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { Input } from "@/src/shared/components/ui/input"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyContent,
@@ -191,7 +191,13 @@ export function FinanceInstrumentMovements({
 
       <AsyncRegion
         pending={isPending}
-        pendingFallback={<ListSkeleton rows={4} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={!loadErrorMessage && movements.length === 0}
         emptyFallback={
           <Empty className="py-10">

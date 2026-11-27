@@ -44,7 +44,6 @@ import { TransactionSignalTrace } from "@/src/modules/finance/transactions/compo
 import { TransactionDetailLinks } from "@/src/modules/finance/transactions/components/transaction-detail-links"
 import { TransactionReversalNotice } from "@/src/modules/finance/transactions/components/transaction-reversal-notice"
 import { canEditTransaction } from "@/src/modules/finance/transactions/lib/transaction-edit"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -300,7 +299,11 @@ function TransactionDetailScreenBody({
   )
 
   if (detailQuery.isPending) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!tx) {

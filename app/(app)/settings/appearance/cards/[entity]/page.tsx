@@ -19,7 +19,7 @@ export default async function CardGalleryEntityPage({
   }
 
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <EntityGalleryScreen slug={entity} />
     </Suspense>
   )

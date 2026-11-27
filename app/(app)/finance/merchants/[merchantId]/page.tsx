@@ -12,7 +12,7 @@ export default async function FinanceMerchantDetailPage({
 }: FinanceMerchantDetailPageProps) {
   const { merchantId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <MerchantDetailScreen merchantId={merchantId} />
     </Suspense>
   )

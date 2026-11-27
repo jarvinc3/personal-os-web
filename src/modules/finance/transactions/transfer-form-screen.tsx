@@ -8,12 +8,12 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useTransaction } from "@/src/modules/finance/shared/hooks/use-transactions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { isTransferTransaction } from "@/src/modules/finance/shared/lib/transactions-query"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { ArrowLeftRightIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback } from "react"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function TransferCreateScreen() {
   return (
@@ -96,7 +96,11 @@ function TransferEditScreenBody({ transactionId }: TransferEditScreenProps) {
   )
 
   if (detailQuery.isPending && !transfer) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (detailQuery.error) {

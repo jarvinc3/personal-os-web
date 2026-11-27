@@ -178,15 +178,3 @@ export function getAiToneLabel(value: AIPreferences["tone"]): string {
       ?.label ?? value
   )
 }
-
-export function getSettingsRow(
-  section: keyof typeof SETTINGS_REGISTRY,
-  row: string
-): SettingsRowIconMeta {
-  const sectionDef = SETTINGS_REGISTRY[section]
-  const rowMeta = sectionDef.rows[row]
-  if (!rowMeta) {
-    throw new Error(`Unknown settings row: ${section}.${row}`)
-  }
-  return rowMeta
-}

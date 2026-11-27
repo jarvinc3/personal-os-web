@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 export default function UsageSettingsRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <UsageSettingsScreen />
     </Suspense>
   )

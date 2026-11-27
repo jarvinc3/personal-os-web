@@ -16,9 +16,9 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function LoanCreateScreen() {
   return (
@@ -107,7 +107,11 @@ function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
   )
 
   if (loansQuery.isPending && !loan) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (loansQuery.error) {

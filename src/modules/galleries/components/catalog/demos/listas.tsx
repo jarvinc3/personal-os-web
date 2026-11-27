@@ -1,19 +1,16 @@
-import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import {
   BellIcon,
+  ChevronRightIcon,
   FileTextIcon,
   InboxIcon,
-  MoonIcon,
   SettingsIcon,
-  ShieldIcon,
   Trash2Icon,
 } from "lucide-react"
 
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { GALLERY_ACCENT } from "@/src/modules/galleries/components/mock/values"
-import { SettingsRow } from "@/src/shared/components/settings/settings-section"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   Accordion,
@@ -43,48 +40,13 @@ import {
   MarkerIcon,
 } from "@/src/shared/components/ui/marker"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { Card } from "@/src/shared/components/ui/card"
+import { Switch } from "@/src/shared/components/ui/switch"
 
 import type {
   GalleryDemoMap,
   GalleryVariantDemoMap,
 } from "@/src/modules/galleries/components/catalog/types"
-
-function SettingsRowDemo() {
-  const [notifications, setNotifications] = useState(true)
-
-  return (
-    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-      <SettingsRow
-        label="Perfil"
-        description="Nombre, correo y foto"
-        icon={ShieldIcon}
-        showChevron
-        onPress={() => simulatedTap("Abrir perfil")}
-      />
-      <SettingsRow
-        label="Avisos"
-        description="Recibir un aviso al llegar un cobro"
-        icon={BellIcon}
-        switchValue={notifications}
-        onSwitchChange={setNotifications}
-      />
-      <SettingsRow
-        label="Tema"
-        value="Oscuro"
-        icon={MoonIcon}
-        showChevron
-        onPress={() => simulatedTap("Elegir tema")}
-      />
-      <SettingsRow
-        label="Eliminar cuenta"
-        icon={Trash2Icon}
-        destructive
-        showChevron
-        onPress={() => simulatedTap("Eliminar cuenta")}
-      />
-    </div>
-  )
-}
 
 export const listasDemos: GalleryDemoMap = {
   item: [
@@ -163,6 +125,93 @@ export const listasDemos: GalleryDemoMap = {
             </ItemContent>
           </Item>
         </ItemGroup>
+      ),
+    },
+    {
+      label: "Filas planas dentro de una Card",
+      code: `
+<Card className="w-full gap-0 bg-card p-1">
+  <ItemGroup className="gap-0 divide-y divide-border/60">
+    <Item
+      variant="plain"
+      className="min-h-[52px] px-3 py-3"
+      render={<Link href={APP_ROUTES.app.settingsAccount} />}
+    >
+      <ItemMedia className="size-9 rounded-md bg-muted">
+        <SettingsIcon className="size-4.5" />
+      </ItemMedia>
+      <ItemContent className="gap-0.5">
+        <ItemTitle className="text-sm font-normal md:text-base">
+          Perfil
+        </ItemTitle>
+        <ItemDescription className="text-xs">
+          Nombre, correo y foto
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
+        <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+      </ItemActions>
+    </Item>
+    <Item variant="plain" className="min-h-[52px] px-3 py-3">
+      <ItemMedia className="size-9 rounded-md bg-muted">
+        <BellIcon className="size-4.5" />
+      </ItemMedia>
+      <ItemContent className="gap-0.5">
+        <ItemTitle className="text-sm font-normal md:text-base">
+          Avisos
+        </ItemTitle>
+        <ItemDescription className="text-xs">
+          Recibir un aviso al llegar un cobro
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
+        <Switch defaultChecked />
+      </ItemActions>
+    </Item>
+  </ItemGroup>
+</Card>
+`,
+      node: (
+        <Card className="w-full gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            <Item
+              variant="plain"
+              className="min-h-[52px] px-3 py-3"
+              render={<Link href={APP_ROUTES.app.settingsAccount} />}
+            >
+              <ItemMedia className="size-9 rounded-md bg-muted">
+                <SettingsIcon className="size-4.5" />
+              </ItemMedia>
+              <ItemContent className="gap-0.5">
+                <ItemTitle className="text-sm font-normal md:text-base">
+                  Perfil
+                </ItemTitle>
+                <ItemDescription className="text-xs">
+                  Nombre, correo y foto
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+              </ItemActions>
+            </Item>
+            <Item variant="plain" className="min-h-[52px] px-3 py-3">
+              <ItemMedia className="size-9 rounded-md bg-muted">
+                <BellIcon className="size-4.5" />
+              </ItemMedia>
+              <ItemContent className="gap-0.5">
+                <ItemTitle className="text-sm font-normal md:text-base">
+                  Avisos
+                </ItemTitle>
+                <ItemDescription className="text-xs">
+                  Recibir un aviso al llegar un cobro
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <Switch defaultChecked />
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </Card>
       ),
     },
   ],
@@ -284,46 +333,6 @@ export const listasDemos: GalleryDemoMap = {
           </div>
         </div>
       ),
-    },
-  ],
-  "settings-row": [
-    {
-      label: "Chevron, switch, destructiva y valor",
-      code: `
-const [notifications, setNotifications] = useState(true)
-
-<div className="flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-  <SettingsRow
-    label="Perfil"
-    description="Nombre, correo y foto"
-    icon={ShieldIcon}
-    showChevron
-    onPress={() => simulatedTap("Abrir perfil")}
-  />
-  <SettingsRow
-    label="Avisos"
-    description="Recibir un aviso al llegar un cobro"
-    icon={BellIcon}
-    switchValue={notifications}
-    onSwitchChange={setNotifications}
-  />
-  <SettingsRow
-    label="Tema"
-    value="Oscuro"
-    icon={MoonIcon}
-    showChevron
-    onPress={() => simulatedTap("Elegir tema")}
-  />
-  <SettingsRow
-    label="Eliminar cuenta"
-    icon={Trash2Icon}
-    destructive
-    showChevron
-    onPress={() => simulatedTap("Eliminar cuenta")}
-  />
-</div>
-`,
-      node: <SettingsRowDemo />,
     },
   ],
   accordion: [
@@ -720,98 +729,6 @@ export const listasVariantDemos: GalleryVariantDemoMap = {
               icon={FileTextIcon}
               isLast
               disabled
-            />
-          </div>
-        ),
-      },
-    ],
-  },
-  "settings-row": {
-    modo: [
-      {
-        label: "navegación (onPress)",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Perfil"
-              description="Nombre, correo y foto"
-              icon={ShieldIcon}
-              isLast
-              onPress={() => simulatedTap("Abrir perfil")}
-            />
-          </div>
-        ),
-      },
-      {
-        label: "switch",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Avisos"
-              description="Recibir un aviso al llegar un cobro"
-              icon={BellIcon}
-              switchValue
-              isLast
-              onSwitchChange={() => simulatedTap("Cambiar avisos")}
-            />
-          </div>
-        ),
-      },
-      {
-        label: "link externo",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Centro de ayuda"
-              description="Preguntas y guías"
-              icon={FileTextIcon}
-              link
-              isLast
-              onPress={() => simulatedTap("Abrir ayuda")}
-            />
-          </div>
-        ),
-      },
-    ],
-    states: [
-      {
-        label: "normal",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Tema"
-              value="Oscuro"
-              icon={MoonIcon}
-              isLast
-              onPress={() => simulatedTap("Elegir tema")}
-            />
-          </div>
-        ),
-      },
-      {
-        label: "destructive",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Eliminar cuenta"
-              icon={Trash2Icon}
-              destructive
-              isLast
-              onPress={() => simulatedTap("Eliminar cuenta")}
-            />
-          </div>
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <div className="flex w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-border bg-card p-1">
-            <SettingsRow
-              label="Eliminar cuenta"
-              icon={Trash2Icon}
-              disabled
-              isLast
-              onPress={() => simulatedTap("Eliminar cuenta")}
             />
           </div>
         ),

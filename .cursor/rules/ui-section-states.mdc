@@ -10,14 +10,14 @@ Una sección que va a pintar filas, cards o un gráfico no se queda en blanco, n
 
 ## Carga: la forma, no un spinner
 
-Mientras llega la primera tanda, el hueco se parece a lo que va a llegar: un esqueleto (`Skeleton`, y `FinanceListSkeleton` en Finanzas) con el alto y el ancho de las filas o cards reales. Un `Spinner` centrado en medio de una sección cuya forma ya se conoce es un hueco en blanco disfrazado; ahí no va.
+Mientras llega la primera tanda, el hueco se parece a lo que va a llegar: un esqueleto (`Skeleton` con la forma de la vista) con el alto y el ancho de las filas o cards reales. Un `Spinner` centrado en medio de una sección cuya forma ya se conoce es un hueco en blanco disfrazado; ahí no va.
 
 El `Spinner` sigue en su sitio:
 
 - Dentro de un control que ya existe: el botón que guarda, el `Link` que navega, el pie de una lista infinita mientras llega la tanda siguiente.
-- En `LoadingView`, mientras la página todavía no tiene forma (no se sabe si el registro existe ni cuántas filas habrá).
+- Centrado en la pantalla, mientras la página todavía no tiene forma: no se sabe si el registro existe ni cuántas filas habrá. `LoadingView` es solo el fallback de Suspense de una ruta; la pantalla que ya decidió su carga escribe su `Spinner` o su esqueleto.
 
-Molde: `FinanceListSkeleton`. Si la forma no es una fila (cards del stack de instituciones, cards de estados de cuenta), el esqueleto es de esa vista, no el genérico de la lista.
+Molde: `Skeleton` con la forma de la vista. Si la forma no es una fila (cards del stack de instituciones, cards de estados de cuenta, el resumen de Patrimonio), el esqueleto es de esa vista, no uno genérico.
 
 ## Vacío: `Empty`, no un párrafo
 

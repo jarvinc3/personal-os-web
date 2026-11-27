@@ -1,5 +1,4 @@
-import { buttonVariants } from "@/src/shared/components/ui/button"
-import { cn } from "@/src/shared/lib/utils"
+import { Button } from "@/src/shared/components/ui/button"
 import {
   Empty,
   EmptyContent,
@@ -37,16 +36,15 @@ export function MissingRecord({
         <EmptyDescription>{description}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Link
-          href={backHref}
-          className={cn(
-            buttonVariants({ variant: "outline", className: "relative" })
-          )}
+        <Button
+          variant="outline"
+          className="relative"
+          render={<Link href={backHref} />}
         >
           <ArrowLeftIcon className="size-4 shrink-0" />
           {backLabel}
           <LinkPendingOverlay />
-        </Link>
+        </Button>
       </EmptyContent>
     </Empty>
   )

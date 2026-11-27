@@ -1,7 +1,6 @@
 "use client"
 
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useCreateSubscription } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import {
@@ -27,6 +26,7 @@ import {
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
@@ -114,7 +114,11 @@ export function DetectedSheet({
             />
           ) : null}
           {recurringQuery.isPending && !recurringQuery.data ? (
-            <ListSkeleton rows={3} />
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
           ) : null}
           {!recurringQuery.isPending && patterns.length === 0 ? (
             <Empty className="py-6">

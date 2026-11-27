@@ -1,7 +1,6 @@
 "use client"
 
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSubscriptionsUpcoming } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
@@ -17,6 +16,7 @@ import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Drawer,
   DrawerContent,
@@ -84,7 +84,13 @@ export function UpcomingSheet({
               isRetrying={query.isFetching}
             />
           ) : null}
-          {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
+          {query.isPending && !query.data ? (
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : null}
           {!query.isPending && charges.length === 0 ? (
             <Empty className="py-6">
               <EmptyHeader>

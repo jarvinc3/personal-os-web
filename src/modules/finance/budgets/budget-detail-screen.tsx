@@ -5,7 +5,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import type { PlanningProgressTone } from "@/src/modules/finance/shared/components/planning-progress-card"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
@@ -36,7 +35,6 @@ import {
   type FinanceBudget,
 } from "@/src/modules/finance/shared/types/entities"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -50,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -229,7 +228,11 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
   )
 
   if (budgetQuery.isPending && !budget) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!budget) {
@@ -305,7 +308,13 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         <SummarySection title="Movimientos del periodo" icon={ChartPieIcon}>
           <AsyncRegion
             pending={movementsQuery.isPending}
-            pendingFallback={<ListSkeleton rows={4} />}
+            pendingFallback={
+              <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+                {Array.from({ length: 4 }, (_, index) => (
+                  <Skeleton key={index} className="h-12 w-full rounded-xl" />
+                ))}
+              </div>
+            }
             empty={!movementsQuery.isError && movements.length === 0}
             emptyFallback={
               <Empty className="py-10">

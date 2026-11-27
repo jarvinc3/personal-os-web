@@ -12,7 +12,7 @@ export default async function FinanceInstitutionAccountPage({
 }: FinanceInstitutionAccountPageProps) {
   const { accountId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <AccountDetailScreen accountId={accountId} />
     </Suspense>
   )

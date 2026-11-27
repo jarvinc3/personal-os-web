@@ -45,7 +45,6 @@ import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -244,7 +243,11 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
   )
 
   if (cardsQuery.isPending && !card) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!card) {

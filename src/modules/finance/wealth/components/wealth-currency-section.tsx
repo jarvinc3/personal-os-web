@@ -8,7 +8,6 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import type {
   FinanceBalanceDrift,
@@ -22,9 +21,41 @@ import {
   TriangleAlertIcon,
   WalletIcon,
 } from "lucide-react"
-import { useId } from "react"
+import { useId, type ReactNode } from "react"
 
 import { WealthLineGroup } from "./wealth-line"
+
+type WealthGroupSectionProps = {
+  title: string
+  totalLabel: string
+  isEmpty: boolean
+  emptyLabel: string
+  children: ReactNode
+}
+
+function WealthGroupSection({
+  title,
+  totalLabel,
+  isEmpty,
+  emptyLabel,
+  children,
+}: WealthGroupSectionProps) {
+  return (
+    <section className="flex flex-col gap-2">
+      <div className="flex flex-row items-center justify-between gap-2 px-1">
+        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {title}
+        </h2>
+        <span className="text-xs font-semibold tabular-nums">{totalLabel}</span>
+      </div>
+      {isEmpty ? (
+        <p className="px-1 text-sm text-muted-foreground">{emptyLabel}</p>
+      ) : (
+        children
+      )}
+    </section>
+  )
+}
 
 type WealthCurrencySectionProps = {
   group: FinanceBalanceSheetCurrencyGroup
@@ -68,82 +99,60 @@ export function WealthCurrencySection({
         </p>
       </header>
 
-      <SettingsSection
+      <WealthGroupSection
         title="Activos"
-        bare
-        headerTrailing={
-          <span className="text-xs font-semibold tabular-nums">
-            {formatFinanceMoney(group.totals.assets, money)}
-          </span>
-        }
+        totalLabel={formatFinanceMoney(group.totals.assets, money)}
+        isEmpty={!hasAssets}
+        emptyLabel={`Sin activos en ${group.currency}.`}
       >
-        {hasAssets ? (
-          <>
-            <WealthLineGroup
-              title="Cuentas"
-              icon={LandmarkIcon}
-              lines={group.accounts}
-              display={display}
-              drifts={drifts}
-            />
-            <WealthLineGroup
-              title="Efectivo"
-              icon={BanknoteIcon}
-              lines={group.cash}
-              display={display}
-              drifts={drifts}
-              helpSlug="efectivo"
-            />
-            <WealthLineGroup
-              title="Por cobrar"
-              icon={HandCoinsIcon}
-              lines={group.receivables}
-              display={display}
-              drifts={drifts}
-              helpSlug="por-cobrar"
-            />
-          </>
-        ) : (
-          <p className="px-1 text-sm text-muted-foreground">
-            Sin activos en {group.currency}.
-          </p>
-        )}
-      </SettingsSection>
+        <WealthLineGroup
+          title="Cuentas"
+          icon={LandmarkIcon}
+          lines={group.accounts}
+          display={display}
+          drifts={drifts}
+        />
+        <WealthLineGroup
+          title="Efectivo"
+          icon={BanknoteIcon}
+          lines={group.cash}
+          display={display}
+          drifts={drifts}
+          helpSlug="efectivo"
+        />
+        <WealthLineGroup
+          title="Por cobrar"
+          icon={HandCoinsIcon}
+          lines={group.receivables}
+          display={display}
+          drifts={drifts}
+          helpSlug="por-cobrar"
+        />
+      </WealthGroupSection>
 
-      <SettingsSection
+      <WealthGroupSection
         title="Deudas"
-        bare
-        headerTrailing={
-          <span className="text-xs font-semibold tabular-nums">
-            {formatFinanceMoney(group.totals.liabilities, money)}
-          </span>
-        }
+        totalLabel={formatFinanceMoney(group.totals.liabilities, money)}
+        isEmpty={!hasLiabilities}
+        emptyLabel={`Sin deudas en ${group.currency}.`}
       >
-        {hasLiabilities ? (
-          <>
-            <WealthLineGroup
-              title="Tarjetas"
-              icon={CreditCardIcon}
-              lines={group.creditCards}
-              display={display}
-              drifts={drifts}
-              helpSlug="tarjeta"
-            />
-            <WealthLineGroup
-              title="Préstamos"
-              icon={WalletIcon}
-              lines={group.loans}
-              display={display}
-              drifts={drifts}
-              helpSlug="prestamo"
-            />
-          </>
-        ) : (
-          <p className="px-1 text-sm text-muted-foreground">
-            Sin deudas en {group.currency}.
-          </p>
-        )}
-      </SettingsSection>
+        <WealthLineGroup
+          title="Tarjetas"
+          icon={CreditCardIcon}
+          lines={group.creditCards}
+          display={display}
+          drifts={drifts}
+          helpSlug="tarjeta"
+        />
+        <WealthLineGroup
+          title="Préstamos"
+          icon={WalletIcon}
+          lines={group.loans}
+          display={display}
+          drifts={drifts}
+          helpSlug="prestamo"
+        />
+      </WealthGroupSection>
 
       {hasDoubtful ? (
         <Alert

@@ -6,7 +6,7 @@ import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 /** Galería de componentes compartidos (#307). */
 export default function ComponentGalleryPage() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ComponentGalleryScreen />
     </Suspense>
   )

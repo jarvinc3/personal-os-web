@@ -36,17 +36,24 @@ import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import { Card } from "@/src/shared/components/ui/card"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   Drawer,
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
 import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
-import {
   ArrowDownWideNarrowIcon,
+  ChevronRightIcon,
   CreditCardIcon,
   EraserIcon,
   ListFilterIcon,
@@ -124,6 +131,30 @@ export function SubscriptionFiltersSheet({
         ? (categories.find((item) => item.id === filters.categoryIds[0])
             ?.name ?? "1 categoría")
         : `${filters.categoryIds.length} categorías`
+
+  const filterRows = [
+    {
+      key: "method",
+      label: "Método de pago",
+      value: methodLabel ?? "Todos",
+      icon: CreditCardIcon,
+      onPress: () => openPicker("destination"),
+    },
+    {
+      key: "category",
+      label: "Categoría",
+      value: categoryLabel,
+      icon: TagsIcon,
+      onPress: () => openPicker("category"),
+    },
+    {
+      key: "sort",
+      label: "Ordenar por",
+      value: SUBSCRIPTION_SORT_LABEL[filters.sort],
+      icon: ArrowDownWideNarrowIcon,
+      onPress: () => openPicker("sort"),
+    },
+  ]
 
   return (
     <>
@@ -203,30 +234,42 @@ export function SubscriptionFiltersSheet({
                 ))}
               </ToggleGroup>
             </Field>
-            <SettingsSection title="Filtros">
-              <SettingsRow
-                icon={CreditCardIcon}
-                label="Método de pago"
-                value={methodLabel ?? "Todos"}
-                showChevron
-                onPress={() => openPicker("destination")}
-              />
-              <SettingsRow
-                icon={TagsIcon}
-                label="Categoría"
-                value={categoryLabel}
-                showChevron
-                onPress={() => openPicker("category")}
-              />
-              <SettingsRow
-                icon={ArrowDownWideNarrowIcon}
-                label="Ordenar por"
-                value={SUBSCRIPTION_SORT_LABEL[filters.sort]}
-                showChevron
-                isLast
-                onPress={() => openPicker("sort")}
-              />
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Filtros
+              </h2>
+              <Card className="gap-0 bg-card p-1">
+                <ItemGroup className="gap-0 divide-y divide-border/60">
+                  {filterRows.map(
+                    ({ key, label, value, icon: Icon, onPress }) => (
+                      <Item
+                        key={key}
+                        variant="plain"
+                        className="min-h-[52px] px-3 py-3"
+                        render={<button type="button" onClick={onPress} />}
+                      >
+                        <ItemMedia className="size-9 rounded-md bg-muted">
+                          <Icon className="size-4.5" />
+                        </ItemMedia>
+                        <ItemContent className="gap-0.5">
+                          <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+                            <ItemTitle className="text-sm font-normal md:text-base">
+                              {label}
+                            </ItemTitle>
+                            <ItemDescription className="max-w-[90%] truncate text-xs md:text-right">
+                              {value}
+                            </ItemDescription>
+                          </div>
+                        </ItemContent>
+                        <ItemActions>
+                          <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                        </ItemActions>
+                      </Item>
+                    )
+                  )}
+                </ItemGroup>
+              </Card>
+            </section>
             {previewQuery.error ? (
               <ErrorState
                 message={financeErrorMessage(previewQuery.error)}

@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -56,7 +55,6 @@ import {
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { useEventSheet } from "@/src/shared/hooks/use-event-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
@@ -76,6 +74,7 @@ import {
 } from "@/src/shared/components/ui/alert-dialog"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { API_ENDPOINTS } from "@/src/shared/constants/api-endpoints"
@@ -176,7 +175,11 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
   )
 
   if (merchantQuery.isPending && !merchant) {
-    return <LoadingView variant="screen" />
+    return (
+      <div className="flex min-h-screen w-full flex-1 items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (merchantQuery.isError || !merchant) {
@@ -339,7 +342,13 @@ function MerchantDetailBody({ merchantId }: { merchantId: string }) {
       <SummarySection title="Movimientos" icon={StoreIcon}>
         <AsyncRegion
           pending={movementsQuery.isPending && !movementsQuery.data}
-          pendingFallback={<ListSkeleton />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={movements.length === 0}
           emptyFallback={
             <Empty className="py-6">

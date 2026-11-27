@@ -4,7 +4,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { ReceivablePaymentSheet } from "@/src/modules/finance/receivables/components/receivable-payment-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/receivables/components/receivable-sheet"
@@ -35,7 +34,6 @@ import {
   FINANCE_RECEIVABLE_STATUS_VARIANT,
 } from "@/src/modules/finance/shared/types/entities"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -50,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -219,7 +218,11 @@ function ReceivableDetailScreenBody({
   )
 
   if (receivablesQuery.isPending && !receivable) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!receivable) {
@@ -293,7 +296,13 @@ function ReceivableDetailScreenBody({
 
         <AsyncRegion
           pending={paymentsQuery.isPending}
-          pendingFallback={<ListSkeleton rows={4} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={!paymentsQuery.isError && payments.length === 0}
           emptyFallback={
             <Empty className="py-10">

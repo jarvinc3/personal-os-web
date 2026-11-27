@@ -25,7 +25,7 @@ import type {
 import { TransactionTransferDetails } from "@/src/modules/finance/transactions/components/transaction-transfer-details"
 import { transactionTypeLabel } from "@/src/modules/finance/transactions/lib/transaction-detail"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
+import { Card } from "@/src/shared/components/ui/card"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 
 type TransactionDetailFactsProps = {
@@ -57,131 +57,136 @@ export function TransactionDetailFacts({
     : null
 
   return (
-    <SettingsSection title="Detalle">
-      <SummaryItem
-        title="Monto"
-        value={
-          tx.type === "ADJUSTMENT"
-            ? `${movementSign(tx) ?? ""} ${formatFinanceMoney(tx.amount, {
-                ...display,
-                currency: tx.currency,
-              })}`.trim()
-            : formatFinanceMoney(tx.amount, {
-                ...display,
-                currency: tx.currency,
-              })
-        }
-        isLast={false}
-        className="px-3"
-      />
-      {isTransferTransaction(tx) && tx.transferToAmount ? (
+    <section className="flex flex-col gap-2">
+      <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Detalle
+      </h2>
+      <Card className="gap-0 bg-card p-1">
         <SummaryItem
-          title="Monto recibido"
-          value={formatFinanceMoney(tx.transferToAmount, {
-            ...display,
-            currency: tx.transferToCurrency ?? tx.currency,
-          })}
+          title="Monto"
+          value={
+            tx.type === "ADJUSTMENT"
+              ? `${movementSign(tx) ?? ""} ${formatFinanceMoney(tx.amount, {
+                  ...display,
+                  currency: tx.currency,
+                })}`.trim()
+              : formatFinanceMoney(tx.amount, {
+                  ...display,
+                  currency: tx.currency,
+                })
+          }
           isLast={false}
           className="px-3"
         />
-      ) : null}
-      <SummaryItem
-        title="En moneda base"
-        value={formatFinanceMoney(tx.amountBaseCurrency, display)}
-        isLast={false}
-        className="px-3"
-      />
-      <SummaryItem
-        title="Tipo"
-        value={transactionTypeLabel(tx.type)}
-        isLast={false}
-        className="px-3"
-      />
-      <SummaryItem
-        title="Estado"
-        value={FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status}
-        isLast={false}
-        className="px-3"
-      />
-      {isTransferTransaction(tx) ? (
-        <TransactionTransferDetails
-          transaction={tx}
-          accounts={accounts}
-          cards={cards}
-          display={display}
+        {isTransferTransaction(tx) && tx.transferToAmount ? (
+          <SummaryItem
+            title="Monto recibido"
+            value={formatFinanceMoney(tx.transferToAmount, {
+              ...display,
+              currency: tx.transferToCurrency ?? tx.currency,
+            })}
+            isLast={false}
+            className="px-3"
+          />
+        ) : null}
+        <SummaryItem
+          title="En moneda base"
+          value={formatFinanceMoney(tx.amountBaseCurrency, display)}
+          isLast={false}
+          className="px-3"
         />
-      ) : (
-        <>
-          {category ? (
-            <CategoryCard
-              name={category.name}
-              icon={category.icon}
-              color={category.color}
-              isSystem={category.isSystem}
-              variant="chip"
-              className="px-3"
-            />
-          ) : (
-            <SummaryItem
-              title="Categoría"
-              value="Sin categoría"
-              isLast={false}
-              className="px-3"
-            />
-          )}
-          {account ? (
-            <AccountProductRow
-              account={account}
-              display={display}
-              variant="compact"
-            />
-          ) : tx.accountName ? (
-            <SummaryItem
-              title="Cuenta"
-              value={tx.accountName}
-              isLast={false}
-              className="px-3"
-            />
-          ) : null}
-          {card ? (
-            <CardProductRow
-              card={card}
-              accounts={accounts}
-              display={display}
-              variant="compact"
-            />
-          ) : tx.cardName ? (
-            <SummaryItem
-              title="Tarjeta"
-              value={tx.cardName}
-              isLast={false}
-              className="px-3"
-            />
-          ) : null}
-          {merchant ? (
-            <MerchantCard
-              merchant={merchant}
-              category={merchantCategory}
-              display={display}
-              variant="compact"
-              href={APP_ROUTES.app.financeMerchant(merchant.id)}
-            />
-          ) : (
-            <SummaryItem
-              title="Comercio"
-              value={tx.merchant ?? tx.merchantName ?? "Sin comercio"}
-              isLast={false}
-              className="px-3"
-            />
-          )}
-        </>
-      )}
-      <SummaryItem
-        title="Descripción"
-        value={tx.description ?? "—"}
-        isLast
-        className="px-3"
-      />
-    </SettingsSection>
+        <SummaryItem
+          title="Tipo"
+          value={transactionTypeLabel(tx.type)}
+          isLast={false}
+          className="px-3"
+        />
+        <SummaryItem
+          title="Estado"
+          value={FINANCE_TRANSACTION_STATUS_LABEL[tx.status] ?? tx.status}
+          isLast={false}
+          className="px-3"
+        />
+        {isTransferTransaction(tx) ? (
+          <TransactionTransferDetails
+            transaction={tx}
+            accounts={accounts}
+            cards={cards}
+            display={display}
+          />
+        ) : (
+          <>
+            {category ? (
+              <CategoryCard
+                name={category.name}
+                icon={category.icon}
+                color={category.color}
+                isSystem={category.isSystem}
+                variant="chip"
+                className="px-3"
+              />
+            ) : (
+              <SummaryItem
+                title="Categoría"
+                value="Sin categoría"
+                isLast={false}
+                className="px-3"
+              />
+            )}
+            {account ? (
+              <AccountProductRow
+                account={account}
+                display={display}
+                variant="compact"
+              />
+            ) : tx.accountName ? (
+              <SummaryItem
+                title="Cuenta"
+                value={tx.accountName}
+                isLast={false}
+                className="px-3"
+              />
+            ) : null}
+            {card ? (
+              <CardProductRow
+                card={card}
+                accounts={accounts}
+                display={display}
+                variant="compact"
+              />
+            ) : tx.cardName ? (
+              <SummaryItem
+                title="Tarjeta"
+                value={tx.cardName}
+                isLast={false}
+                className="px-3"
+              />
+            ) : null}
+            {merchant ? (
+              <MerchantCard
+                merchant={merchant}
+                category={merchantCategory}
+                display={display}
+                variant="compact"
+                href={APP_ROUTES.app.financeMerchant(merchant.id)}
+              />
+            ) : (
+              <SummaryItem
+                title="Comercio"
+                value={tx.merchant ?? tx.merchantName ?? "Sin comercio"}
+                isLast={false}
+                className="px-3"
+              />
+            )}
+          </>
+        )}
+        <SummaryItem
+          title="Descripción"
+          value={tx.description ?? "—"}
+          isLast
+          className="px-3"
+        />
+      </Card>
+    </section>
   )
 }

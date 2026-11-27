@@ -9,7 +9,6 @@ import {
   SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -101,7 +100,7 @@ export const encabezadosDemos: GalleryDemoMap = {
   ],
   "summary-group": [
     {
-      label: "Concepto con línea y descripción",
+      label: "Concepto entre líneas y descripción",
       code: `
 <SummaryGroup
   title="Saldo inicial"
@@ -127,57 +126,6 @@ export const encabezadosDemos: GalleryDemoMap = {
             isLast
           />
         </SummaryGroup>
-      ),
-    },
-  ],
-  "settings-section": [
-    {
-      label: "Con etiqueta, descripción y acción",
-      code: `
-<SettingsSection
-  title="Datos"
-  description="Exporta o elimina tu información"
-  headerTrailing={
-    <Button
-      size="icon-sm"
-      variant="ghost"
-      aria-label="Ver todo"
-      onClick={() => simulatedTap("Ver todo")}
-    >
-      <PlusIcon />
-    </Button>
-  }
->
-  <SummaryItem
-    title="Exportar mis datos"
-    value="JSON"
-    icon={FileTextIcon}
-    isLast
-  />
-</SettingsSection>
-`,
-      node: (
-        <SettingsSection
-          title="Datos"
-          description="Exporta o elimina tu información"
-          headerTrailing={
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              aria-label="Ver todo"
-              onClick={() => simulatedTap("Ver todo")}
-            >
-              <PlusIcon />
-            </Button>
-          }
-        >
-          <SummaryItem
-            title="Exportar mis datos"
-            value="JSON"
-            icon={FileTextIcon}
-            isLast
-          />
-        </SettingsSection>
       ),
     },
   ],
@@ -374,73 +322,6 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
               />
             </SummaryGroup>
           </div>
-        ),
-      },
-    ],
-  },
-  "settings-section": {
-    bare: [
-      {
-        label: "false (card propia)",
-        node: (
-          <SettingsSection
-            title="Datos"
-            description="Exporta o elimina tu información"
-            className="w-full max-w-sm"
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
-        ),
-      },
-      {
-        label: "true (sin card)",
-        node: (
-          <SettingsSection
-            title="Datos"
-            bare
-            className="w-full max-w-sm rounded-2xl border border-border p-2"
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
-        ),
-      },
-    ],
-    headerTrailing: [
-      {
-        label: "acción a la derecha del título",
-        node: (
-          <SettingsSection
-            title="Datos"
-            description="Exporta o elimina tu información"
-            className="w-full max-w-sm"
-            headerTrailing={
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                aria-label="Ver todo"
-                onClick={() => simulatedTap("Ver todo")}
-              >
-                <PlusIcon />
-              </Button>
-            }
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
         ),
       },
     ],

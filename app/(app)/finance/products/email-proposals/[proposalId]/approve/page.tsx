@@ -12,7 +12,7 @@ export default async function FinanceProductProposalApprovalPage({
 }: FinanceProductProposalApprovalPageProps) {
   const { proposalId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ProposalApprovalScreen proposalId={proposalId} />
     </Suspense>
   )

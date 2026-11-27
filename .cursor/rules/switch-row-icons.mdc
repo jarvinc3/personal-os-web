@@ -6,16 +6,24 @@ alwaysApply: false
 
 # Icono en switches
 
-`SettingsRow` con `onSwitchChange` y una fila de `Field` con `variant="card"` y `Switch` llevan un icono a la izquierda del título, con el color de acento de la sección. El texto de ayuda va debajo del título.
+Una fila `Item` con `Switch` en `ItemActions` y una fila de `Field` con `variant="card"` y `Switch` llevan un icono a la izquierda del título, con el color de acento de la sección. El texto de ayuda va debajo del título.
 
 ```tsx
-<SettingsRow
-  label="Push"
-  icon={Bell}
-  accentColor={accent}
-  switchValue={push}
-  onSwitchChange={setPush}
-/>
+<Item variant="plain" className="min-h-[52px] px-3 py-3">
+  <ItemMedia
+    className="size-9 rounded-md"
+    style={{ backgroundColor: `${accent}1a` }}
+  >
+    <Bell className="size-4.5" style={{ color: accent }} />
+  </ItemMedia>
+  <ItemContent className="gap-0.5">
+    <ItemTitle className="text-sm font-normal md:text-base">Push</ItemTitle>
+    <ItemDescription className="text-xs">Avisos en el teléfono.</ItemDescription>
+  </ItemContent>
+  <ItemActions>
+    <Switch checked={push} onCheckedChange={setPush} />
+  </ItemActions>
+</Item>
 <Field
   variant="card"
   orientation="horizontal"

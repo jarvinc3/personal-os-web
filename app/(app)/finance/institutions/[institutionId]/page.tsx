@@ -12,7 +12,7 @@ export default async function InstitutionDetailPage({
 }: InstitutionDetailPageProps) {
   const { institutionId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <InstitutionDetailScreen institutionId={institutionId} />
     </Suspense>
   )

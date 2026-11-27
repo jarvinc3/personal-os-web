@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function LoginRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <LoginScreen />
     </Suspense>
   )

@@ -9,7 +9,7 @@ type HelpGuidePageProps = {
 export default async function HelpGuideRoute({ params }: HelpGuidePageProps) {
   const { slug } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <HelpGuideScreen slug={slug} />
     </Suspense>
   )

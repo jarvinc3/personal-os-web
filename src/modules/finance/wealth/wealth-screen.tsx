@@ -9,8 +9,9 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import { WealthCurrencySection } from "@/src/modules/finance/wealth/components/wealth-currency-section"
 import { WealthSummary } from "@/src/modules/finance/wealth/components/wealth-summary"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { buttonVariants } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn } from "@/src/shared/lib/utils"
 import { MissingBreakdownNotice } from "@/src/modules/finance/shared/components/layout/missing-breakdown-notice"
 import {
@@ -64,7 +65,21 @@ function WealthScreenBody() {
   )
 
   if (balanceSheetQuery.isPending && !balanceSheet) {
-    return <LoadingView variant="inline" className="py-16" />
+    return (
+      <div
+        className="mx-auto flex w-full max-w-3xl flex-col gap-4 pb-8"
+        aria-hidden
+      >
+        <Skeleton className="h-32 w-full rounded-3xl" />
+        <div className="flex flex-col gap-3 rounded-3xl border border-border bg-muted/40 p-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="mt-1 h-3 w-20" />
+          <Skeleton className="h-14 w-full rounded-2xl" />
+          <Skeleton className="h-14 w-full rounded-2xl" />
+        </div>
+      </div>
+    )
   }
 
   if (balanceSheetQuery.isError && !balanceSheet) {
@@ -78,7 +93,11 @@ function WealthScreenBody() {
   }
 
   if (!balanceSheet) {
-    return <LoadingView variant="inline" className="py-16" />
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   const drifts = integrityQuery.data?.drifts ?? []

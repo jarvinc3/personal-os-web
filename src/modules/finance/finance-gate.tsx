@@ -8,7 +8,6 @@ import {
   APP_ROUTES,
   settingsModuleHref,
 } from "@/src/shared/constants/app-routes"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { buttonVariants } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
 import {
@@ -19,6 +18,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { useHeaderContext } from "@/src/shared/context/header-context"
 import { LandmarkIcon, SettingsIcon } from "lucide-react"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
@@ -73,7 +73,11 @@ export function FinanceGate({ children }: { children: ReactNode }) {
   }, [isAuthenticated, isAuthLoading, router])
 
   if (isAuthLoading || !isAuthenticated || isProfileLoading) {
-    return <LoadingView variant="screen" />
+    return (
+      <div className="flex min-h-screen w-full flex-1 items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!isEnabled) {

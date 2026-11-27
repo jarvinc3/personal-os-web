@@ -6,7 +6,7 @@ import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 /** Galería de cards (#272). */
 export default function CardGalleryPage() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <CardGalleryScreen />
     </Suspense>
   )

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function VerifyEmailRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <VerifyEmailScreen />
     </Suspense>
   )

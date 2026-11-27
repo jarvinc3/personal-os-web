@@ -15,16 +15,25 @@ import {
 } from "@/src/modules/settings/lib/locale-options"
 import { weekStartsOnLabel } from "@/src/modules/settings/lib/week-starts-on"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
-import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
 import { settingsModuleHref } from "@/src/shared/constants/app-routes"
 import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
+import { Card } from "@/src/shared/components/ui/card"
+import { cn } from "@/src/shared/lib/utils"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
-import { Coins, Globe } from "lucide-react"
+import { ChevronRightIcon, Coins, Globe } from "lucide-react"
 
 const REGIONAL_ACCENT = SETTINGS_REGISTRY.account.accent
+const TimeZoneIcon = SETTINGS_REGISTRY.account.rows.timeZone.icon
+const WeekStartIcon = SETTINGS_REGISTRY.account.rows.weekStartsOn.icon
 
 export function RegionalSettingsScreen() {
   return (
@@ -56,48 +65,131 @@ function RegionalSettingsScreenBody() {
       ? `${weekStartsOnLabel(weekStart)} (según la región)`
       : weekStartsOnLabel(weekStart)
 
+  const regionRows = [
+    {
+      key: "timeZone",
+      label: "Zona horaria",
+      description: "Las fechas y horas se muestran en esta zona.",
+      value: timeZone,
+      icon: TimeZoneIcon,
+      onPress: () => setOpenTimeZoneSheet(true),
+    },
+    {
+      key: "locale",
+      label: "Idioma",
+      description: "Idioma y formatos regionales de la app.",
+      value: locale,
+      icon: Globe,
+      onPress: () => setOpenLocaleSheet(true),
+    },
+    {
+      key: "weekStartsOn",
+      label: "Primer día de la semana",
+      description: "Se usa en calendarios y en las semanas de la app.",
+      value: weekStartValue,
+      icon: WeekStartIcon,
+      onPress: () => setOpenWeekStartSheet(true),
+    },
+  ]
+
   return (
     <SettingsSecondaryPage title="Preferencias regionales">
-      <SettingsSection title="Región">
-        <SettingsRow
-          label="Zona horaria"
-          description="Las fechas y horas se muestran en esta zona."
-          value={timeZone}
-          onPress={() => setOpenTimeZoneSheet(true)}
-          accentColor={REGIONAL_ACCENT}
-          {...SETTINGS_REGISTRY.account.rows.timeZone}
-        />
-        <SettingsRow
-          label="Idioma"
-          description="Idioma y formatos regionales de la app."
-          value={locale}
-          onPress={() => setOpenLocaleSheet(true)}
-          accentColor={REGIONAL_ACCENT}
-          icon={Globe}
-        />
-        <SettingsRow
-          label="Primer día de la semana"
-          description="Se usa en calendarios y en las semanas de la app."
-          value={weekStartValue}
-          onPress={() => setOpenWeekStartSheet(true)}
-          accentColor={REGIONAL_ACCENT}
-          {...SETTINGS_REGISTRY.account.rows.weekStartsOn}
-          isLast
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Región
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            {regionRows.map(
+              ({ key, label, description, value, icon: Icon, onPress }) => (
+                <Item
+                  key={key}
+                  variant="plain"
+                  className="min-h-[52px] px-3 py-3"
+                  render={<button type="button" onClick={onPress} />}
+                >
+                  <ItemMedia
+                    className="size-9 rounded-md"
+                    style={{ backgroundColor: `${REGIONAL_ACCENT}20` }}
+                  >
+                    <Icon
+                      className="size-4.5"
+                      style={{ color: REGIONAL_ACCENT }}
+                    />
+                  </ItemMedia>
+                  <ItemContent className="gap-0.5">
+                    <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+                      <ItemTitle className="text-sm font-normal md:text-base">
+                        {label}
+                      </ItemTitle>
+                      <ItemDescription className="max-w-[90%] truncate text-xs md:text-right">
+                        {value}
+                      </ItemDescription>
+                    </div>
+                    <ItemDescription className="text-xs">
+                      {description}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
+              )
+            )}
+          </ItemGroup>
+        </Card>
+      </section>
 
-      <SettingsSection title="Moneda">
-        <SettingsRow
-          label="Moneda por defecto"
-          description="La moneda principal de Finanzas."
-          value={config.baseCurrency}
-          onPress={() => navigate(settingsModuleHref("finance"))}
-          disabled={isPending}
-          accentColor={SETTINGS_REGISTRY.account.accent}
-          icon={Coins}
-          isLast
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Moneda
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0">
+            <Item
+              variant="plain"
+              className={cn(
+                "min-h-[52px] px-3 py-3",
+                isPending && "opacity-50"
+              )}
+              aria-disabled={isPending || undefined}
+              render={
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => navigate(settingsModuleHref("finance"))}
+                />
+              }
+            >
+              <ItemMedia
+                className="size-9 rounded-md"
+                style={{ backgroundColor: `${REGIONAL_ACCENT}20` }}
+              >
+                <Coins
+                  className="size-4.5"
+                  style={{ color: REGIONAL_ACCENT }}
+                />
+              </ItemMedia>
+              <ItemContent className="gap-0.5">
+                <div className="flex flex-col gap-0.5 md:flex-row md:items-center md:justify-between md:gap-3">
+                  <ItemTitle className="text-sm font-normal md:text-base">
+                    Moneda por defecto
+                  </ItemTitle>
+                  <ItemDescription className="max-w-[90%] truncate text-xs md:text-right">
+                    {config.baseCurrency}
+                  </ItemDescription>
+                </div>
+                <ItemDescription className="text-xs">
+                  La moneda principal de Finanzas.
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </Card>
+      </section>
 
       <EditTimeZoneSheet
         open={openTimeZoneSheet}

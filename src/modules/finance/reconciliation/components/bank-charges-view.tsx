@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useBankCharges } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
@@ -24,6 +23,7 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { Building2Icon, LandmarkIcon, TagsIcon } from "lucide-react"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 type BankChargesViewProps = {
   enabled: boolean
@@ -58,7 +58,13 @@ export function BankChargesView({
   return (
     <AsyncRegion
       pending={query.isPending}
-      pendingFallback={<ListSkeleton rows={4} />}
+      pendingFallback={
+        <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-12 w-full rounded-xl" />
+          ))}
+        </div>
+      }
       empty={!charges || charges.count === 0}
       emptyFallback={
         <Empty className="py-8">

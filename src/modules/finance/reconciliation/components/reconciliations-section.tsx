@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type { ReconciliationTarget } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import {
@@ -27,10 +26,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ScaleIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 type ReconciliationsSectionProps = {
   enabled: boolean
@@ -63,11 +62,10 @@ export function ReconciliationsSection({
   }
 
   return (
-    <SettingsSection
-      title="Conciliaciones"
-      bare
-      className="gap-3 rounded-3xl bg-background"
-    >
+    <section className="flex flex-col gap-3 rounded-3xl bg-background">
+      <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Conciliaciones
+      </h2>
       {query.isError ? (
         <ErrorState
           message={financeErrorMessage(query.error)}
@@ -77,7 +75,13 @@ export function ReconciliationsSection({
       ) : null}
       <AsyncRegion
         pending={query.isPending && !query.data}
-        pendingFallback={<ListSkeleton />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -142,6 +146,6 @@ export function ReconciliationsSection({
           onLoadMore={() => void query.fetchNextPage()}
         />
       </AsyncRegion>
-    </SettingsSection>
+    </section>
   )
 }

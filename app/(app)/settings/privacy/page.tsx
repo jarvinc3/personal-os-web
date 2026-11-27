@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 export default function PrivacySettingsRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <PrivacySettingsScreen />
     </Suspense>
   )

@@ -12,7 +12,7 @@ export default async function FinanceInstitutionCardPage({
 }: FinanceInstitutionCardPageProps) {
   const { cardId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <CardDetailScreen cardId={cardId} />
     </Suspense>
   )

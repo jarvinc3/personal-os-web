@@ -12,6 +12,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- `SummaryGroup` compone `Marker` con la etiqueta centrada entre dos líneas. Las pantallas que esperan un registro eligen su carga: `Spinner` centrado en los detalles y las hojas, y un esqueleto con la forma de la vista en Patrimonio; `LoadingView` queda solo como fallback de Suspense de las rutas. `ErrorState` sigue componiendo `Empty` y `Button`. Sin cambio de contrato (#419).
+
+- Los ajustes, Notificaciones, Ayuda y las listas de Finanzas componen `Item` dentro de `Card` y `ItemGroup`, con las filas en arreglos de objetos: se retiran `SettingsRow` y `SettingsSection`. `Item` gana `variant="plain"` para las filas que van dentro de una card, y `MissingRecord` compone `Button` con `render` hacia `Link`. El esqueleto de lista se reparte con `Skeleton` en cada vista y se retira `ListSkeleton`. Sin cambio de contrato (#419).
+
 - Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. Las filas de switch y las de elección resaltan con el fondo del acento de su módulo al 10 %, sin borde de color. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
 
 - Las rutas de Agenda, Proyectos y Salud componen `Empty` con el enlace a su ajuste, y las pilas de cards y el conocimiento componen `Skeleton`. Se retiran `ModuleComingSoon`, `CardSkeleton` y `KnowledgeListSkeleton`. Sin cambio visible ni de contrato (#419).

@@ -14,9 +14,9 @@ import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function CardCreateScreen() {
   return (
@@ -98,7 +98,11 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
   )
 
   if (cardsQuery.isPending && !card) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (cardsQuery.error) {

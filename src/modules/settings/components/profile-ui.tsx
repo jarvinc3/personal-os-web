@@ -7,7 +7,6 @@ import type {
   ModuleSlug,
 } from "@/src/modules/settings/types/module-config.types"
 import { DEFAULT_MODULE_CONFIG_BY_SLUG } from "@/src/modules/settings/constants/user-settings-defaults"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   PendingSurface,
@@ -120,10 +119,11 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
   }
 
   return (
-    <SettingsSection
-      title="Apps"
-      bare
-      headerTrailing={
+    <section className="flex flex-col gap-2">
+      <div className="flex flex-row items-center justify-between gap-2 px-1">
+        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Apps
+        </h2>
         <div className="flex items-center">
           <Button
             type="button"
@@ -146,8 +146,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
             <ChevronRightIcon />
           </Button>
         </div>
-      }
-    >
+      </div>
       <div
         ref={listRef}
         onScroll={updateScrollState}
@@ -171,7 +170,7 @@ function ModuleSettingsRows({ onOpenModule }: ModuleSettingsRowsProps) {
         ))}
         <div style={{ minWidth: MODULE_SETTINGS_CARD_GAP }} />
       </div>
-    </SettingsSection>
+    </section>
   )
 }
 

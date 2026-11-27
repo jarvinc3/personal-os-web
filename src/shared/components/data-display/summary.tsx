@@ -10,7 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
-import { Separator } from "@/src/shared/components/ui/separator"
+import { Marker, MarkerContent } from "@/src/shared/components/ui/marker"
 
 type SummarySectionProps = {
   title?: string
@@ -159,17 +159,14 @@ export function SummaryGroup({
 }: SummaryGroupProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-0.5 px-2 pt-1">
-        <div className="flex items-center gap-2">
-          <span className="shrink-0 text-xs font-medium text-muted-foreground">
-            {title}
-          </span>
-          <Separator className="min-w-0 flex-1" />
-        </div>
-        {description ? (
-          <span className="text-xs text-muted-foreground">{description}</span>
-        ) : null}
-      </div>
+      <Marker variant="separator">
+        <MarkerContent>{title}</MarkerContent>
+      </Marker>
+      {description ? (
+        <p className="text-center text-xs text-muted-foreground">
+          {description}
+        </p>
+      ) : null}
       {children}
     </div>
   )

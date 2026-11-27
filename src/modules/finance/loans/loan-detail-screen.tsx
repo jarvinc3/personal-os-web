@@ -6,7 +6,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
@@ -47,7 +46,6 @@ import {
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -62,6 +60,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyContent,
@@ -250,7 +249,11 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
   )
 
   if (loansQuery.isPending && !loan) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!loan) {
@@ -387,7 +390,13 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
         <AsyncRegion
           pending={installmentsQuery.isPending}
-          pendingFallback={<ListSkeleton rows={5} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={!installmentsQuery.isError && installments.length === 0}
           emptyFallback={
             <Empty className="py-10">

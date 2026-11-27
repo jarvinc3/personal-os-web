@@ -54,7 +54,7 @@ import { InboxIcon } from "lucide-react"
       },
     ],
     variants: [
-      { name: "variant", values: "default, outline, muted" },
+      { name: "variant", values: "default, outline, muted, plain" },
       { name: "size", values: "default, sm, xs" },
       { name: "variant (Media)", values: "default, icon, image" },
       {
@@ -65,8 +65,9 @@ import { InboxIcon } from "lucide-react"
     props: [
       {
         name: "variant",
-        type: '"default" | "outline" | "muted"',
-        description: "Borde y fondo de la fila.",
+        type: '"default" | "outline" | "muted" | "plain"',
+        description:
+          "Borde y fondo de la fila. plain no pinta superficie y sirve para filas dentro de una Card.",
       },
       {
         name: "size",
@@ -136,7 +137,7 @@ import { InboxIcon } from "lucide-react"
     description:
       "Fila canónica de una lista: media circular, título, descripción, valor y chevron.",
     whenToUse:
-      "Una fila dentro de SummarySection o SettingsSection, con href o onPress.",
+      "Una fila dentro de SummarySection o de una Card con ItemGroup, con href o onPress.",
     whenNotToUse:
       "Una entidad de Finanzas: su card. Un grupo sin sección: no envuelvas la fila en un div de borde a mano.",
     importPath: "@/src/shared/components/data-display/summary",
@@ -180,55 +181,6 @@ import { FileTextIcon } from "lucide-react"
         name: "value",
         type: "ReactNode",
         description: "Valor a la derecha, normalmente tabular-nums.",
-      },
-    ],
-  },
-  {
-    id: "settings-row",
-    name: "SettingsRow",
-    category: "listas",
-    kind: "domain",
-    description:
-      "Fila de ajustes con icono, etiqueta, valor, chevron o switch.",
-    whenToUse:
-      "Un ajuste dentro de SettingsSection: navegación, switch o acción destructiva.",
-    whenNotToUse: "Una fila de una lista de producto: SummaryItem.",
-    importPath: "@/src/shared/components/settings/settings-section",
-    snippet: `import { SettingsRow } from "@/src/shared/components/settings/settings-section"
-
-<SettingsRow
-  label="Avisos"
-  description="Recibir un aviso al llegar un cobro"
-  icon={BellIcon}
-  switchValue={notifications}
-  onSwitchChange={setNotifications}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "SettingsRow" }],
-    variants: [
-      { name: "modo", values: "navegación (onPress), switch, link externo" },
-      { name: "states", values: "normal, destructive, disabled" },
-    ],
-    props: [
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Obligatorio cuando la fila lleva switch.",
-      },
-      {
-        name: "switchValue / onSwitchChange",
-        type: "boolean / (checked: boolean) => void",
-        description: "Estado del switch de la fila.",
-      },
-      {
-        name: "destructive",
-        type: "boolean",
-        description: "Pinta la etiqueta y el icono en destructive.",
-      },
-      {
-        name: "showChevron",
-        type: "boolean",
-        description: "Muestra la flecha de navegación.",
       },
     ],
   },

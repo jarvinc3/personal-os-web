@@ -48,7 +48,6 @@ import {
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -302,7 +301,11 @@ function InstitutionDetailScreenBody({
   )
 
   if (isLoading && !institution) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!institution) {

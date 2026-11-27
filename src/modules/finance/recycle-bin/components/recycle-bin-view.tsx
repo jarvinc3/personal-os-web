@@ -26,8 +26,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { Card } from "@/src/shared/components/ui/card"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
@@ -296,11 +296,16 @@ export function RecycleBinView() {
               description="Las cuentas, tarjetas o préstamos que archives aparecen aquí."
             />
           ) : (
-            <SettingsSection title="Archivados">
-              {archived.map((record, index) =>
-                renderArchived(record, index === archived.length - 1)
-              )}
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Archivados
+              </h2>
+              <Card className="gap-0 bg-card p-1">
+                {archived.map((record, index) =>
+                  renderArchived(record, index === archived.length - 1)
+                )}
+              </Card>
+            </section>
           )}
         </TabsContent>
 
@@ -311,11 +316,16 @@ export function RecycleBinView() {
               description="Los registros que borres aparecen aquí mientras se puedan recuperar."
             />
           ) : (
-            <SettingsSection title="Eliminados">
-              {deleted.map((record, index) =>
-                renderDeleted(record, index === deleted.length - 1)
-              )}
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Eliminados
+              </h2>
+              <Card className="gap-0 bg-card p-1">
+                {deleted.map((record, index) =>
+                  renderDeleted(record, index === deleted.length - 1)
+                )}
+              </Card>
+            </section>
           )}
           {recycleBinErrorState === "inline" ? (
             <InfiniteListErrorFooter

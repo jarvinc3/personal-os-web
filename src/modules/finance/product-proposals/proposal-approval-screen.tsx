@@ -34,7 +34,6 @@ import {
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
@@ -167,7 +166,11 @@ function ProposalApprovalScreenBody({
     (proposalsQuery.isPending && !proposalsQuery.data) ||
     (institutionsQuery.isPending && !institutionsQuery.data)
   ) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (proposalsQuery.error) {

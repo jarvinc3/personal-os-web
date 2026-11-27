@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 export default function IntelligenceAdminKnowledgeRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <KnowledgeAdminScreen />
     </Suspense>
   )

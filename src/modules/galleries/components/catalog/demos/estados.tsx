@@ -3,8 +3,6 @@ import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
 import { simulatedTap } from "@/src/modules/galleries/components/simulated-tap"
 import { IconBadge } from "@/src/shared/components/data-display/icon-badge"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   EMPTY_COMPACT_CLASS_NAME,
@@ -147,36 +145,6 @@ export const estadosDemos: GalleryDemoMap = {
         <div className="flex w-full flex-col gap-2">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-20 w-full rounded-2xl" />
-        </div>
-      ),
-    },
-  ],
-  "list-skeleton": [
-    {
-      label: "Tres filas",
-      code: `
-<div className="w-full rounded-2xl border border-border">
-  <ListSkeleton rows={3} />
-</div>
-`,
-      node: (
-        <div className="w-full rounded-2xl border border-border">
-          <ListSkeleton rows={3} />
-        </div>
-      ),
-    },
-  ],
-  "loading-view": [
-    {
-      label: "Inline",
-      code: `
-<div className="w-full rounded-2xl border border-border">
-  <LoadingView variant="inline" />
-</div>
-`,
-      node: (
-        <div className="w-full rounded-2xl border border-border">
-          <LoadingView variant="inline" />
         </div>
       ),
     },
@@ -348,46 +316,6 @@ export const estadosVariantDemos: GalleryVariantDemoMap = {
       {
         label: "círculo",
         node: <Skeleton className="size-10 rounded-full" />,
-      },
-    ],
-  },
-  "list-skeleton": {
-    rows: [
-      {
-        label: "3",
-        node: (
-          <div className="w-full max-w-sm rounded-2xl border border-border">
-            <ListSkeleton rows={3} />
-          </div>
-        ),
-      },
-      {
-        label: "5",
-        node: (
-          <div className="w-full max-w-sm rounded-2xl border border-border">
-            <ListSkeleton rows={5} />
-          </div>
-        ),
-      },
-    ],
-  },
-  "loading-view": {
-    variant: [
-      {
-        label: "screen",
-        node: (
-          <div className="h-[70vh] w-full max-w-sm overflow-hidden rounded-2xl border border-border">
-            <LoadingView variant="screen" />
-          </div>
-        ),
-      },
-      {
-        label: "inline",
-        node: (
-          <div className="w-full max-w-sm rounded-2xl border border-border">
-            <LoadingView variant="inline" />
-          </div>
-        ),
       },
     ],
   },

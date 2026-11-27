@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 export default function ModulesSettingsRoute() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ModulesSettingsScreen />
     </Suspense>
   )
