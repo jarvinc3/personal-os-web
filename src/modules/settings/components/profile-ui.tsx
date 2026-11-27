@@ -1,6 +1,7 @@
 "use client"
 
 import type { ModuleSettingsState } from "@/src/modules/settings/lib/module-settings-state"
+import { activeRowStyle } from "@/src/shared/components/ui/field"
 import type {
   ConfigurableModuleSlug,
   ModuleSlug,
@@ -52,10 +53,8 @@ function ModuleSheetEnableRow({
   const id = useId()
   return (
     <div
-      className="flex flex-row items-center justify-between rounded-2xl border bg-card px-4 py-3"
-      style={
-        isEnabled ? { borderColor: accentColor, borderWidth: 1 } : undefined
-      }
+      className="flex flex-row items-center justify-between rounded-2xl border border-border bg-card px-4 py-3"
+      style={activeRowStyle(accentColor, isEnabled)}
     >
       <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer pr-3">
         <p className="text-base font-medium text-foreground">App activa</p>

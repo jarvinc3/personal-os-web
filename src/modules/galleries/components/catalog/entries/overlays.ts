@@ -2,108 +2,6 @@ import type { GalleryComponentMeta } from "@/src/modules/galleries/components/ca
 
 export const overlaysDocs: readonly GalleryComponentMeta[] = [
   {
-    id: "bottom-sheet",
-    name: "BottomSheet",
-    category: "overlays",
-    kind: "domain",
-    description:
-      "Hoja de edición, flotante para un evento o ancha con dos columnas, siempre por ruta.",
-    whenToUse:
-      "Edición o contenido secundario en cualquier módulo, con su URL y su cierre por Atrás.",
-    whenNotToUse:
-      "Una confirmación: ConfirmDialog. Una vista que merece ruta propia: pantalla.",
-    importPath: "@/src/shared/components/sheets/bottom-sheet",
-    snippet: `import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-
-const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
-
-<BottomSheet
-  open={sheet.open}
-  onOpenChange={sheet.setOpen}
-  title="Editar comercio"
-  actions={{ submit: <Button>Guardar</Button> }}
->
-  {children}
-</BottomSheet>`,
-    subcomponents: [],
-    anatomy: [{ name: "BottomSheet" }],
-    variants: [
-      { name: "variant", values: "default, floating" },
-      { name: "size", values: "default, wide" },
-      { name: "states", values: "open, pending, closed" },
-    ],
-    props: [
-      {
-        name: "open / onOpenChange",
-        type: "boolean / (open: boolean) => void",
-        description: "Estado que vive en la URL con useSheetParam.",
-      },
-      {
-        name: "actions",
-        type: "{ close?, submit?, delete? }",
-        description: "Acciones del pie de la hoja.",
-      },
-      {
-        name: "pending",
-        type: "boolean",
-        description: "Deshabilita las acciones y muestra el pending.",
-      },
-      {
-        name: "variant / size",
-        type: "BottomSheetVariant / BottomSheetSize",
-        description: "Evento flotante o panel ancho.",
-      },
-    ],
-  },
-  {
-    id: "confirm-dialog",
-    name: "ConfirmDialog",
-    category: "overlays",
-    kind: "domain",
-    description:
-      "Confirmación de una acción destructiva o difícil de deshacer, con su tono.",
-    whenToUse: "Antes de borrar, vaciar, reemplazar o recalcular datos.",
-    whenNotToUse:
-      "Navegación, abrir un sheet o un alta reversible. Un AlertDialog simple puede cubrir el caso.",
-    importPath: "@/src/shared/components/feedback/confirm-dialog",
-    snippet: `import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
-
-<ConfirmDialog
-  open={open}
-  onOpenChange={setOpen}
-  title="¿Eliminar el movimiento?"
-  description="Se quitará de la lista y del saldo de la cuenta."
-  confirmLabel="Eliminar"
-  confirmIcon={Trash2Icon}
-  tone="danger"
-  onConfirm={onConfirm}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "ConfirmDialog" }],
-    variants: [
-      { name: "tone", values: "default, danger" },
-      { name: "states", values: "normal, pending, disabled" },
-      { name: "wide", values: "false, true para un diálogo con formulario" },
-    ],
-    props: [
-      {
-        name: "title / description",
-        type: "ReactNode",
-        description: "Pregunta y consecuencia de la acción.",
-      },
-      {
-        name: "confirmLabel / confirmIcon",
-        type: "ReactNode / LucideIcon",
-        description: "Verbo real de la acción y su icono.",
-      },
-      {
-        name: "pending",
-        type: "boolean",
-        description: "Deshabilita ambos botones mientras corre la acción.",
-      },
-    ],
-  },
-  {
     id: "alert-dialog",
     name: "AlertDialog",
     category: "overlays",
@@ -111,9 +9,9 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     description:
       "Diálogo modal de confirmación con acción y cancelar, sin ruta.",
     whenToUse:
-      "Una confirmación puntual armada a mano, con su título y su consecuencia.",
+      "Toda confirmación de una acción destructiva o difícil de deshacer: título en pregunta, consecuencia, icono y pending.",
     whenNotToUse:
-      "Una confirmación de Finanzas: ConfirmDialog ya reúne el patrón. Una edición: BottomSheet.",
+      "Navegación, abrir una hoja o un alta reversible. Una edición: una hoja con Drawer.",
     importPath: "@/src/shared/components/ui/alert-dialog",
     snippet: `import {
   AlertDialog,
@@ -127,18 +25,34 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
   AlertDialogTrigger,
 } from "@/src/shared/components/ui/alert-dialog"
 
-<AlertDialog>
-  <AlertDialogTrigger render={<Button variant="destructive" />}>
-    Eliminar
-  </AlertDialogTrigger>
+<AlertDialog open={open} onOpenChange={setOpen}>
   <AlertDialogContent>
     <AlertDialogHeader>
+      <AlertDialogMedia className="bg-destructive/10 text-destructive">
+        <Trash2Icon />
+      </AlertDialogMedia>
       <AlertDialogTitle>¿Eliminar el movimiento?</AlertDialogTitle>
-      <AlertDialogDescription>No se puede deshacer.</AlertDialogDescription>
+      <AlertDialogDescription>
+        Se quitará de la lista y del saldo de la cuenta. No se puede deshacer.
+      </AlertDialogDescription>
     </AlertDialogHeader>
     <AlertDialogFooter>
-      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-      <AlertDialogAction variant="destructive">Eliminar</AlertDialogAction>
+      <AlertDialogCancel disabled={pending}>
+        <XIcon className="size-4 shrink-0" aria-hidden="true" />
+        Cancelar
+      </AlertDialogCancel>
+      <AlertDialogAction
+        variant="destructive"
+        disabled={pending}
+        onClick={onConfirm}
+      >
+        {pending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+        )}
+        {pending ? "Eliminando..." : "Eliminar"}
+      </AlertDialogAction>
     </AlertDialogFooter>
   </AlertDialogContent>
 </AlertDialog>`,
@@ -171,12 +85,26 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     variants: [
       { name: "size (Content)", values: "default, sm" },
       { name: "variant (Action)", values: "default, destructive, outline" },
+      { name: "states", values: "normal, pending" },
     ],
     props: [
       {
         name: "open / onOpenChange",
         type: "boolean / (open: boolean) => void",
-        description: "Estado del diálogo; Esc y Cancelar cierran.",
+        description:
+          "Estado del diálogo; Esc y Cancelar cierran, un clic fuera no. Con pending, el cambio se ignora.",
+      },
+      {
+        name: "AlertDialogMedia",
+        type: "ReactNode",
+        description:
+          "Icono grande del encabezado; en una acción destructiva lleva bg-destructive/10 y text-destructive.",
+      },
+      {
+        name: "pending",
+        type: "boolean",
+        description:
+          "Deshabilita Cancelar y la acción, y cambia el icono de la acción por Spinner.",
       },
     ],
   },
@@ -189,7 +117,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     whenToUse:
       "Un contenido modal que no es una confirmación y no merece una hoja.",
     whenNotToUse:
-      "Una edición de producto: BottomSheet por ruta. Una confirmación: AlertDialog.",
+      "Una edición de producto: una hoja con Drawer por ruta. Una confirmación: AlertDialog.",
     importPath: "@/src/shared/components/ui/dialog",
     snippet: `import {
   Dialog,
@@ -250,26 +178,33 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     category: "overlays",
     kind: "ui",
     description:
-      "Panel deslizante primitivo, con swipe para cerrar. Es la base de BottomSheet y del sidebar móvil.",
-    whenToUse: "El primitivo que compone BottomSheet o el sidebar móvil.",
+      "Panel deslizante con swipe. Cada hoja de producto compone Drawer, SheetHeader, SheetBody y su pie; los selectores se abren como drawers anidados.",
+    whenToUse:
+      "Toda hoja de producto: edición, selección o aviso, siempre por ruta. La cabecera y el cuerpo viven en SheetHeader y SheetBody.",
     whenNotToUse:
-      "Una edición de producto: BottomSheet, que ya envuelve Drawer. La demo abre por ruta.",
+      "Una confirmación: AlertDialog. Una vista que merece ruta propia: pantalla.",
     importPath: "@/src/shared/components/ui/drawer",
-    snippet: `import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/src/shared/components/ui/drawer"
+    snippet: `import { Drawer, DrawerContent, DrawerFooter } from "@/src/shared/components/ui/drawer"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 
-<Drawer open={open} onOpenChange={setOpen} swipeDirection="down">
+const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
+
+<Drawer open={sheet.open} onOpenChange={(next) => sheet.setOpen(next)}>
   <DrawerContent>
-    <DrawerHeader>
-      <DrawerTitle>Título</DrawerTitle>
-      <DrawerDescription>Descripción</DrawerDescription>
-    </DrawerHeader>
-    {children}
+    <SheetHeader title="Editar comercio" description="Los cambios se guardan al confirmar." />
+    <SheetBody>{children}</SheetBody>
+    <DrawerFooter className={SHEET_FOOTER_CLASS}>
+      <Button type="button" variant="outline" className="flex-1" onClick={() => sheet.setOpen(false)}>
+        <XIcon aria-hidden="true" />
+        Cancelar
+      </Button>
+      <Button type="button" className="flex-1" onClick={onSave}>
+        <SaveIcon aria-hidden="true" />
+        Guardar
+      </Button>
+    </DrawerFooter>
   </DrawerContent>
 </Drawer>`,
     subcomponents: [
@@ -288,13 +223,19 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
         children: [
           {
             name: "DrawerContent",
-            children: [{ name: "DrawerHeader" }, { name: "DrawerFooter" }],
+            children: [
+              { name: "SheetHeader" },
+              { name: "SheetBody" },
+              { name: "DrawerFooter" },
+            ],
           },
         ],
       },
     ],
     variants: [
       { name: "swipeDirection", values: "down, up, left, right" },
+      { name: "modal", values: "true, false" },
+      { name: "anidado", values: "un drawer sobre otro" },
       { name: "showSwipeHandle / snapPoints", values: "opcionales" },
     ],
     props: [
@@ -306,7 +247,31 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       {
         name: "swipeDirection",
         type: '"down" | "up" | "left" | "right"',
-        description: "Lado del que entra y gesto que lo cierra.",
+        description:
+          "Lado del que entra y gesto que lo cierra. Por defecto, derecha en escritorio y abajo en móvil.",
+      },
+      {
+        name: "modal",
+        type: 'boolean | "trap-focus"',
+        description: "Con false, la página sigue interactiva detrás del panel.",
+      },
+      {
+        name: "snapPoints",
+        type: "(number | string)[]",
+        description:
+          "Alturas donde se detiene el panel: fracciones de 0 a 1 o medidas en px/rem.",
+      },
+      {
+        name: "showSwipeHandle",
+        type: "boolean",
+        description:
+          "Muestra el tirador que permite arrastrar entre puntos de anclaje.",
+      },
+      {
+        name: "composición de producto",
+        type: "SheetHeader + SheetBody + DrawerFooter",
+        description:
+          "La cabecera, el cuerpo desplazable y el pie que repite cada hoja. Un selector dentro de otra hoja se monta dentro de su Drawer y se apila como drawer anidado.",
       },
     ],
   },
@@ -319,7 +284,7 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
     whenToUse:
       "Un ajuste puntual, una ayuda o un contenido corto junto a su disparador.",
     whenNotToUse:
-      "Un formulario de edición: BottomSheet. Un menú de acciones: DropdownMenu.",
+      "Un formulario de edición: una hoja con Drawer. Un menú de acciones: DropdownMenu.",
     importPath: "@/src/shared/components/ui/popover",
     snippet: `import {
   Popover,
@@ -381,7 +346,8 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       "Menú de acciones anclado a un botón, con grupos, atajos y submenús.",
     whenToUse:
       "Las acciones secundarias de una fila o un encabezado, detrás de un botón de más.",
-    whenNotToUse: "Un formulario: BottomSheet. Una confirmación: AlertDialog.",
+    whenNotToUse:
+      "Un formulario: una hoja con Drawer. Una confirmación: AlertDialog.",
     importPath: "@/src/shared/components/ui/dropdown-menu",
     snippet: `import {
   DropdownMenu,
@@ -624,6 +590,8 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
       { name: "collapsible", values: "offcanvas, icon, none" },
       { name: "variant", values: "sidebar, floating, inset" },
       { name: "mobile", values: "Drawer lateral" },
+      { name: "variant (MenuButton)", values: "default, outline" },
+      { name: "size (MenuButton)", values: "default, sm, lg" },
     ],
     props: [
       {
@@ -640,6 +608,16 @@ const sheet = useSheetParam(FINANCE_SHEET_KEYS.category)
         name: "isActive (MenuButton)",
         type: "boolean",
         description: "Marca la ruta activa.",
+      },
+      {
+        name: "variant (SidebarMenuButton)",
+        type: '"default" | "outline"',
+        description: "Aspecto del botón de cada entrada del menú.",
+      },
+      {
+        name: "size (SidebarMenuButton)",
+        type: '"default" | "sm" | "lg"',
+        description: "Alto del botón de cada entrada del menú.",
       },
     ],
   },

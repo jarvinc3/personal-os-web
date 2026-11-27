@@ -2,7 +2,7 @@
 
 Vista secundaria `/finance/sync` (hermana de Categorías). Header `secondary` título «Correos», back a Productos. Atajo en Productos (`MailIcon`).
 
-OAuth autoriza **solo el buzón** (tokens). `returnTo` = `{NEXT_PUBLIC_URL}/finance/sync?sheet=oauth-gmail-result`: el callback vuelve **siempre** a `/finance/sync`, añade `success=true|false` y no lleva `institutionId`. Resultado: BottomSheet `floating` (éxito o error). La institución se vincula **después**, en un paso aparte: primero se conecta el buzón y luego cada remitente con una institución.
+OAuth autoriza **solo el buzón** (tokens). `returnTo` = `{NEXT_PUBLIC_URL}/finance/sync?sheet=oauth-gmail-result`: el callback vuelve **siempre** a `/finance/sync`, añade `success=true|false` y no lleva `institutionId`. Resultado: hoja flotante (`Drawer` con `FLOATING_SHEET_CONTENT_CLASS`) de éxito o error. La institución se vincula **después**, en un paso aparte: primero se conecta el buzón y luego cada remitente con una institución.
 
 Vínculo de banco: institución + correos From del banco (`bankSenderEmails`). El dominio no es input. POST `/finance/email-sync/sources` con un Gmail ya conectado. Unique `(userId, institutionId)`: el atajo del detalle de institución queda `disabled` («Conectada a {gmail}») si ya hay source; si no, abre sheet de vínculo (sin Google). Sin buzones: CTA a Correos.
 

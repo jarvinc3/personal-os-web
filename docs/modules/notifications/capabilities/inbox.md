@@ -19,4 +19,4 @@
 - `AC-NTF-W-001` — Given IN_APP on, When llega `notification.new` y pathname no es `/notifications`, Then toast + invalidate list/unread.
 - `AC-NTF-W-002` — Given ya en `/notifications`, When `notification.new`, Then invalidate **sin** toast (evita duplicar).
 
-Evidencia: `notifications-screen.tsx`, `notification-row.tsx`, `notification-list-skeleton.tsx`, `use-notifications.ts`, `notification-visual.ts`, `group-notifications-by-date.ts`.
+Evidencia: `notifications-screen.tsx`, `notification-row.tsx`, `notifications-blocked-state.tsx`, `use-notifications.ts`, `notification-visual.ts`, `group-notifications-by-date.ts`.

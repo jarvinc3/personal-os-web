@@ -1,12 +1,20 @@
 "use client"
 
 import type { AgendaModuleFormValues } from "@/src/modules/agenda/settings/lib/agenda-module-form"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import type { AgendaModuleConfig } from "@/src/modules/settings/types/module-config.types"
 import {
   SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -54,17 +62,20 @@ export function AgendaViewSection({
           }
         >
           {VIEW_OPTIONS.map((o) => (
-            <OptionRow
+            <FieldLabel
               key={o.value}
-              icon={CalendarDays}
-              iconColor={MODULE_ACCENT}
-              label={o.label}
-              selected={defaultView === o.value}
-              onPress={() =>
+              onClick={() =>
                 setValue("defaultView", o.value, { shouldDirty: true })
               }
-              trailing={<RadioGroupItem value={o.value} />}
-            />
+              className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+              style={activeRowStyle(MODULE_ACCENT, defaultView === o.value)}
+            >
+              <FieldMedia icon={CalendarDays} color={MODULE_ACCENT} />
+              <FieldContent>
+                <FieldTitle className="text-sm">{o.label}</FieldTitle>
+              </FieldContent>
+              <RadioGroupItem value={o.value} />
+            </FieldLabel>
           ))}
         </RadioGroup>
       </SummarySection>

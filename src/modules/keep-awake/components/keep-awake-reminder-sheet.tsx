@@ -1,6 +1,8 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { useSyncExternalStore } from "react"
 import {
   DEFAULT_REMINDER,
@@ -15,12 +17,17 @@ import {
   type KeepAwakeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
 import { TimePairWheels } from "@/src/shared/components/forms/wheel-picker"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { type FormEvent, useState } from "react"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { ClockIcon, SaveIcon, Trash2Icon } from "lucide-react"
+import { ClockIcon, SaveIcon, Trash2Icon, XIcon } from "lucide-react"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
 type KeepAwakeReminderSheetProps = {
@@ -82,24 +89,35 @@ export function KeepAwakeReminderSheet({
   }
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Recordatorio"
-      actions={{
-        delete: reminder.enabled ? (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title="Recordatorio" />
+        <SheetBody>
+          {open ? (
+            <KeepAwakeReminderForm onSaved={() => onOpenChange(false)} />
+          ) : null}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          {reminder.enabled ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className={cn(PRESSABLE_CLASS, "flex-1")}
+              onClick={disable}
+            >
+              <Trash2Icon className="size-4 shrink-0" />
+              Quitar
+            </Button>
+          ) : null}
           <Button
             type="button"
-            variant="secondary"
-            className={cn(PRESSABLE_CLASS, "flex-1")}
-            onClick={disable}
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
           >
-            <Trash2Icon className="size-4 shrink-0" />
-            Quitar
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
           </Button>
-        ) : undefined,
-        submit: (
           <Button
             type="submit"
             form={REMINDER_FORM_ID}
@@ -108,13 +126,9 @@ export function KeepAwakeReminderSheet({
             <SaveIcon className="size-4 shrink-0" />
             Guardar
           </Button>
-        ),
-      }}
-    >
-      {open ? (
-        <KeepAwakeReminderForm onSaved={() => onOpenChange(false)} />
-      ) : null}
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

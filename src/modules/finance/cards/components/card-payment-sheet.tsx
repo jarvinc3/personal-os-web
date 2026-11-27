@@ -1,8 +1,10 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -36,10 +38,31 @@ import {
   formatFinanceMoney,
   parseFinanceMoney,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   SummaryItem,
@@ -54,6 +77,7 @@ import {
   PlusIcon,
   TriangleAlertIcon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { useMemo, useReducer, useState } from "react"
 import type { FinanceCard } from "@/src/modules/finance/shared/types/entities"
@@ -171,187 +195,232 @@ export function CardPaymentSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={onOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardPayment} />
-        }
-        pending={createMutation.isPending}
-        title="Pagar tarjeta"
-        description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={createMutation.isPending}
-              className="flex-1"
-              onClick={() => void onSubmit()}
-            >
-              {createMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Pagar tarjeta"
+            description={`Sale de tu cuenta y sube el disponible de ${cardName}.`}
+            pending={createMutation.isPending}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardPayment} />
+            }
+          />
+          <SheetBody pending={createMutation.isPending}>
+            <SummarySection title="Pago" icon={CreditCardIcon}>
+              {currencies.length > 1 ? (
+                <Field className="gap-1">
+                  <FieldLabel>Moneda</FieldLabel>
+                  <ToggleGroup
+                    value={[currency]}
+                    onValueChange={(next) => {
+                      if (next.length > 0) {
+                        setCurrency(next[0])
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    aria-label="Moneda"
+                  >
+                    {currencies.map((code) => (
+                      <ToggleGroupItem
+                        key={code}
+                        value={code}
+                        className="rounded-full"
+                      >
+                        {code}
+                      </ToggleGroupItem>
+                    ))}
+                  </ToggleGroup>
+                </Field>
               ) : null}
-              Pagar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Pago" icon={CreditCardIcon}>
-          {currencies.length > 1 ? (
-            <SegmentedControl
-              label="Moneda"
-              value={currency}
-              onChange={setCurrency}
-              options={currencies.map((code) => ({
-                value: code,
-                label: code,
-              }))}
-            />
+              <FinanceMoneyField
+                calculatorKey="card-payment-amount"
+                label="Monto"
+                amount={amount}
+                onAmountChange={setAmount}
+                onAmountCommit={(next) => setAmount(next)}
+                amountError={amountError ?? undefined}
+                currency={currency}
+              />
+              <div className="flex flex-wrap gap-2">
+                {minimum !== null && minimum > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmount(String(minimum))}
+                  >
+                    <CoinsIcon className="size-4 shrink-0" />
+                    {`Pago mínimo ${formatFinanceMoney(minimum, display)}`}
+                  </Button>
+                ) : null}
+                {closing !== null && closing > 0 ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setAmount(String(closing))}
+                  >
+                    <WalletIcon className="size-4 shrink-0" />
+                    {`Balance al corte ${formatFinanceMoney(closing, display)}`}
+                  </Button>
+                ) : null}
+              </div>
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Cuenta de origen
+                </FieldLabel>
+                <DestinationTrigger
+                  destination={
+                    effectiveAccountId
+                      ? encodeLedgerTarget("account", effectiveAccountId)
+                      : CATALOG_NONE
+                  }
+                  accounts={accounts}
+                  cards={[]}
+                  display={display}
+                  placeholder="Elige la cuenta"
+                  onClick={() => openPicker("account")}
+                />
+                {accounts.length === 0 ? (
+                  <FieldError>Necesitas una cuenta activa.</FieldError>
+                ) : null}
+              </Field>
+              <FinanceDateField
+                label="Fecha"
+                value={transactionDate}
+                onChange={setTransactionDate}
+              />
+              <FieldDescription className="text-xs">
+                El pago no cuenta como gasto: solo mueve dinero a la tarjeta.
+              </FieldDescription>
+            </SummarySection>
+          </SheetBody>
+          {!createMutation.isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => onOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={createMutation.isPending}
+                className="flex-1"
+                onClick={() => void onSubmit()}
+              >
+                {createMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Pagar
+              </Button>
+            </DrawerFooter>
           ) : null}
-          <FinanceMoneyField
-            calculatorKey="card-payment-amount"
-            label="Monto"
-            amount={amount}
-            onAmountChange={setAmount}
-            onAmountCommit={(next) => setAmount(next)}
-            amountError={amountError ?? undefined}
-            currency={currency}
-          />
-          <div className="flex flex-wrap gap-2">
-            {minimum !== null && minimum > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setAmount(String(minimum))}
-              >
-                <CoinsIcon className="size-4 shrink-0" />
-                {`Pago mínimo ${formatFinanceMoney(minimum, display)}`}
-              </Button>
-            ) : null}
-            {closing !== null && closing > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setAmount(String(closing))}
-              >
-                <WalletIcon className="size-4 shrink-0" />
-                {`Balance al corte ${formatFinanceMoney(closing, display)}`}
-              </Button>
-            ) : null}
-          </div>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Cuenta de origen
-            </FieldLabel>
-            <DestinationTrigger
-              destination={
-                effectiveAccountId
-                  ? encodeLedgerTarget("account", effectiveAccountId)
-                  : CATALOG_NONE
-              }
-              accounts={accounts}
-              cards={[]}
-              display={display}
-              placeholder="Elige la cuenta"
-              onClick={() => openPicker("account")}
-            />
-            {accounts.length === 0 ? (
-              <FieldError>Necesitas una cuenta activa.</FieldError>
-            ) : null}
-          </Field>
-          <FinanceDateField
-            label="Fecha"
-            value={transactionDate}
-            onChange={setTransactionDate}
-          />
-          <FinanceHelpText>
-            El pago no cuenta como gasto: solo mueve dinero a la tarjeta.
-          </FinanceHelpText>
-        </SummarySection>
-      </BottomSheet>
+        </DrawerContent>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={accounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setAccountId(splitLedgerTarget(next).accountId ?? "")
+          }
+        />
+      </Drawer>
 
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={accounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setAccountId(splitLedgerTarget(next).accountId ?? "")
-        }
-      />
-
-      <ConfirmDialog
+      <AlertDialog
         open={pendingDuplicate !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !createMutation.isPending) {
             dispatchDuplicate({ type: "CANCELLED" })
           }
         }}
-        icon={TriangleAlertIcon}
-        title="Ya hay un pago parecido"
-        description="Ese pago llegó por correo y todavía no está registrado a mano. Si continúas, quedan dos pagos con los mismos datos."
-        confirmLabel="Registrar igual"
-        confirmIcon={PlusIcon}
-        pending={createMutation.isPending}
-        pendingLabel="Registrando..."
-        onConfirm={() => void confirmDuplicate()}
-        closeOnConfirm={false}
-        wide
       >
-        {pendingDuplicate ? (
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-col">
-              <SummaryItem
-                title="Monto"
-                icon={CoinsIcon}
-                value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
-                  ...display,
-                  currency: pendingDuplicate.candidate.currency ?? "",
-                })}
-              />
-              <SummaryItem
-                title="Fecha"
-                icon={CalendarIcon}
-                value={
-                  cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
-                    timeZone,
-                    locale: formatLocale,
-                  }) ?? "—"
-                }
-                isLast
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="px-1 text-xs text-muted-foreground">
-                Cuenta de origen
-              </span>
-              {sourceAccount ? (
-                <AccountProductRow
-                  account={sourceAccount}
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <TriangleAlertIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>Ya hay un pago parecido</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ese pago llegó por correo y todavía no está registrado a mano. Si
+              continúas, quedan dos pagos con los mismos datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {pendingDuplicate ? (
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-col">
+                <SummaryItem
+                  title="Monto"
+                  icon={CoinsIcon}
+                  value={formatFinanceMoney(pendingDuplicate.candidate.amount, {
+                    ...display,
+                    currency: pendingDuplicate.candidate.currency ?? "",
+                  })}
+                />
+                <SummaryItem
+                  title="Fecha"
+                  icon={CalendarIcon}
+                  value={
+                    cardPaymentDuplicateDateLabel(pendingDuplicate.candidate, {
+                      timeZone,
+                      locale: formatLocale,
+                    }) ?? "—"
+                  }
+                  isLast
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="px-1 text-xs text-muted-foreground">
+                  Cuenta de origen
+                </span>
+                {sourceAccount ? (
+                  <AccountProductRow
+                    account={sourceAccount}
+                    display={display}
+                    variant="compact"
+                  />
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="px-1 text-xs text-muted-foreground">
+                  Tarjeta
+                </span>
+                <CardProductRow
+                  card={card}
+                  accounts={accounts}
                   display={display}
                   variant="compact"
                 />
-              ) : null}
+              </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="px-1 text-xs text-muted-foreground">
-                Tarjeta
-              </span>
-              <CardProductRow
-                card={card}
-                accounts={accounts}
-                display={display}
-                variant="compact"
-              />
-            </div>
-          </div>
-        ) : null}
-      </ConfirmDialog>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={createMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              disabled={createMutation.isPending}
+              onClick={() => void confirmDuplicate()}
+            >
+              {createMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <PlusIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {createMutation.isPending ? "Registrando..." : "Registrar igual"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

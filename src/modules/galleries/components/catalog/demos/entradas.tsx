@@ -1,15 +1,12 @@
-import { useState } from "react"
+import Image from "next/image"
 import {
   BellIcon,
   FileTextIcon,
-  MailIcon,
   SearchIcon,
   StoreIcon,
   XIcon,
 } from "lucide-react"
 
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import {
   Attachment,
   AttachmentAction,
@@ -34,14 +31,17 @@ import {
 } from "@/src/shared/components/ui/combobox"
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
+  FieldMedia,
 } from "@/src/shared/components/ui/field"
 import { Input } from "@/src/shared/components/ui/input"
 import {
   InputGroup,
   InputGroupAddon,
+  InputGroupButton,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
 import { Label } from "@/src/shared/components/ui/label"
@@ -67,84 +67,7 @@ import type {
 
 const DENSITIES = ["Cómoda", "Compacta", "Amplia"]
 const LABELS = ["Casa", "Trabajo", "Viaje"]
-
-function FormTextFieldDemo() {
-  const [name, setName] = useState("Comercio Ejemplo")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("clave-de-ejemplo")
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <FormTextField
-        label="Nombre"
-        value={name}
-        onChange={setName}
-        icon={StoreIcon}
-      />
-      <FormTextField
-        label="Correo"
-        value={email}
-        onChange={setEmail}
-        icon={MailIcon}
-        type="email"
-        placeholder="nombre@ejemplo.com"
-      />
-      <FormTextField
-        label="Comercio"
-        value=""
-        onChange={() => {}}
-        icon={StoreIcon}
-        error="Escribe el nombre del comercio"
-      />
-      <FormTextField
-        label="Contraseña"
-        value={password}
-        onChange={setPassword}
-        type="password"
-        revealable
-      />
-      <FormTextField
-        label="Correo verificado"
-        value="cuenta@ejemplo.com"
-        onChange={() => {}}
-        icon={MailIcon}
-        disabled
-      />
-    </div>
-  )
-}
-
-function SwitchFieldRowDemo() {
-  const [notify, setNotify] = useState(true)
-  const [digest, setDigest] = useState(false)
-
-  return (
-    <div className="flex w-full flex-col gap-3">
-      <SwitchFieldRow
-        label="Avisos"
-        description="Recibir un aviso al llegar un cobro"
-        icon={BellIcon}
-        checked={notify}
-        onCheckedChange={setNotify}
-      />
-      <SwitchFieldRow
-        label="Resumen semanal"
-        description="Correo con el resumen de la semana"
-        icon={MailIcon}
-        checked={digest}
-        onCheckedChange={setDigest}
-      />
-      <SwitchFieldRow
-        label="Avisos del sistema"
-        description="No se puede cambiar en este ejemplo"
-        icon={BellIcon}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-      />
-    </div>
-  )
-}
+const GALLERY_ACCENT = "#0f766e"
 
 export const entradasDemos: GalleryDemoMap = {
   input: [
@@ -390,41 +313,6 @@ export const entradasDemos: GalleryDemoMap = {
       ),
     },
   ],
-  "switch-field-row": [
-    {
-      label: "Encendido, apagado y deshabilitado",
-      code: `
-const [notify, setNotify] = useState(true)
-const [digest, setDigest] = useState(false)
-
-<div className="flex w-full flex-col gap-3">
-  <SwitchFieldRow
-    label="Avisos"
-    description="Recibir un aviso al llegar un cobro"
-    icon={BellIcon}
-    checked={notify}
-    onCheckedChange={setNotify}
-  />
-  <SwitchFieldRow
-    label="Resumen semanal"
-    description="Correo con el resumen de la semana"
-    icon={MailIcon}
-    checked={digest}
-    onCheckedChange={setDigest}
-  />
-  <SwitchFieldRow
-    label="Avisos del sistema"
-    description="No se puede cambiar en este ejemplo"
-    icon={BellIcon}
-    checked={false}
-    onCheckedChange={() => {}}
-    disabled
-  />
-</div>
-`,
-      node: <SwitchFieldRowDemo />,
-    },
-  ],
   "input-group": [
     {
       label: "Búsqueda con icono líder",
@@ -445,54 +333,39 @@ const [digest, setDigest] = useState(false)
         </InputGroup>
       ),
     },
-  ],
-  "form-text-field": [
     {
-      label: "Normal, error, contraseña y deshabilitado",
+      label: "Campo de dato con etiqueta y error",
       code: `
-const [name, setName] = useState("Comercio Ejemplo")
-const [email, setEmail] = useState("")
-const [password, setPassword] = useState("clave-de-ejemplo")
-
-<div className="flex w-full flex-col gap-3">
-  <FormTextField
-    label="Nombre"
-    value={name}
-    onChange={setName}
-    icon={StoreIcon}
-  />
-  <FormTextField
-    label="Correo"
-    value={email}
-    onChange={setEmail}
-    icon={MailIcon}
-    type="email"
-    placeholder="nombre@ejemplo.com"
-  />
-  <FormTextField
-    label="Comercio"
-    value=""
-    onChange={() => {}}
-    icon={StoreIcon}
-    error="Escribe el nombre del comercio"
-  />
-  <FormTextField
-    label="Contraseña"
-    value={password}
-    onChange={setPassword}
-    type="password"
-    revealable
-  />
-  <FormTextField
-    label="Correo verificado"
-    value="cuenta@ejemplo.com"
-    onChange={() => {}}
-    icon={MailIcon}
-    disabled
-  />
-</div>
+<Field data-invalid className="w-full max-w-sm gap-0.5">
+  <FieldLabel htmlFor="nombre" className="pl-2 text-sm text-muted-foreground">
+    Nombre
+  </FieldLabel>
+  <InputGroup className="h-10 overflow-hidden px-1">
+    <InputGroupAddon align="inline-start">
+      <StoreIcon className="text-muted-foreground" />
+    </InputGroupAddon>
+    <InputGroupInput id="nombre" aria-invalid />
+  </InputGroup>
+  <FieldError>Escribe el nombre del comercio</FieldError>
+</Field>
 `,
-      node: <FormTextFieldDemo />,
+      node: (
+        <Field data-invalid className="w-full max-w-sm gap-0.5">
+          <FieldLabel
+            htmlFor="gallery-input-group-field"
+            className="pl-2 text-sm text-muted-foreground"
+          >
+            Nombre
+          </FieldLabel>
+          <InputGroup className="h-10 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <StoreIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput id="gallery-input-group-field" aria-invalid />
+          </InputGroup>
+          <FieldError>Escribe el nombre del comercio</FieldError>
+        </Field>
+      ),
     },
   ],
   select: [
@@ -821,6 +694,36 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
         ),
       },
     ],
+    variant: [
+      {
+        label: "plain",
+        node: (
+          <Field className="w-full max-w-sm gap-1">
+            <FieldLabel htmlFor="variant-field-plain">Nombre</FieldLabel>
+            <Input id="variant-field-plain" placeholder="Mercado Central" />
+          </Field>
+        ),
+      },
+      {
+        label: "card",
+        node: (
+          <Field
+            variant="card"
+            orientation="horizontal"
+            className="w-full max-w-sm"
+          >
+            <FieldMedia icon={BellIcon} color={GALLERY_ACCENT} />
+            <FieldContent>
+              <FieldLabel htmlFor="variant-field-card">Avisos</FieldLabel>
+              <FieldDescription>
+                Recibir un aviso al llegar un cobro
+              </FieldDescription>
+            </FieldContent>
+            <Switch id="variant-field-card" defaultChecked />
+          </Field>
+        ),
+      },
+    ],
     states: [
       {
         label: "normal",
@@ -1018,63 +921,6 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
       },
     ],
   },
-  "switch-field-row": {
-    states: [
-      {
-        label: "checked",
-        node: (
-          <SwitchFieldRow
-            label="Avisos"
-            description="Recibir un aviso al llegar un cobro"
-            icon={BellIcon}
-            checked
-            onCheckedChange={() => {}}
-          />
-        ),
-      },
-      {
-        label: "unchecked",
-        node: (
-          <SwitchFieldRow
-            label="Resumen semanal"
-            description="Correo con el resumen de la semana"
-            icon={MailIcon}
-            checked={false}
-            onCheckedChange={() => {}}
-          />
-        ),
-      },
-      {
-        label: "disabled",
-        node: (
-          <SwitchFieldRow
-            label="Avisos del sistema"
-            description="No se puede cambiar"
-            icon={BellIcon}
-            checked={false}
-            onCheckedChange={() => {}}
-            disabled
-          />
-        ),
-      },
-    ],
-    accentColor: [
-      {
-        label: "color del módulo cuando está activo",
-        node: (
-          <SwitchFieldRow
-            label="Avisos"
-            description="Recibir un aviso al llegar un cobro"
-            icon={BellIcon}
-            iconColor="#0f766e"
-            accentColor="#0f766e"
-            checked
-            onCheckedChange={() => {}}
-          />
-        ),
-      },
-    ],
-  },
   "input-group": {
     align: [
       {
@@ -1172,102 +1018,59 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
         ),
       },
     ],
-  },
-  "form-text-field": {
-    states: [
+    "size (Button)": [
       {
-        label: "normal",
+        label: "xs",
         node: (
-          <FormTextField
-            label="Nombre"
-            value="Comercio Ejemplo"
-            onChange={() => {}}
-            icon={StoreIcon}
-          />
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="xs">
+                <SearchIcon />
+                Buscar
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         ),
       },
       {
-        label: "invalid",
+        label: "sm",
         node: (
-          <FormTextField
-            label="Comercio"
-            value=""
-            onChange={() => {}}
-            icon={StoreIcon}
-            error="Escribe el nombre del comercio"
-          />
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="sm">
+                <SearchIcon />
+                Buscar
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         ),
       },
       {
-        label: "disabled",
+        label: "icon-xs",
         node: (
-          <FormTextField
-            label="Correo verificado"
-            value="cuenta@ejemplo.com"
-            onChange={() => {}}
-            icon={MailIcon}
-            disabled
-          />
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-xs" aria-label="Buscar">
+                <SearchIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         ),
       },
       {
-        label: "revealable",
+        label: "icon-sm",
         node: (
-          <FormTextField
-            label="Contraseña"
-            value="clave-de-ejemplo"
-            onChange={() => {}}
-            type="password"
-            revealable
-          />
-        ),
-      },
-    ],
-    type: [
-      {
-        label: "text",
-        node: (
-          <FormTextField
-            label="Nombre"
-            value="Comercio Ejemplo"
-            onChange={() => {}}
-            type="text"
-          />
-        ),
-      },
-      {
-        label: "email",
-        node: (
-          <FormTextField
-            label="Correo"
-            value=""
-            onChange={() => {}}
-            type="email"
-            placeholder="nombre@ejemplo.com"
-          />
-        ),
-      },
-      {
-        label: "password",
-        node: (
-          <FormTextField
-            label="Contraseña"
-            value="clave-de-ejemplo"
-            onChange={() => {}}
-            type="password"
-          />
-        ),
-      },
-      {
-        label: "search",
-        node: (
-          <FormTextField
-            label="Buscar"
-            value=""
-            onChange={() => {}}
-            type="search"
-            placeholder="Buscar etiqueta"
-          />
+          <InputGroup className="h-10 w-full max-w-sm">
+            <InputGroupInput placeholder="Buscar" aria-label="Buscar" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-sm" aria-label="Buscar">
+                <SearchIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         ),
       },
     ],
@@ -1534,6 +1337,38 @@ export const entradasVariantDemos: GalleryVariantDemoMap = {
               <AttachmentDescription>
                 {ATTACHMENT_FILE.description}
               </AttachmentDescription>
+            </AttachmentContent>
+          </Attachment>
+        ),
+      },
+    ],
+    "variant (Media)": [
+      {
+        label: "icon",
+        node: (
+          <Attachment className="w-full max-w-sm">
+            <AttachmentMedia>
+              <FileTextIcon />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>{ATTACHMENT_FILE.title}</AttachmentTitle>
+              <AttachmentDescription>
+                {ATTACHMENT_FILE.description}
+              </AttachmentDescription>
+            </AttachmentContent>
+          </Attachment>
+        ),
+      },
+      {
+        label: "image",
+        node: (
+          <Attachment className="w-full max-w-sm">
+            <AttachmentMedia variant="image">
+              <Image src="/images/image.png" alt="" width={40} height={40} />
+            </AttachmentMedia>
+            <AttachmentContent>
+              <AttachmentTitle>captura.png</AttachmentTitle>
+              <AttachmentDescription>Imagen · 204 KB</AttachmentDescription>
             </AttachmentContent>
           </Attachment>
         ),

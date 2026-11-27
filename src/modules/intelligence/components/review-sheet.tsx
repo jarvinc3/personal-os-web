@@ -33,9 +33,19 @@ import type {
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { DateWheels } from "@/src/shared/components/forms/wheel-picker"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import {
+  SHEET_FOOTER_CLASS,
+  WIDE_SHEET_CONTENT_CLASS,
+} from "@/src/shared/components/sheets/sheet-layout"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Empty,
   EmptyDescription,
@@ -243,30 +253,307 @@ export function ReviewSheet({
   })
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      size="wide"
-      showClose={false}
-      title={message?.subject || "Revisar correo"}
-      description={
-        message
-          ? `${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)} · #${shortMessageId(message.id)}`
-          : undefined
-      }
-      headerAction={
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={closeLabel}
-          onClick={() => onOpenChange(false)}
-        >
-          <X aria-hidden="true" />
-        </Button>
-      }
-      actions={{
-        submit: (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent className={WIDE_SHEET_CONTENT_CLASS}>
+        <SheetHeader
+          title={message?.subject || "Revisar correo"}
+          description={
+            message
+              ? `${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)} · #${shortMessageId(message.id)}`
+              : undefined
+          }
+          actions={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={closeLabel}
+              onClick={() => onOpenChange(false)}
+            >
+              <X aria-hidden="true" />
+            </Button>
+          }
+        />
+        <SheetBody>
+          <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start">
+            <ReviewPreview
+              messageId={messageId}
+              partition={partition}
+              isPending={messageQuery.isPending}
+              isError={messageQuery.isError}
+              subject={message?.subject}
+              fromAddress={message?.fromAddress}
+              receivedAt={message?.receivedAt}
+              sanitizedBody={message?.content?.sanitizedBody}
+              rawBody={message?.content?.rawBody}
+              onRetry={() => void messageQuery.refetch()}
+            />
+            <div className="flex flex-col gap-3">
+              {formHeader}
+              {shortcuts ? <ReviewShortcutHelp /> : null}
+              <FieldGroup className="gap-3">
+                <ReviewLabelFields
+                  fieldId={fieldId}
+                  relevance={values.relevance ?? ""}
+                  semanticType={semanticType}
+                  routes={selectedRoutes}
+                  semanticTypes={SEMANTIC_TYPES}
+                  relevanceError={errors.relevance?.message}
+                  semanticTypeError={errors.semanticType?.message}
+                  onRelevanceChange={(relevance) =>
+                    setValue("relevance", relevance, { shouldDirty: true })
+                  }
+                  onSemanticTypeChange={selectSemanticType}
+                  onToggleRoute={toggleRoute}
+                />
+                {hasTransaction ? (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {semanticType === "FIN_TRANSACTION" ? (
+                      <Field>
+                        <FieldLabel htmlFor={`kind-${fieldId}`}>
+                          <ReceiptText className="size-4" aria-hidden="true" />{" "}
+                          Tipo de transacción
+                        </FieldLabel>
+                        <Select
+                          value={values.kind ?? ""}
+                          onValueChange={(value) =>
+                            setValue("kind", (value ?? "") as TransactionKind, {
+                              shouldDirty: true,
+                              shouldValidate: true,
+                            })
+                          }
+                        >
+                          <SelectTrigger
+                            id={`kind-${fieldId}`}
+                            className="w-full"
+                          >
+                            <ReceiptText
+                              className="size-4"
+                              aria-hidden="true"
+                            />
+                            <SelectValue placeholder="Elige un tipo">
+                              {(value: string | null) =>
+                                reviewSelectLabel(
+                                  value,
+                                  TRANSACTION_KIND_LABELS,
+                                  "Elige un tipo"
+                                )
+                              }
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              {(
+                                Object.entries(TRANSACTION_KIND_LABELS) as [
+                                  TransactionKind,
+                                  string,
+                                ][]
+                              ).map(([kind, label]) => (
+                                <SelectItem key={kind} value={kind}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                        {errors.kind?.message ? (
+                          <FieldError>{errors.kind.message}</FieldError>
+                        ) : null}
+                      </Field>
+                    ) : null}
+                    <Field>
+                      <FieldLabel htmlFor={`amount-${fieldId}`}>
+                        <ReceiptText
+                          data-icon="inline-start"
+                          className="size-4"
+                        />{" "}
+                        Monto (opcional)
+                      </FieldLabel>
+                      <Input
+                        id={`amount-${fieldId}`}
+                        type="number"
+                        min="0"
+                        step="any"
+                        inputMode="decimal"
+                        {...register("amount")}
+                      />
+                      {errors.amount?.message ? (
+                        <FieldError>{errors.amount.message}</FieldError>
+                      ) : null}
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`currency-${fieldId}`}>
+                        <Coins data-icon="inline-start" className="size-4" />{" "}
+                        Moneda (opcional)
+                      </FieldLabel>
+                      <Input
+                        id={`currency-${fieldId}`}
+                        maxLength={3}
+                        placeholder="DOP"
+                        {...register("currency", {
+                          onChange: (event) =>
+                            setValue(
+                              "currency",
+                              event.target.value.toUpperCase()
+                            ),
+                        })}
+                      />
+                      {errors.currency?.message ? (
+                        <FieldError>{errors.currency.message}</FieldError>
+                      ) : null}
+                    </Field>
+                    <WheelField
+                      label="Fecha (opcional)"
+                      valueLabel={
+                        values.transactionDate
+                          ? formatDate(values.transactionDate, formatLocale)
+                          : "Sin fecha"
+                      }
+                      icon={CalendarDays}
+                      footer={(close) => (
+                        <div className="mt-3 flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setValue("transactionDate", "", {
+                                shouldDirty: true,
+                              })
+                              close()
+                            }}
+                          >
+                            <X className="size-4" aria-hidden="true" /> Sin
+                            fecha
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="ml-auto"
+                            disabled={!values.transactionDate}
+                            onClick={close}
+                          >
+                            <Check className="size-4" aria-hidden="true" />{" "}
+                            Listo
+                          </Button>
+                        </div>
+                      )}
+                    >
+                      <DateWheels
+                        value={values.transactionDate ?? ""}
+                        onChange={(next) =>
+                          setValue("transactionDate", next, {
+                            shouldDirty: true,
+                          })
+                        }
+                      />
+                    </WheelField>
+                    <Field>
+                      <FieldLabel htmlFor={`direction-${fieldId}`}>
+                        <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
+                        Dirección (opcional)
+                      </FieldLabel>
+                      <Select
+                        value={values.direction ?? ""}
+                        onValueChange={(value) =>
+                          setValue(
+                            "direction",
+                            (value ?? "") as TransactionDirection,
+                            { shouldDirty: true }
+                          )
+                        }
+                      >
+                        <SelectTrigger
+                          id={`direction-${fieldId}`}
+                          className="w-full"
+                        >
+                          <ArrowLeftRight
+                            className="size-4"
+                            aria-hidden="true"
+                          />
+                          <SelectValue placeholder="Sin dirección">
+                            {(value: string | null) =>
+                              reviewSelectLabel(
+                                value,
+                                TRANSACTION_DIRECTION_LABELS,
+                                "Sin dirección"
+                              )
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            {(
+                              Object.entries(TRANSACTION_DIRECTION_LABELS) as [
+                                TransactionDirection,
+                                string,
+                              ][]
+                            ).map(([direction, label]) => (
+                              <SelectItem key={direction} value={direction}>
+                                {label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`merchant-${fieldId}`}>
+                        <Building2 className="size-4" aria-hidden="true" />{" "}
+                        Comercio (opcional)
+                      </FieldLabel>
+                      <Input
+                        id={`merchant-${fieldId}`}
+                        {...register("merchant")}
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`bank-reference-${fieldId}`}>
+                        <Hash className="size-4" aria-hidden="true" />{" "}
+                        Referencia bancaria (opcional)
+                      </FieldLabel>
+                      <Input
+                        id={`bank-reference-${fieldId}`}
+                        {...register("bankReference")}
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`last4-${fieldId}`}>
+                        <Hash className="size-4" aria-hidden="true" /> Últimos 4
+                        dígitos (opcional)
+                      </FieldLabel>
+                      <Input
+                        id={`last4-${fieldId}`}
+                        inputMode="numeric"
+                        maxLength={4}
+                        {...register("last4")}
+                      />
+                      {errors.last4?.message ? (
+                        <FieldError>{errors.last4.message}</FieldError>
+                      ) : null}
+                    </Field>
+                  </div>
+                ) : null}
+                <Field>
+                  <FieldLabel htmlFor={`notes-${fieldId}`}>
+                    <NotebookText data-icon="inline-start" className="size-4" />{" "}
+                    Nota o motivo del rechazo
+                  </FieldLabel>
+                  <Textarea
+                    id={`notes-${fieldId}`}
+                    {...register("notes")}
+                    placeholder="Obligatoria para Otro o al rechazar"
+                  />
+                  {errors.notes?.message ? (
+                    <FieldError>{errors.notes.message}</FieldError>
+                  ) : null}
+                </Field>
+              </FieldGroup>
+            </div>
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
           <div className="flex w-full gap-2">
             <Button
               type="button"
@@ -310,263 +597,9 @@ export function ReviewSheet({
               Rechazar
             </Button>
           </div>
-        ),
-      }}
-    >
-      <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start">
-        <ReviewPreview
-          messageId={messageId}
-          partition={partition}
-          isPending={messageQuery.isPending}
-          isError={messageQuery.isError}
-          subject={message?.subject}
-          fromAddress={message?.fromAddress}
-          receivedAt={message?.receivedAt}
-          sanitizedBody={message?.content?.sanitizedBody}
-          rawBody={message?.content?.rawBody}
-          onRetry={() => void messageQuery.refetch()}
-        />
-        <div className="flex flex-col gap-3">
-          {formHeader}
-          {shortcuts ? <ReviewShortcutHelp /> : null}
-          <FieldGroup className="gap-3">
-            <ReviewLabelFields
-              fieldId={fieldId}
-              relevance={values.relevance ?? ""}
-              semanticType={semanticType}
-              routes={selectedRoutes}
-              semanticTypes={SEMANTIC_TYPES}
-              relevanceError={errors.relevance?.message}
-              semanticTypeError={errors.semanticType?.message}
-              onRelevanceChange={(relevance) =>
-                setValue("relevance", relevance, { shouldDirty: true })
-              }
-              onSemanticTypeChange={selectSemanticType}
-              onToggleRoute={toggleRoute}
-            />
-            {hasTransaction ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {semanticType === "FIN_TRANSACTION" ? (
-                  <Field>
-                    <FieldLabel htmlFor={`kind-${fieldId}`}>
-                      <ReceiptText className="size-4" aria-hidden="true" /> Tipo
-                      de transacción
-                    </FieldLabel>
-                    <Select
-                      value={values.kind ?? ""}
-                      onValueChange={(value) =>
-                        setValue("kind", (value ?? "") as TransactionKind, {
-                          shouldDirty: true,
-                          shouldValidate: true,
-                        })
-                      }
-                    >
-                      <SelectTrigger id={`kind-${fieldId}`} className="w-full">
-                        <ReceiptText className="size-4" aria-hidden="true" />
-                        <SelectValue placeholder="Elige un tipo">
-                          {(value: string | null) =>
-                            reviewSelectLabel(
-                              value,
-                              TRANSACTION_KIND_LABELS,
-                              "Elige un tipo"
-                            )
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {(
-                            Object.entries(TRANSACTION_KIND_LABELS) as [
-                              TransactionKind,
-                              string,
-                            ][]
-                          ).map(([kind, label]) => (
-                            <SelectItem key={kind} value={kind}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    {errors.kind?.message ? (
-                      <FieldError>{errors.kind.message}</FieldError>
-                    ) : null}
-                  </Field>
-                ) : null}
-                <Field>
-                  <FieldLabel htmlFor={`amount-${fieldId}`}>
-                    <ReceiptText data-icon="inline-start" className="size-4" />{" "}
-                    Monto (opcional)
-                  </FieldLabel>
-                  <Input
-                    id={`amount-${fieldId}`}
-                    type="number"
-                    min="0"
-                    step="any"
-                    inputMode="decimal"
-                    {...register("amount")}
-                  />
-                  {errors.amount?.message ? (
-                    <FieldError>{errors.amount.message}</FieldError>
-                  ) : null}
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`currency-${fieldId}`}>
-                    <Coins data-icon="inline-start" className="size-4" /> Moneda
-                    (opcional)
-                  </FieldLabel>
-                  <Input
-                    id={`currency-${fieldId}`}
-                    maxLength={3}
-                    placeholder="DOP"
-                    {...register("currency", {
-                      onChange: (event) =>
-                        setValue("currency", event.target.value.toUpperCase()),
-                    })}
-                  />
-                  {errors.currency?.message ? (
-                    <FieldError>{errors.currency.message}</FieldError>
-                  ) : null}
-                </Field>
-                <WheelField
-                  label="Fecha (opcional)"
-                  valueLabel={
-                    values.transactionDate
-                      ? formatDate(values.transactionDate, formatLocale)
-                      : "Sin fecha"
-                  }
-                  icon={CalendarDays}
-                  footer={(close) => (
-                    <div className="mt-3 flex items-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setValue("transactionDate", "", { shouldDirty: true })
-                          close()
-                        }}
-                      >
-                        <X className="size-4" aria-hidden="true" /> Sin fecha
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        className="ml-auto"
-                        disabled={!values.transactionDate}
-                        onClick={close}
-                      >
-                        <Check className="size-4" aria-hidden="true" /> Listo
-                      </Button>
-                    </div>
-                  )}
-                >
-                  <DateWheels
-                    value={values.transactionDate ?? ""}
-                    onChange={(next) =>
-                      setValue("transactionDate", next, { shouldDirty: true })
-                    }
-                  />
-                </WheelField>
-                <Field>
-                  <FieldLabel htmlFor={`direction-${fieldId}`}>
-                    <ArrowLeftRight className="size-4" aria-hidden="true" />{" "}
-                    Dirección (opcional)
-                  </FieldLabel>
-                  <Select
-                    value={values.direction ?? ""}
-                    onValueChange={(value) =>
-                      setValue(
-                        "direction",
-                        (value ?? "") as TransactionDirection,
-                        { shouldDirty: true }
-                      )
-                    }
-                  >
-                    <SelectTrigger
-                      id={`direction-${fieldId}`}
-                      className="w-full"
-                    >
-                      <ArrowLeftRight className="size-4" aria-hidden="true" />
-                      <SelectValue placeholder="Sin dirección">
-                        {(value: string | null) =>
-                          reviewSelectLabel(
-                            value,
-                            TRANSACTION_DIRECTION_LABELS,
-                            "Sin dirección"
-                          )
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {(
-                          Object.entries(TRANSACTION_DIRECTION_LABELS) as [
-                            TransactionDirection,
-                            string,
-                          ][]
-                        ).map(([direction, label]) => (
-                          <SelectItem key={direction} value={direction}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`merchant-${fieldId}`}>
-                    <Building2 className="size-4" aria-hidden="true" /> Comercio
-                    (opcional)
-                  </FieldLabel>
-                  <Input id={`merchant-${fieldId}`} {...register("merchant")} />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`bank-reference-${fieldId}`}>
-                    <Hash className="size-4" aria-hidden="true" /> Referencia
-                    bancaria (opcional)
-                  </FieldLabel>
-                  <Input
-                    id={`bank-reference-${fieldId}`}
-                    {...register("bankReference")}
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor={`last4-${fieldId}`}>
-                    <Hash className="size-4" aria-hidden="true" /> Últimos 4
-                    dígitos (opcional)
-                  </FieldLabel>
-                  <Input
-                    id={`last4-${fieldId}`}
-                    inputMode="numeric"
-                    maxLength={4}
-                    {...register("last4")}
-                  />
-                  {errors.last4?.message ? (
-                    <FieldError>{errors.last4.message}</FieldError>
-                  ) : null}
-                </Field>
-              </div>
-            ) : null}
-            <Field>
-              <FieldLabel htmlFor={`notes-${fieldId}`}>
-                <NotebookText data-icon="inline-start" className="size-4" />{" "}
-                Nota o motivo del rechazo
-              </FieldLabel>
-              <Textarea
-                id={`notes-${fieldId}`}
-                {...register("notes")}
-                placeholder="Obligatoria para Otro o al rechazar"
-              />
-              {errors.notes?.message ? (
-                <FieldError>{errors.notes.message}</FieldError>
-              ) : null}
-            </Field>
-          </FieldGroup>
-        </div>
-      </div>
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

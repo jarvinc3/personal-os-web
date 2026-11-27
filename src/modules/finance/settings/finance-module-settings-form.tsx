@@ -3,6 +3,7 @@
 import { FinanceIntegritySettingsSection } from "@/src/modules/finance/integrity"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
+import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { FINANCE_DASHBOARD_PERIOD_OPTIONS } from "@/src/modules/finance/shared/lib/dashboard-period"
 import { ModuleSheetEnableRow } from "@/src/modules/settings/components/profile-ui"
 import { SETTINGS_SHEET_KEYS, WipeDataSheet } from "@/src/modules/settings"
@@ -13,13 +14,21 @@ import { useProfileSheetFormSync } from "@/src/modules/settings/hooks/use-profil
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
 import { findAppBranches } from "@/src/modules/settings/lib/wipe-branches"
 import { DATA_APP } from "@/src/modules/settings/types/wipe.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import {
   SettingsRow,
   SettingsSection,
 } from "@/src/shared/components/settings/settings-section"
 import { FormScreen } from "@/src/shared/components/forms/form-screen"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { getModule } from "@/src/shared/constants/module-registry"
@@ -39,6 +48,7 @@ import {
   ScanEyeIcon,
   Tags,
   Trash2,
+  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -116,15 +126,23 @@ function FinanceSettingsSheet({
   const sheet = FINANCE_SETTINGS_SHEETS[id]
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      title={sheet.title}
-      description={sheet.description}
-    >
-      {children}
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title={sheet.title} description={sheet.description} />
+        <SheetBody>{children}</SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
@@ -143,6 +161,8 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
   const financeBranches = findAppBranches(branchesQuery.data, DATA_APP.FINANCE)
   const accountsQuery = useAccounts(isModuleEnabled)
   const accounts = accountsQuery.data ?? []
+  const institutionsQuery = useInstitutions(isModuleEnabled)
+  const institutions = institutionsQuery.data ?? []
   const moneyDisplay = {
     currency: config.baseCurrency,
     showCents: config.display.showCents,
@@ -395,6 +415,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
       >
         <MovementDefaultsSection
           control={control}
+          institutions={institutions}
           accounts={accounts}
           display={moneyDisplay}
         />
@@ -408,6 +429,7 @@ export function FinanceModuleSettingsForm({ onDone }: { onDone: () => void }) {
         <FixedIncomeSection
           control={control}
           baseCurrency={config.baseCurrency}
+          institutions={institutions}
           accounts={accounts}
           display={moneyDisplay}
         />

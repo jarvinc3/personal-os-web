@@ -1,6 +1,11 @@
 "use client"
 
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import type { FinanceMerchantSuggestion } from "@/src/modules/finance/shared/types/entities"
 import type { TransactionFormValues } from "@/src/modules/finance/transactions/lib/transaction-form"
 import type { MovementType } from "@/src/modules/finance/transactions/lib/transaction-form-values"
@@ -30,14 +35,36 @@ export function TransactionMerchantField({
       name="merchant"
       render={({ field }) => (
         <div className="flex flex-col gap-1">
-          <FormTextField
-            label={type === "CREDIT" ? "Origen" : "Comercio"}
-            icon={type === "CREDIT" ? HandCoinsIcon : StoreIcon}
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.merchant?.message}
-          />
+          <Field
+            data-invalid={errors.merchant ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor="transaction-merchant"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              {type === "CREDIT" ? "Origen" : "Comercio"}
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                {type === "CREDIT" ? (
+                  <HandCoinsIcon className="text-muted-foreground" />
+                ) : (
+                  <StoreIcon className="text-muted-foreground" />
+                )}
+              </InputGroupAddon>
+              <InputGroupInput
+                id="transaction-merchant"
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                onBlur={field.onBlur}
+                aria-invalid={errors.merchant ? true : undefined}
+              />
+            </InputGroup>
+            {errors.merchant?.message ? (
+              <FieldError>{errors.merchant.message}</FieldError>
+            ) : null}
+          </Field>
           {suggestion &&
           suggestion.name.trim().toLowerCase() !==
             field.value.trim().toLowerCase() ? (

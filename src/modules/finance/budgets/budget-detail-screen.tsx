@@ -35,10 +35,21 @@ import {
   FINANCE_BUDGET_PERIOD_LABEL,
   type FinanceBudget,
 } from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
   EmptyDescription,
@@ -59,6 +70,7 @@ import {
   MoreVerticalIcon,
   PencilIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -354,14 +366,44 @@ function BudgetDetailScreenBody({ budgetId }: FinanceBudgetDetailProps) {
         ]}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={budgetTitleText}
-        pending={deleteBudget.isPending}
-        consequences="Deja de seguir el gasto de esa categoría. No se puede deshacer."
-        onConfirm={() => void onDeleteBudget()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !deleteBudget.isPending) {
+            setConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{budgetTitleText}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deja de seguir el gasto de esa categoría. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteBudget.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteBudget.isPending}
+              onClick={() => void onDeleteBudget()}
+            >
+              {deleteBudget.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteBudget.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <BudgetSheet
         open={openBudgetSheet}

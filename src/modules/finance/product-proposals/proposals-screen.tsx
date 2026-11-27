@@ -34,7 +34,17 @@ import type {
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import {
   SummaryItem,
   SummarySection,
@@ -63,6 +73,7 @@ import {
   MailSearchIcon,
   ScanSearchIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
@@ -293,22 +304,47 @@ function ProductProposalsScreenBody() {
         onChange={changeStatus}
       />
 
-      <ConfirmDialog
+      <AlertDialog
         open={Boolean(pendingDiscard)}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !discardMutation.isPending) {
             setPendingDiscardId(null)
           }
         }}
-        tone="danger"
-        icon={Trash2Icon}
-        title={`¿Descartar ${pendingDiscard?.draft.name ?? "la propuesta"}?`}
-        description="No se crea ningún producto. La propuesta queda fuera de la lista y no se puede recuperar."
-        confirmLabel="Descartar"
-        confirmIcon={Trash2Icon}
-        pending={discardMutation.isPending}
-        onConfirm={() => void discardPending()}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Descartar {pendingDiscard?.draft.name ?? "la propuesta"}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              No se crea ningún producto. La propuesta queda fuera de la lista y
+              no se puede recuperar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={discardMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={discardMutation.isPending}
+              onClick={() => void discardPending()}
+            >
+              {discardMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -12,10 +12,10 @@ Antes de pintar: ¿esta pantalla **es** la acción, o **contiene** varias apps? 
 **Hacer**
 
 - Un hero: estado + un número/CTA. Título solo en el shell header.
-- Secundario (recordatorio, historial, ayuda, ajustes) en `BottomSheet` desde iconos de chrome. Popover solo para un ajuste puntual.
+- Secundario (recordatorio, historial, ayuda, ajustes) en una hoja (`Drawer` con `SheetHeader` y `SheetBody`) desde iconos de chrome. Popover solo para un ajuste puntual.
 - Borrador hasta **Guardar** / **Aceptar**. **Cerrar** descarta. Destructive explícito (**Quitar** / **Limpiar**).
 - Estado activo visible en la página (chip, punto en el icono). No hace falta abrir el sheet para saber si está on.
-- Evento (“llegó”, “listo”, “falló”) → `BottomSheet` `variant="floating"`, poco texto, visual fuerte.
+- Evento (“llegó”, “listo”, “falló”) → hoja flotante (`Drawer` con `FLOATING_SHEET_CONTENT_CLASS`), poco texto, visual fuerte.
 - El `*client.tsx` compone. Partir archivo si la pieza tiene trabajo propio (prompt, ruedas), no para reenviar 12 props.
 
 **No hacer**

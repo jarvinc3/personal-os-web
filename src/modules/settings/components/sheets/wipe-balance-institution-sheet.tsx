@@ -13,8 +13,17 @@ import {
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance"
 import type { FinanceBalanceSheetSlice } from "@/src/modules/finance"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import { XIcon } from "lucide-react"
 
 const ALL_INSTITUTIONS_COLOR = "#0f172a"
 
@@ -84,54 +93,68 @@ export function WipeBalanceInstitutionSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Institución"
-      description="Elige de quién se ponen los saldos en cero."
-    >
-      {loading ? (
-        <div className="flex flex-col gap-2" aria-hidden>
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-16 w-full rounded-2xl" />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <InstitutionWalletCard
-            card={buildPlainInstitutionCard({
-              name: "Todas las instituciones",
-              color: ALL_INSTITUTIONS_COLOR,
-              balanceAmount: balanceLabel(
-                balanceSheetQuery.data?.global,
-                display
-              ),
-            })}
-            variant="compact"
-            detail="balance"
-            selected={value === allValue}
-            onPress={() => choose(allValue)}
-          />
-          {institutions.map((institution) => {
-            const position = positions.get(institution.id)
-            return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Institución"
+          description="Elige de quién se ponen los saldos en cero."
+        />
+        <SheetBody>
+          {loading ? (
+            <div className="flex flex-col gap-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-16 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
               <InstitutionWalletCard
-                key={institution.id}
-                card={buildInstitutionCardFromCatalog({
-                  institution,
-                  balanceLabel: "Balance",
-                  balanceAmount: balanceLabel(position, display),
-                  balanceLines: positionBalanceLines(position, display),
+                card={buildPlainInstitutionCard({
+                  name: "Todas las instituciones",
+                  color: ALL_INSTITUTIONS_COLOR,
+                  balanceAmount: balanceLabel(
+                    balanceSheetQuery.data?.global,
+                    display
+                  ),
                 })}
                 variant="compact"
                 detail="balance"
-                selected={value === institution.id}
-                onPress={() => choose(institution.id)}
+                selected={value === allValue}
+                onPress={() => choose(allValue)}
               />
-            )
-          })}
-        </div>
-      )}
-    </BottomSheet>
+              {institutions.map((institution) => {
+                const position = positions.get(institution.id)
+                return (
+                  <InstitutionWalletCard
+                    key={institution.id}
+                    card={buildInstitutionCardFromCatalog({
+                      institution,
+                      balanceLabel: "Balance",
+                      balanceAmount: balanceLabel(position, display),
+                      balanceLines: positionBalanceLines(position, display),
+                    })}
+                    variant="compact"
+                    detail="balance"
+                    selected={value === institution.id}
+                    onPress={() => choose(institution.id)}
+                  />
+                )
+              })}
+            </div>
+          )}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

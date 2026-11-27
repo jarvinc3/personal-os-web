@@ -13,8 +13,6 @@ import {
   InstitutionProductTabs,
   type InstitutionProductTab,
 } from "@/src/modules/finance/institutions/components/institution-product-tabs"
-import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
@@ -52,11 +50,30 @@ import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { Building2Icon, MoreVerticalIcon } from "lucide-react"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
+import {
+  ArchiveIcon,
+  Building2Icon,
+  MoreVerticalIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 
@@ -462,27 +479,96 @@ function InstitutionDetailScreenBody({
         options={options}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={institution.name}
-        pending={deleteInstitution.isPending}
-        consequences="Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se puede deshacer."
-        onConfirm={() => void onDeleteInstitution()}
-        archive={{
-          label: "¿Solo ocultarla? Archivar",
-          pending: archiveInstitution.isPending,
-          onArchive: () => void onArchiveInstitution(),
+        onOpenChange={(open) => {
+          if (!open && !deleteInstitution.isPending) {
+            setConfirmOpen(false)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{institution.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan cuentas, tarjetas, correos ligados y préstamos. No se
+              puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={
+              deleteInstitution.isPending || archiveInstitution.isPending
+            }
+            className={cn("justify-start", PRESSABLE_CLASS)}
+            onClick={() => void onArchiveInstitution()}
+          >
+            <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+            ¿Solo ocultarla? Archivar
+          </Button>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteInstitution.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteInstitution.isPending}
+              onClick={() => void onDeleteInstitution()}
+            >
+              {deleteInstitution.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteInstitution.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ArchiveRecordDialog
+      <AlertDialog
         open={archiveConfirmOpen}
-        onOpenChange={setArchiveConfirmOpen}
-        recordName={institution.name}
-        pending={archiveInstitution.isPending}
-        onConfirm={() => void onArchiveInstitution()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !archiveInstitution.isPending) {
+            setArchiveConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ArchiveIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Archivar “{institution.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deja de aparecer en las listas. Puedes restaurarlo desde la
+              papelera de reciclaje o con Deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archiveInstitution.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={archiveInstitution.isPending}
+              onClick={() => void onArchiveInstitution()}
+            >
+              {archiveInstitution.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {archiveInstitution.isPending ? "Archivando..." : "Archivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AccountSheet
         open={openAccountSheet}

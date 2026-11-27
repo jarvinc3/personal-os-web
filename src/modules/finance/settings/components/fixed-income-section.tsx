@@ -1,5 +1,13 @@
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import { DayListField } from "@/src/shared/components/forms/day-list-field"
 import {
   SummaryGroup,
@@ -12,7 +20,10 @@ import { Controller, useWatch, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
 import { AccountChoiceList } from "./account-choice-list"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -24,6 +35,7 @@ const FREQUENCY_OPTIONS = [
 type FixedIncomeSectionProps = {
   control: Control<FinanceModuleFormValues>
   baseCurrency: string
+  institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   display: FinanceMoneyDisplay
 }
@@ -31,6 +43,7 @@ type FixedIncomeSectionProps = {
 export function FixedIncomeSection({
   control,
   baseCurrency,
+  institutions,
   accounts,
   display,
 }: FixedIncomeSectionProps) {
@@ -45,15 +58,26 @@ export function FixedIncomeSection({
         control={control}
         name="fixedIncomeEnabled"
         render={({ field }) => (
-          <SwitchFieldRow
-            icon={HandCoins}
-            iconColor={MODULE_ACCENT}
-            accentColor={MODULE_ACCENT}
-            label="Tengo un ingreso fijo"
-            description="Se usa como monto sugerido cuando llega una nómina sin cifra."
-            checked={field.value}
-            onCheckedChange={field.onChange}
-          />
+          <Field
+            variant="card"
+            orientation="horizontal"
+            style={activeRowStyle(MODULE_ACCENT, field.value)}
+          >
+            <FieldMedia icon={HandCoins} color={MODULE_ACCENT} />
+            <FieldContent>
+              <FieldLabel htmlFor={field.name}>
+                Tengo un ingreso fijo
+              </FieldLabel>
+              <FieldDescription className="text-xs">
+                Se usa como monto sugerido cuando llega una nómina sin cifra.
+              </FieldDescription>
+            </FieldContent>
+            <Switch
+              id={field.name}
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          </Field>
         )}
       />
       {fixedIncomeEnabled ? (
@@ -111,6 +135,8 @@ export function FixedIncomeSection({
               name="fixedIncomeAccountId"
               render={({ field }) => (
                 <AccountChoiceList
+                  pickerKey="fixed-income-account"
+                  institutions={institutions}
                   accounts={accounts}
                   display={display}
                   selectedId={field.value}

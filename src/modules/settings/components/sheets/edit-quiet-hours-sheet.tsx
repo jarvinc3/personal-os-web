@@ -2,8 +2,15 @@
 
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { WheelField } from "@/src/shared/components/forms/wheel-field"
@@ -13,7 +20,7 @@ import {
   formatTimeForDisplay,
   normalizeTimeToApi,
 } from "@/src/shared/lib/date-format"
-import { ClockFadingIcon, ClockIcon } from "lucide-react"
+import { ClockFadingIcon, ClockIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
 
@@ -71,54 +78,67 @@ export function EditQuietHoursSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      title="Horario silencioso"
-      description="Fuera de este rango se respetan los canales globales de notificación."
-      actions={{
-        submit: (
-          <Button
-            disabled={!isDirty || updateProfileMutation.isPending}
-            className="flex-1"
-            onClick={() => void handleSave()}
-          >
-            {updateProfileMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : null}
-            {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Horario" icon={ClockFadingIcon}>
-        <WheelField
-          label="Inicio"
-          valueLabel={formatTimeForDisplay(start, locale)}
-          icon={ClockIcon}
-          disabled={updateProfileMutation.isPending}
-        >
-          <TimePairWheels
-            value={start}
-            onChange={setStart}
-            minuteStep={5}
-            disabled={updateProfileMutation.isPending}
-          />
-        </WheelField>
-        <WheelField
-          label="Fin"
-          valueLabel={formatTimeForDisplay(end, locale)}
-          icon={ClockIcon}
-          disabled={updateProfileMutation.isPending}
-        >
-          <TimePairWheels
-            value={end}
-            onChange={setEnd}
-            minuteStep={5}
-            disabled={updateProfileMutation.isPending}
-          />
-        </WheelField>
-      </SummarySection>
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Horario silencioso"
+          description="Fuera de este rango se respetan los canales globales de notificación."
+          pending={updateProfileMutation.isPending}
+        />
+        <SheetBody pending={updateProfileMutation.isPending}>
+          <SummarySection title="Horario" icon={ClockFadingIcon}>
+            <WheelField
+              label="Inicio"
+              valueLabel={formatTimeForDisplay(start, locale)}
+              icon={ClockIcon}
+              disabled={updateProfileMutation.isPending}
+            >
+              <TimePairWheels
+                value={start}
+                onChange={setStart}
+                minuteStep={5}
+                disabled={updateProfileMutation.isPending}
+              />
+            </WheelField>
+            <WheelField
+              label="Fin"
+              valueLabel={formatTimeForDisplay(end, locale)}
+              icon={ClockIcon}
+              disabled={updateProfileMutation.isPending}
+            >
+              <TimePairWheels
+                value={end}
+                onChange={setEnd}
+                minuteStep={5}
+                disabled={updateProfileMutation.isPending}
+              />
+            </WheelField>
+          </SummarySection>
+        </SheetBody>
+        {!updateProfileMutation.isPending ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              disabled={!isDirty || updateProfileMutation.isPending}
+              className="flex-1"
+              onClick={() => void handleSave()}
+            >
+              {updateProfileMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

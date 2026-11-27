@@ -8,11 +8,24 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { cn } from "@/src/shared/lib/utils"
-import { CheckIcon, GlobeIcon, SearchIcon } from "lucide-react"
+import { CheckIcon, GlobeIcon, SearchIcon, XIcon } from "lucide-react"
 import { useMemo, useState } from "react"
 
 /** Every zone the browser knows, plus the current one when it lists an alias. */
@@ -54,54 +67,74 @@ export function EditTimeZoneSheet({ open, onOpenChange }: SettingsSheetProps) {
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Zona horaria"
-      description="Las fechas y horas de Finanzas se muestran en esta zona."
-    >
-      <FormTextField
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar una zona"
-        icon={SearchIcon}
-        ariaLabel="Buscar una zona horaria"
-      />
-      <ul className="flex max-h-80 flex-col overflow-y-auto">
-        {visible.map((zone) => {
-          const isCurrent = zone === current
-          return (
-            <li key={zone}>
-              <button
-                type="button"
-                onClick={() => choose(zone)}
-                aria-current={isCurrent ? "true" : undefined}
-                className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2.5 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
-                  isCurrent ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                <span className="flex min-w-0 items-center gap-2">
-                  <GlobeIcon className="size-4 shrink-0" aria-hidden />
-                  <span className="truncate">{zone}</span>
-                </span>
-                {isCurrent ? (
-                  <CheckIcon className="size-4 shrink-0" aria-hidden />
-                ) : null}
-              </button>
-            </li>
-          )
-        })}
-        {visible.length === 0 ? (
-          <li>
-            <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-              <EmptyHeader>
-                <EmptyTitle>Ninguna zona coincide</EmptyTitle>
-              </EmptyHeader>
-            </Empty>
-          </li>
-        ) : null}
-      </ul>
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Zona horaria"
+          description="Las fechas y horas de Finanzas se muestran en esta zona."
+        />
+        <SheetBody>
+          <Field className="gap-0.5">
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <SearchIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar una zona"
+                aria-label="Buscar una zona horaria"
+              />
+            </InputGroup>
+          </Field>
+          <ul className="flex max-h-80 flex-col overflow-y-auto">
+            {visible.map((zone) => {
+              const isCurrent = zone === current
+              return (
+                <li key={zone}>
+                  <button
+                    type="button"
+                    onClick={() => choose(zone)}
+                    aria-current={isCurrent ? "true" : undefined}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2.5 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+                      isCurrent ? "text-foreground" : "text-muted-foreground"
+                    )}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <GlobeIcon className="size-4 shrink-0" aria-hidden />
+                      <span className="truncate">{zone}</span>
+                    </span>
+                    {isCurrent ? (
+                      <CheckIcon className="size-4 shrink-0" aria-hidden />
+                    ) : null}
+                  </button>
+                </li>
+              )
+            })}
+            {visible.length === 0 ? (
+              <li>
+                <Empty className={EMPTY_COMPACT_CLASS_NAME}>
+                  <EmptyHeader>
+                    <EmptyTitle>Ninguna zona coincide</EmptyTitle>
+                  </EmptyHeader>
+                </Empty>
+              </li>
+            ) : null}
+          </ul>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

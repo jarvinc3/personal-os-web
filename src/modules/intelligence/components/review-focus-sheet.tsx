@@ -6,8 +6,15 @@ import type {
   AiHumanVerificationInput,
   AiReviewQueueItem,
 } from "@/src/modules/intelligence/types/intelligence.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Empty,
   EmptyDescription,
@@ -15,7 +22,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react"
+import { CheckCircle2, ChevronLeft, ChevronRight, XIcon } from "lucide-react"
 
 type ReviewFocusPending = {
   messageId: string | undefined
@@ -128,33 +135,49 @@ export function ReviewFocusSheet({
         shortcuts={{ onNext: goToNext, onPrevious: goToPrevious }}
         closeLabel="Salir del modo foco"
       />
-      <BottomSheet
-        open={waitingForMore}
-        onOpenChange={onOpenChange}
-        title="Cargando pendientes"
-        pending
-      >
-        <div />
-      </BottomSheet>
-      <BottomSheet
+      <Drawer open={waitingForMore} onOpenChange={onOpenChange}>
+        <DrawerContent>
+          <SheetHeader title="Cargando pendientes" pending />
+          <SheetBody pending>
+            <div />
+          </SheetBody>
+        </DrawerContent>
+      </Drawer>
+      <Drawer
         open={open && current === undefined && !waitingForMore}
         onOpenChange={onOpenChange}
-        title="Cola terminada"
-        description="No quedan correos pendientes con los filtros activos."
-        closeLabel="Salir"
       >
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <CheckCircle2 aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>Revisaste todos los pendientes</EmptyTitle>
-            <EmptyDescription>
-              Los correos nuevos aparecerán aquí cuando lleguen.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </BottomSheet>
+        <DrawerContent>
+          <SheetHeader
+            title="Cola terminada"
+            description="No quedan correos pendientes con los filtros activos."
+          />
+          <SheetBody>
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <CheckCircle2 aria-hidden="true" />
+                </EmptyMedia>
+                <EmptyTitle>Revisaste todos los pendientes</EmptyTitle>
+                <EmptyDescription>
+                  Los correos nuevos aparecerán aquí cuando lleguen.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Salir
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </>
   )
 }

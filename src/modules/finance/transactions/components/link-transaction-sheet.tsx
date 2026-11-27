@@ -18,8 +18,15 @@ import {
   formatFinanceMoney,
   type FinanceMoneyDisplay,
 } from "@/src/modules/finance/shared/lib/money"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
@@ -30,7 +37,7 @@ import {
 } from "@/src/shared/components/ui/tabs"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
-import { ChevronLeftIcon } from "lucide-react"
+import { ChevronLeftIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 const LINK_TABS = {
@@ -165,92 +172,108 @@ export function LinkTransactionSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Vincular movimiento"
-      description="No crea dinero nuevo: registra el efecto en la planificación."
-    >
-      <Tabs {...tabsBehavior}>
-        <TabsList className="w-full">
-          <TabsTrigger value={LINK_TABS.installment}>Cuota</TabsTrigger>
-          <TabsTrigger value={LINK_TABS.receivable}>Cobro</TabsTrigger>
-          <TabsTrigger value={LINK_TABS.goal}>Meta</TabsTrigger>
-        </TabsList>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Vincular movimiento"
+          description="No crea dinero nuevo: registra el efecto en la planificación."
+        />
+        <SheetBody>
+          <Tabs {...tabsBehavior}>
+            <TabsList className="w-full">
+              <TabsTrigger value={LINK_TABS.installment}>Cuota</TabsTrigger>
+              <TabsTrigger value={LINK_TABS.receivable}>Cobro</TabsTrigger>
+              <TabsTrigger value={LINK_TABS.goal}>Meta</TabsTrigger>
+            </TabsList>
 
-        <TabsContent
-          value={LINK_TABS.installment}
-          className="flex flex-col gap-2 pt-3"
-        >
-          {selectedLoan ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="justify-start"
-              onClick={() => setLoanId(null)}
+            <TabsContent
+              value={LINK_TABS.installment}
+              className="flex flex-col gap-2 pt-3"
             >
-              <ChevronLeftIcon className="size-4 shrink-0" />
-              {selectedLoan.lenderName}
-            </Button>
-          ) : null}
+              {selectedLoan ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() => setLoanId(null)}
+                >
+                  <ChevronLeftIcon className="size-4 shrink-0" />
+                  {selectedLoan.lenderName}
+                </Button>
+              ) : null}
 
-          {renderInstallmentTargets()}
-        </TabsContent>
+              {renderInstallmentTargets()}
+            </TabsContent>
 
-        <TabsContent
-          value={LINK_TABS.receivable}
-          className="flex flex-col gap-2 pt-3"
-        >
-          {receivables.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Sin cobros abiertos.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {receivables.map((receivable) => (
-                <ReceivableCard
-                  key={receivable.id}
-                  source={{ kind: "receivable", receivable }}
-                  display={display}
-                  variant="compact"
-                  onPress={() =>
-                    submit({
-                      kind: "RECEIVABLE_PAYMENT",
-                      receivableId: receivable.id,
-                    })
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
+            <TabsContent
+              value={LINK_TABS.receivable}
+              className="flex flex-col gap-2 pt-3"
+            >
+              {receivables.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Sin cobros abiertos.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {receivables.map((receivable) => (
+                    <ReceivableCard
+                      key={receivable.id}
+                      source={{ kind: "receivable", receivable }}
+                      display={display}
+                      variant="compact"
+                      onPress={() =>
+                        submit({
+                          kind: "RECEIVABLE_PAYMENT",
+                          receivableId: receivable.id,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
 
-        <TabsContent
-          value={LINK_TABS.goal}
-          className="flex flex-col gap-2 pt-3"
-        >
-          {goals.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Sin metas abiertas.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {goals.map((goal) => (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  display={display}
-                  variant="compact"
-                  onPress={() =>
-                    submit({
-                      kind: "SAVINGS_CONTRIBUTION",
-                      goalId: goal.id,
-                    })
-                  }
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </BottomSheet>
+            <TabsContent
+              value={LINK_TABS.goal}
+              className="flex flex-col gap-2 pt-3"
+            >
+              {goals.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Sin metas abiertas.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {goals.map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      display={display}
+                      variant="compact"
+                      onPress={() =>
+                        submit({
+                          kind: "SAVINGS_CONTRIBUTION",
+                          goalId: goal.id,
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

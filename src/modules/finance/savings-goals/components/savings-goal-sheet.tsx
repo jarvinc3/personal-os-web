@@ -2,10 +2,7 @@
 
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSuggestionRow,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSuggestionRow } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -32,12 +29,28 @@ import {
 import { todayDateInput } from "@/src/modules/finance/shared/lib/ledger-form"
 import { buildSavingsGoalBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import type { FinanceSavingsGoal } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -49,6 +62,7 @@ import {
   NotebookPenIcon,
   PiggyBankIcon,
   TargetIcon,
+  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -182,191 +196,238 @@ export function SavingsGoalSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.savings} />}
-        pending={pending}
-        title={isEdit ? "Editar meta" : "Nueva meta"}
-        description="Se marca como completada cuando lo ahorrado alcanza la meta."
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={isPending}
-              className="flex-1"
-              onClick={onSubmit}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isEdit ? "Editar meta" : "Nueva meta"}
+            description="Se marca como completada cuando lo ahorrado alcanza la meta."
+            pending={pending}
+            actions={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.savings} />}
+          />
+          <SheetBody pending={pending}>
+            <SummarySection title="Meta de ahorro" icon={PiggyBankIcon}>
+              {goal ? (
+                <FieldDescription className="text-xs">
+                  {goal.isCompleted ? "Completada" : "En curso"}
+                  {goal.isCompleted && goal.completedAt
+                    ? ` · ${formatCalendarDate(goal.completedAt, display.locale)}`
+                    : ""}
+                </FieldDescription>
+              ) : null}
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.name ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="goal-name"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Nombre
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <TargetIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="goal-name"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        placeholder=""
+                        aria-invalid={errors.name ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.name?.message ? (
+                      <FieldError>{errors.name.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="accountId"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-sm text-muted-foreground">
+                      Cuenta de ahorro
+                    </FieldLabel>
+                    <DestinationTrigger
+                      destination={
+                        field.value
+                          ? encodeLedgerTarget("account", field.value)
+                          : CATALOG_NONE
+                      }
+                      accounts={activeAccounts}
+                      cards={[]}
+                      display={display}
+                      placeholder="Elige la cuenta"
+                      onClick={() => openPicker("account")}
+                    />
+                    {errors.accountId?.message ? (
+                      <FieldError>{errors.accountId.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <FieldDescription className="text-xs">
+                Elige la cuenta donde guardas este dinero.
+              </FieldDescription>
+            </SummarySection>
+
+            <SummarySection title="Progreso" icon={TargetIcon}>
+              <Controller
+                control={control}
+                name="targetAmount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="savings-goal-target"
+                    label="Meta"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("targetAmount")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.targetAmount?.message}
+                    currency={currency || defaultCurrency}
+                    onCurrencyPress={() => openPicker("currency")}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="currentAmount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="savings-goal-saved"
+                    label="Ahorrado"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("currentAmount")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.currentAmount?.message}
+                    currency={currency || defaultCurrency}
+                    disabled={isEdit}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="targetDate"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Fecha objetivo"
+                    value={field.value}
+                    onChange={field.onChange}
+                    minDate={todayDateInput()}
+                    minYear={new Date().getFullYear()}
+                    optional
+                  />
+                )}
+              />
+              {suggestion ? (
+                <FinanceSuggestionRow>
+                  {`${formatFinanceMoney(suggestion.monthlyAmount, display)} / mes · ${suggestion.months} meses · ${Math.round(suggestion.coveredPct)}% cubierto`}
+                </FinanceSuggestionRow>
+              ) : null}
+            </SummarySection>
+
+            <SummarySection
+              title="Detalles opcionales"
+              icon={CircleAlert}
+              collapsible
             >
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              Guardar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Meta de ahorro" icon={PiggyBankIcon}>
-          {goal ? (
-            <FinanceHelpText>
-              {goal.isCompleted ? "Completada" : "En curso"}
-              {goal.isCompleted && goal.completedAt
-                ? ` · ${formatCalendarDate(goal.completedAt, display.locale)}`
-                : ""}
-            </FinanceHelpText>
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.description ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="goal-description"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Descripción
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <NotebookPenIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="goal-description"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        aria-invalid={errors.description ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.description?.message ? (
+                      <FieldError>{errors.description.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+            </SummarySection>
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={isPending}
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {isPending ? <Spinner data-icon="inline-start" /> : null}
+                Guardar
+              </Button>
+            </DrawerFooter>
           ) : null}
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <FormTextField
-                icon={TargetIcon}
-                label="Nombre"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-                placeholder=""
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="accountId"
-            render={({ field }) => (
-              <Field className="gap-1">
-                <FieldLabel className="text-sm text-muted-foreground">
-                  Cuenta de ahorro
-                </FieldLabel>
-                <DestinationTrigger
-                  destination={
-                    field.value
-                      ? encodeLedgerTarget("account", field.value)
-                      : CATALOG_NONE
-                  }
-                  accounts={activeAccounts}
-                  cards={[]}
-                  display={display}
-                  placeholder="Elige la cuenta"
-                  onClick={() => openPicker("account")}
-                />
-                {errors.accountId?.message ? (
-                  <FieldError>{errors.accountId.message}</FieldError>
-                ) : null}
-              </Field>
-            )}
-          />
-          <FinanceHelpText>
-            Elige la cuenta donde guardas este dinero.
-          </FinanceHelpText>
-        </SummarySection>
+        </DrawerContent>
+        <FinanceCurrencyPickerSheet
+          open={picker === "currency"}
+          onOpenChange={closeHandlerFor("currency")}
+          value={currency || defaultCurrency}
+          onSelect={(next) =>
+            setValue("currency", next, { shouldValidate: true })
+          }
+        />
 
-        <SummarySection title="Progreso" icon={TargetIcon}>
-          <Controller
-            control={control}
-            name="targetAmount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="savings-goal-target"
-                label="Meta"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("targetAmount")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.targetAmount?.message}
-                currency={currency || defaultCurrency}
-                onCurrencyPress={() => openPicker("currency")}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="currentAmount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="savings-goal-saved"
-                label="Ahorrado"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("currentAmount")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.currentAmount?.message}
-                currency={currency || defaultCurrency}
-                disabled={isEdit}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="targetDate"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Fecha objetivo"
-                value={field.value}
-                onChange={field.onChange}
-                minDate={todayDateInput()}
-                minYear={new Date().getFullYear()}
-                optional
-              />
-            )}
-          />
-          {suggestion ? (
-            <FinanceSuggestionRow>
-              {`${formatFinanceMoney(suggestion.monthlyAmount, display)} / mes · ${suggestion.months} meses · ${Math.round(suggestion.coveredPct)}% cubierto`}
-            </FinanceSuggestionRow>
-          ) : null}
-        </SummarySection>
-
-        <SummarySection
-          title="Detalles opcionales"
-          icon={CircleAlert}
-          collapsible
-        >
-          <Controller
-            control={control}
-            name="description"
-            render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Descripción"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.description?.message}
-              />
-            )}
-          />
-        </SummarySection>
-      </BottomSheet>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={activeAccounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
+              shouldValidate: true,
+            })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
-
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={currency || defaultCurrency}
-        onSelect={(next) =>
-          setValue("currency", next, { shouldValidate: true })
-        }
-      />
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={activeAccounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
-            shouldValidate: true,
-          })
-        }
-      />
     </>
   )
 }

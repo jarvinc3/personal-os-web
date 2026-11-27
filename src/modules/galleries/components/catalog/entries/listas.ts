@@ -56,6 +56,7 @@ import { InboxIcon } from "lucide-react"
     variants: [
       { name: "variant", values: "default, outline, muted" },
       { name: "size", values: "default, sm, xs" },
+      { name: "variant (Media)", values: "default, icon, image" },
       {
         name: "states",
         values: "normal, interactive (render), disabled por el padre",
@@ -71,6 +72,11 @@ import { InboxIcon } from "lucide-react"
         name: "size",
         type: '"default" | "sm" | "xs"',
         description: "Espaciado y tamaño de la media.",
+      },
+      {
+        name: "variant (ItemMedia)",
+        type: '"default" | "icon" | "image"',
+        description: "Media sin fondo, icono en círculo o miniatura.",
       },
       {
         name: "render",

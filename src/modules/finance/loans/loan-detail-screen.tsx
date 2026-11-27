@@ -46,12 +46,22 @@ import {
   FINANCE_LOAN_INSTALLMENT_STATUS_LABEL,
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
-import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
   EmptyContent,
@@ -70,6 +80,7 @@ import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   ArchiveIcon,
   HandCoinsIcon,
@@ -79,6 +90,7 @@ import {
   TableIcon,
   Trash2Icon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -527,27 +539,94 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         currentInstallments={loan.totalInstallments}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={loanTitle}
-        pending={deleteLoan.isPending}
-        consequences="Se borran sus cuotas y su calendario de pagos. No se puede deshacer."
-        onConfirm={() => void onDeleteLoan()}
-        archive={{
-          label: "¿Solo ocultarlo? Archivar",
-          pending: archiveLoan.isPending,
-          onArchive: () => void onArchiveLoan(),
+        onOpenChange={(open) => {
+          if (!open && !deleteLoan.isPending) {
+            setConfirmOpen(false)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{loanTitle}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borran sus cuotas y su calendario de pagos. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={deleteLoan.isPending || archiveLoan.isPending}
+            className={cn("justify-start", PRESSABLE_CLASS)}
+            onClick={() => void onArchiveLoan()}
+          >
+            <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+            ¿Solo ocultarlo? Archivar
+          </Button>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteLoan.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteLoan.isPending}
+              onClick={() => void onDeleteLoan()}
+            >
+              {deleteLoan.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteLoan.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ArchiveRecordDialog
+      <AlertDialog
         open={archiveConfirmOpen}
-        onOpenChange={setArchiveConfirmOpen}
-        recordName={loanTitle}
-        pending={archiveLoan.isPending}
-        onConfirm={() => void onArchiveLoan()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !archiveLoan.isPending) {
+            setArchiveConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ArchiveIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Archivar “{loanTitle}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deja de aparecer en las listas. Puedes restaurarlo desde la
+              papelera de reciclaje o con Deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archiveLoan.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={archiveLoan.isPending}
+              onClick={() => void onArchiveLoan()}
+            >
+              {archiveLoan.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {archiveLoan.isPending ? "Archivando..." : "Archivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

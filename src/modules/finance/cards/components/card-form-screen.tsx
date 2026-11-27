@@ -28,7 +28,10 @@ import {
   type CardFormPrefill,
 } from "@/src/modules/finance/cards/lib/card-form-values"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import {
   CATALOG_NONE,
   FINANCE_CARD_NETWORKS,
@@ -312,13 +315,27 @@ export function CardFormScreen({
           control={control}
           name="type"
           render={({ field }) => (
-            <SegmentedControl
-              value={field.value}
-              onChange={field.onChange}
-              options={TYPE_OPTIONS}
+            <ToggleGroup
+              value={[field.value]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  field.onChange(next[0])
+                }
+              }}
+              variant="outline"
               size="lg"
-              fullWidth
-            />
+              className="w-full"
+            >
+              {TYPE_OPTIONS.map((option) => (
+                <ToggleGroupItem
+                  key={option.value}
+                  value={option.value}
+                  className="h-11 flex-1 rounded-full text-base"
+                >
+                  {option.label}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           )}
         />
 

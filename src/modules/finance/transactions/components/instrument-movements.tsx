@@ -16,8 +16,15 @@ import {
 } from "@/src/modules/finance/shared/lib/transactions-query"
 import type { FinanceTransactionType } from "@/src/modules/finance/shared/types/entities"
 import { TransactionMovementRow } from "@/src/modules/finance/transactions/components/transaction-movement-row"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Input } from "@/src/shared/components/ui/input"
 import {
   Empty,
@@ -245,67 +252,81 @@ export function FinanceInstrumentMovements({
         ))}
       </AsyncRegion>
 
-      <BottomSheet
-        open={filtersOpen}
-        onOpenChange={setFiltersOpen}
-        title="Filtros"
-        description="Tipo de movimiento y rango de fechas"
-      >
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap gap-2">
-            {FLOW_FILTERS.map((option) => {
-              const Icon = option.icon
-              return (
+      <Drawer open={filtersOpen} onOpenChange={(next) => setFiltersOpen(next)}>
+        <DrawerContent>
+          <SheetHeader
+            title="Filtros"
+            description="Tipo de movimiento y rango de fechas"
+          />
+          <SheetBody>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap gap-2">
+                {FLOW_FILTERS.map((option) => {
+                  const Icon = option.icon
+                  return (
+                    <Button
+                      key={option.value}
+                      type="button"
+                      size="sm"
+                      variant={flow === option.value ? "default" : "outline"}
+                      className={cn("rounded-full", PRESSABLE_CLASS)}
+                      onClick={() => setFlow(option.value)}
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      {option.label}
+                    </Button>
+                  )
+                })}
+              </div>
+              <FinanceDateField
+                label="Desde"
+                value={dateFrom}
+                onChange={setDateFrom}
+                optional
+              />
+              <FinanceDateField
+                label="Hasta"
+                value={dateTo}
+                onChange={setDateTo}
+                optional
+              />
+              <div className="flex gap-2">
                 <Button
-                  key={option.value}
                   type="button"
-                  size="sm"
-                  variant={flow === option.value ? "default" : "outline"}
-                  className={cn("rounded-full", PRESSABLE_CLASS)}
-                  onClick={() => setFlow(option.value)}
+                  variant="outline"
+                  onClick={() => {
+                    setFlow("ALL")
+                    setDateFrom("")
+                    setDateTo("")
+                  }}
                 >
-                  <Icon className="size-4 shrink-0" />
-                  {option.label}
+                  <XIcon className="size-4 shrink-0" />
+                  Limpiar
                 </Button>
-              )
-            })}
-          </div>
-          <FinanceDateField
-            label="Desde"
-            value={dateFrom}
-            onChange={setDateFrom}
-            optional
-          />
-          <FinanceDateField
-            label="Hasta"
-            value={dateTo}
-            onChange={setDateTo}
-            optional
-          />
-          <div className="flex gap-2">
+                <Button
+                  type="button"
+                  className="flex-1"
+                  onClick={() => setFiltersOpen(false)}
+                >
+                  <CheckIcon className="size-4 shrink-0" />
+                  Aplicar
+                </Button>
+              </div>
+            </div>
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setFlow("ALL")
-                setDateFrom("")
-                setDateTo("")
-              }}
-            >
-              <XIcon className="size-4 shrink-0" />
-              Limpiar
-            </Button>
-            <Button
-              type="button"
               className="flex-1"
               onClick={() => setFiltersOpen(false)}
             >
-              <CheckIcon className="size-4 shrink-0" />
-              Aplicar
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
             </Button>
-          </div>
-        </div>
-      </BottomSheet>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

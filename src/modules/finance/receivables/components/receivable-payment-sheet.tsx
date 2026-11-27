@@ -1,7 +1,6 @@
 "use client"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -26,11 +25,23 @@ import {
 } from "@/src/modules/finance/shared/lib/money"
 import { buildReceivablePaymentBody } from "@/src/modules/finance/shared/lib/planning-payloads"
 import { receivableTargets } from "@/src/modules/finance/receivables/lib/receivable-targets"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -44,6 +55,7 @@ import {
   HandshakeIcon,
   TrendingUpIcon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -202,210 +214,229 @@ export function ReceivablePaymentSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={handleOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.receivablePayment} />
-        }
-        pending={pending}
-        title="Registrar cobro"
-        description={
-          debtorName ? `Entra dinero de ${debtorName} a la cuenta.` : undefined
-        }
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={
-                createMutation.isPending ||
-                (exceedsOutstanding && excessHandling === null) ||
-                targetMissing
-              }
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {createMutation.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : null}
-              Registrar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Cobro" icon={HandshakeIcon}>
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="receivable-payment-amount"
-                label="Monto"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("amount")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={amountError}
-                currency={currency}
+      <Drawer open={open} onOpenChange={handleOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title="Registrar cobro"
+            description={
+              debtorName
+                ? `Entra dinero de ${debtorName} a la cuenta.`
+                : undefined
+            }
+            pending={pending}
+            actions={
+              <SheetHelpAction
+                sheetKey={FINANCE_SHEET_KEYS.receivablePayment}
               />
-            )}
+            }
           />
-          {outstanding !== undefined && outstanding > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setValue("amount", String(outstanding), {
-                    shouldValidate: true,
-                  })
-                }
-              >
-                <CoinsIcon className="size-4 shrink-0" />
-                {`Todo ${formatFinanceMoney(outstanding, receivableDisplay)}`}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setValue("amount", String(outstanding / 2), {
-                    shouldValidate: true,
-                  })
-                }
-              >
-                <DivideIcon className="size-4 shrink-0" />
-                Mitad
-              </Button>
-            </div>
-          ) : null}
-          {exceedsOutstanding && outstanding !== undefined ? (
-            <div className="flex flex-col gap-2 rounded-2xl border border-border p-3">
-              <p className="text-sm font-semibold">
-                Sobra {formatFinanceMoney(excessAmount, receivableDisplay)}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Elige qué hacer con la diferencia.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {excessOptions.map((option) => {
-                  const Icon = option.icon
-                  return (
-                    <Button
-                      key={option.value}
-                      type="button"
-                      variant={
-                        excessHandling === option.value ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() => {
-                        setExcessHandling(option.value)
-                        setTargetReceivableId(null)
-                      }}
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      {option.label}
-                    </Button>
-                  )
-                })}
-              </div>
-              {excessHandling === "APPLY_TO_RECEIVABLE" ? (
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm font-medium">Cobro que recibe</p>
-                  {targetOptions.map((option) => (
-                    <Button
-                      key={option.id}
-                      type="button"
-                      variant={
-                        targetReceivableId === option.id ? "default" : "outline"
-                      }
-                      size="sm"
-                      className="justify-between"
-                      onClick={() => setTargetReceivableId(option.id)}
-                    >
-                      <span className="truncate">{option.debtorName}</span>
-                      <span className="tabular-nums">
-                        {formatFinanceMoney(
-                          String(option.pending),
-                          receivableDisplay
-                        )}
-                      </span>
-                    </Button>
-                  ))}
-                  {targetMissing ? (
-                    <p className="text-xs text-muted-foreground">
-                      Elige el cobro que recibe la diferencia.
-                    </p>
+          <SheetBody pending={pending}>
+            <SummarySection title="Cobro" icon={HandshakeIcon}>
+              <Controller
+                control={control}
+                name="amount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="receivable-payment-amount"
+                    label="Monto"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("amount")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={amountError}
+                    currency={currency}
+                  />
+                )}
+              />
+              {outstanding !== undefined && outstanding > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setValue("amount", String(outstanding), {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <CoinsIcon className="size-4 shrink-0" />
+                    {`Todo ${formatFinanceMoney(outstanding, receivableDisplay)}`}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setValue("amount", String(outstanding / 2), {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
+                    <DivideIcon className="size-4 shrink-0" />
+                    Mitad
+                  </Button>
+                </div>
+              ) : null}
+              {exceedsOutstanding && outstanding !== undefined ? (
+                <div className="flex flex-col gap-2 rounded-2xl border border-border p-3">
+                  <p className="text-sm font-semibold">
+                    Sobra {formatFinanceMoney(excessAmount, receivableDisplay)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Elige qué hacer con la diferencia.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {excessOptions.map((option) => {
+                      const Icon = option.icon
+                      return (
+                        <Button
+                          key={option.value}
+                          type="button"
+                          variant={
+                            excessHandling === option.value
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          onClick={() => {
+                            setExcessHandling(option.value)
+                            setTargetReceivableId(null)
+                          }}
+                        >
+                          <Icon className="size-4 shrink-0" />
+                          {option.label}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  {excessHandling === "APPLY_TO_RECEIVABLE" ? (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-medium">Cobro que recibe</p>
+                      {targetOptions.map((option) => (
+                        <Button
+                          key={option.id}
+                          type="button"
+                          variant={
+                            targetReceivableId === option.id
+                              ? "default"
+                              : "outline"
+                          }
+                          size="sm"
+                          className="justify-between"
+                          onClick={() => setTargetReceivableId(option.id)}
+                        >
+                          <span className="truncate">{option.debtorName}</span>
+                          <span className="tabular-nums">
+                            {formatFinanceMoney(
+                              String(option.pending),
+                              receivableDisplay
+                            )}
+                          </span>
+                        </Button>
+                      ))}
+                      {targetMissing ? (
+                        <p className="text-xs text-muted-foreground">
+                          Elige el cobro que recibe la diferencia.
+                        </p>
+                      ) : null}
+                    </div>
                   ) : null}
                 </div>
               ) : null}
-            </div>
-          ) : null}
-          <Controller
-            control={control}
-            name="accountId"
-            render={({ field }) => (
-              <Field className="gap-1">
-                <FieldLabel className="text-sm text-muted-foreground">
-                  Cuenta donde entró el dinero
-                </FieldLabel>
-                <DestinationTrigger
-                  destination={
-                    field.value
-                      ? encodeLedgerTarget("account", field.value)
-                      : CATALOG_NONE
-                  }
-                  accounts={activeAccounts}
-                  cards={[]}
-                  display={display}
-                  onClick={() => openPicker("account")}
-                />
-                {errors.accountId?.message ? (
-                  <FieldError>{errors.accountId.message}</FieldError>
-                ) : null}
-              </Field>
-            )}
-          />
-          <Controller
-            control={control}
-            name="paidAt"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Fecha"
-                value={field.value}
-                onChange={field.onChange}
-                optional
+              <Controller
+                control={control}
+                name="accountId"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel className="text-sm text-muted-foreground">
+                      Cuenta donde entró el dinero
+                    </FieldLabel>
+                    <DestinationTrigger
+                      destination={
+                        field.value
+                          ? encodeLedgerTarget("account", field.value)
+                          : CATALOG_NONE
+                      }
+                      accounts={activeAccounts}
+                      cards={[]}
+                      display={display}
+                      onClick={() => openPicker("account")}
+                    />
+                    {errors.accountId?.message ? (
+                      <FieldError>{errors.accountId.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
               />
-            )}
-          />
-          <FinanceHelpText>
-            {outstandingLabel
-              ? `Queda por cobrar ${outstandingLabel}. El cobro crea un ingreso en la cuenta elegida.`
-              : "El cobro crea un ingreso en la cuenta elegida."}
-          </FinanceHelpText>
-        </SummarySection>
-      </BottomSheet>
+              <Controller
+                control={control}
+                name="paidAt"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Fecha"
+                    value={field.value}
+                    onChange={field.onChange}
+                    optional
+                  />
+                )}
+              />
+              <FieldDescription className="text-xs">
+                {outstandingLabel
+                  ? `Queda por cobrar ${outstandingLabel}. El cobro crea un ingreso en la cuenta elegida.`
+                  : "El cobro crea un ingreso en la cuenta elegida."}
+              </FieldDescription>
+            </SummarySection>
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => handleOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={
+                  createMutation.isPending ||
+                  (exceedsOutstanding && excessHandling === null) ||
+                  targetMissing
+                }
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {createMutation.isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : null}
+                Registrar
+              </Button>
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+        <DestinationPickerSheet
+          open={picker === "account"}
+          onOpenChange={closeHandlerFor("account")}
+          institutions={institutions}
+          accounts={activeAccounts}
+          cards={[]}
+          display={display}
+          accountsOnly
+          onSelect={(next) =>
+            setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
+              shouldValidate: true,
+            })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
-
-      <DestinationPickerSheet
-        open={picker === "account"}
-        onOpenChange={closeHandlerFor("account")}
-        institutions={institutions}
-        accounts={activeAccounts}
-        cards={[]}
-        display={display}
-        accountsOnly
-        onSelect={(next) =>
-          setValue("accountId", splitLedgerTarget(next).accountId ?? "", {
-            shouldValidate: true,
-          })
-        }
-      />
     </>
   )
 }

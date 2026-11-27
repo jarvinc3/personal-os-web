@@ -1,6 +1,16 @@
 "use client"
 
 import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-metadata"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import {
   DEFAULT_LOCALE,
@@ -13,9 +23,15 @@ import {
 } from "@/src/modules/settings/lib/week-starts-on"
 import type { WeekStartsOn } from "@/src/modules/settings/types/profile.types"
 import type { SettingsSheetProps } from "@/src/modules/settings/types/sheet.types"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -23,7 +39,7 @@ import {
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { appToast } from "@/src/shared/lib/app-toast"
-import { CalendarRangeIcon } from "lucide-react"
+import { CalendarRangeIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 const WEEK_START_ACCENT = SETTINGS_REGISTRY.account.accent
@@ -68,56 +84,90 @@ export function EditWeekStartSheet({ open, onOpenChange }: SettingsSheetProps) {
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      title="Primer día de la semana"
-      description="Se usa en los calendarios y en las semanas de toda la app."
-      actions={{
-        submit: (
-          <Button
-            className="flex-1"
-            disabled={!isDirty || updateProfileMutation.isPending}
-            onClick={handleSave}
-          >
-            {updateProfileMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : null}
-            {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Semana" icon={CalendarRangeIcon}>
-        <RadioGroup
-          value={selection}
-          onValueChange={(value) => setSelection(value as Selection)}
-        >
-          <OptionRow
-            icon={CalendarRangeIcon}
-            iconColor={WEEK_START_ACCENT}
-            accentColor={WEEK_START_ACCENT}
-            label="Según la región"
-            description={`${weekStartsOnLabel(automaticDay)} en ${localeLabel(locale)}.`}
-            selected={selection === AUTOMATIC}
-            onPress={() => setSelection(AUTOMATIC)}
-            trailing={<RadioGroupItem value={AUTOMATIC} />}
-          />
-          {WEEK_STARTS_ON_OPTIONS.map((option) => (
-            <OptionRow
-              key={option.value}
-              icon={CalendarRangeIcon}
-              iconColor={WEEK_START_ACCENT}
-              accentColor={WEEK_START_ACCENT}
-              label={option.label}
-              description={`La semana empieza el ${option.label.toLowerCase()}.`}
-              selected={selection === String(option.value)}
-              onPress={() => setSelection(String(option.value) as Selection)}
-              trailing={<RadioGroupItem value={String(option.value)} />}
-            />
-          ))}
-        </RadioGroup>
-      </SummarySection>
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Primer día de la semana"
+          description="Se usa en los calendarios y en las semanas de toda la app."
+          pending={updateProfileMutation.isPending}
+        />
+        <SheetBody pending={updateProfileMutation.isPending}>
+          <SummarySection title="Semana" icon={CalendarRangeIcon}>
+            <RadioGroup
+              value={selection}
+              onValueChange={(value) => setSelection(value as Selection)}
+            >
+              <FieldLabel
+                onClick={() => setSelection(AUTOMATIC)}
+                className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+                style={activeRowStyle(
+                  WEEK_START_ACCENT,
+                  selection === AUTOMATIC
+                )}
+              >
+                <FieldMedia
+                  icon={CalendarRangeIcon}
+                  color={WEEK_START_ACCENT}
+                />
+                <FieldContent>
+                  <FieldTitle className="text-sm">Según la región</FieldTitle>
+                  <FieldDescription className="text-xs text-muted-foreground">{`${weekStartsOnLabel(automaticDay)} en ${localeLabel(locale)}.`}</FieldDescription>
+                </FieldContent>
+                <RadioGroupItem value={AUTOMATIC} />
+              </FieldLabel>
+              {WEEK_STARTS_ON_OPTIONS.map((option) => (
+                <FieldLabel
+                  key={option.value}
+                  onClick={() =>
+                    setSelection(String(option.value) as Selection)
+                  }
+                  className={cn(
+                    FIELD_CHOICE_CLASS_NAME,
+                    "border-border bg-card"
+                  )}
+                  style={activeRowStyle(
+                    WEEK_START_ACCENT,
+                    selection === String(option.value)
+                  )}
+                >
+                  <FieldMedia
+                    icon={CalendarRangeIcon}
+                    color={WEEK_START_ACCENT}
+                  />
+                  <FieldContent>
+                    <FieldTitle className="text-sm">{option.label}</FieldTitle>
+                    <FieldDescription className="text-xs text-muted-foreground">{`La semana empieza el ${option.label.toLowerCase()}.`}</FieldDescription>
+                  </FieldContent>
+                  <RadioGroupItem value={String(option.value)} />
+                </FieldLabel>
+              ))}
+            </RadioGroup>
+          </SummarySection>
+        </SheetBody>
+        {!updateProfileMutation.isPending ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={!isDirty || updateProfileMutation.isPending}
+              onClick={handleSave}
+            >
+              {updateProfileMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : null}
+              {updateProfileMutation.isPending ? "Guardando..." : "Guardar"}
+            </Button>
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

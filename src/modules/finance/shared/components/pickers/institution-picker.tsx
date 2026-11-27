@@ -15,9 +15,17 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, XIcon } from "lucide-react"
 
 const CATALOG_NONE_COLOR = "#334155"
 
@@ -83,39 +91,55 @@ export function InstitutionPickerSheet({
   const selectable = selectableBankInstitutions(institutions)
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Institución">
-      <div className="flex flex-col gap-2">
-        {noneLabel ? (
-          <InstitutionWalletCard
-            card={buildPlainInstitutionCard({
-              name: noneLabel,
-              color: CATALOG_NONE_COLOR,
-            })}
-            variant="compact"
-            detail="none"
-            selected={value === CATALOG_NONE}
-            onPress={() => choose(CATALOG_NONE)}
-          />
-        ) : null}
-        {selectable.length === 0 ? (
-          <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-            <EmptyHeader>
-              <EmptyTitle>No hay instituciones en el catálogo</EmptyTitle>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          selectable.map((institution) => (
-            <InstitutionWalletCard
-              key={institution.id}
-              card={buildInstitutionCardFromCatalog({ institution })}
-              variant="compact"
-              detail="none"
-              selected={value === institution.id}
-              onPress={() => choose(institution.id)}
-            />
-          ))
-        )}
-      </div>
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title="Institución" />
+        <SheetBody>
+          <div className="flex flex-col gap-2">
+            {noneLabel ? (
+              <InstitutionWalletCard
+                card={buildPlainInstitutionCard({
+                  name: noneLabel,
+                  color: CATALOG_NONE_COLOR,
+                })}
+                variant="compact"
+                detail="none"
+                selected={value === CATALOG_NONE}
+                onPress={() => choose(CATALOG_NONE)}
+              />
+            ) : null}
+            {selectable.length === 0 ? (
+              <Empty className={EMPTY_COMPACT_CLASS_NAME}>
+                <EmptyHeader>
+                  <EmptyTitle>No hay instituciones en el catálogo</EmptyTitle>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              selectable.map((institution) => (
+                <InstitutionWalletCard
+                  key={institution.id}
+                  card={buildInstitutionCardFromCatalog({ institution })}
+                  variant="compact"
+                  detail="none"
+                  selected={value === institution.id}
+                  onPress={() => choose(institution.id)}
+                />
+              ))
+            )}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

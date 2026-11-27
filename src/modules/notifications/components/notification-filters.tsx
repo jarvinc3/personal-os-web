@@ -2,7 +2,10 @@
 
 import type { NotificationReadFilter } from "@/src/modules/notifications/types/notification.types"
 import type { ModuleSlug } from "@/src/modules/settings"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { Button } from "@/src/shared/components/ui/button"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { BellDot, CheckCheckIcon, ListIcon } from "lucide-react"
@@ -26,26 +29,47 @@ export function NotificationFilters({
   onReadFilterChange,
   onModuleFilterChange,
 }: NotificationFiltersProps) {
+  const filterOptions = [
+    { value: "all", label: "Todas", icon: ListIcon },
+    {
+      value: "unread",
+      label: unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas",
+      icon: BellDot,
+    },
+    {
+      value: "read",
+      label: readCount > 0 ? `Leídas (${readCount})` : "Leídas",
+      icon: CheckCheckIcon,
+    },
+  ] as const
+
   return (
     <div className="flex flex-wrap gap-2">
-      <SegmentedControl
-        ariaLabel="Filtro de notificaciones"
-        value={readFilter}
-        onChange={onReadFilterChange}
-        options={[
-          { value: "all", label: "Todas", icon: ListIcon },
-          {
-            value: "unread",
-            label: unreadCount > 0 ? `No leídas (${unreadCount})` : "No leídas",
-            icon: BellDot,
-          },
-          {
-            value: "read",
-            label: readCount > 0 ? `Leídas (${readCount})` : "Leídas",
-            icon: CheckCheckIcon,
-          },
-        ]}
-      />
+      <ToggleGroup
+        value={[readFilter]}
+        onValueChange={(next) => {
+          if (next.length > 0) {
+            onReadFilterChange(next[0])
+          }
+        }}
+        variant="outline"
+        size="sm"
+        aria-label="Filtro de notificaciones"
+      >
+        {filterOptions.map((option) => {
+          const OptionIcon = option.icon
+          return (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="rounded-full"
+            >
+              <OptionIcon />
+              {option.label}
+            </ToggleGroupItem>
+          )
+        })}
+      </ToggleGroup>
       {moduleOptions.length > 0 ? (
         <div
           className="flex flex-wrap gap-2"

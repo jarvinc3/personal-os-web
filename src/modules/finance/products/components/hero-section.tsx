@@ -16,7 +16,11 @@ import {
   currencyWithBalance,
   receivablesLine,
 } from "@/src/modules/finance/products/lib/currency-summary"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { GlossaryHelpButton } from "@/src/modules/help"
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
@@ -143,15 +147,30 @@ export function FinanceHeroSection({
           <GlossaryHelpButton slug="patrimonio" />
         </div>
         {currencyTotals.length > 1 ? (
-          <SegmentedControl
-            label="Moneda del anillo"
-            value={activeCurrency}
-            onChange={setPickedCurrency}
-            options={currencyTotals.map((group) => ({
-              value: group.currency,
-              label: group.currency,
-            }))}
-          />
+          <Field className="gap-1">
+            <FieldLabel>Moneda del anillo</FieldLabel>
+            <ToggleGroup
+              value={[activeCurrency]}
+              onValueChange={(next) => {
+                if (next.length > 0) {
+                  setPickedCurrency(next[0])
+                }
+              }}
+              variant="outline"
+              size="sm"
+              aria-label="Moneda del anillo"
+            >
+              {currencyTotals.map((group) => (
+                <ToggleGroupItem
+                  key={group.currency}
+                  value={group.currency}
+                  className="rounded-full"
+                >
+                  {group.currency}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
         ) : null}
       </div>
 

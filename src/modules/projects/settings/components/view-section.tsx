@@ -1,8 +1,16 @@
 "use client"
 
 import type { ProjectsModuleFormValues } from "@/src/modules/projects/settings/lib/projects-module-form"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  FieldContent,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
+import { cn } from "@/src/shared/lib/utils"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
 import {
   RadioGroup,
   RadioGroupItem,
@@ -45,17 +53,20 @@ export function ProjectsViewSection({
         }
       >
         {PROJECT_VIEW_OPTIONS.map((option) => (
-          <OptionRow
+          <FieldLabel
             key={option.value}
-            icon={option.icon}
-            iconColor={MODULE_ACCENT}
-            label={option.label}
-            selected={defaultView === option.value}
-            onPress={() =>
+            onClick={() =>
               setValue("defaultView", option.value, { shouldDirty: true })
             }
-            trailing={<RadioGroupItem value={option.value} />}
-          />
+            className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+            style={activeRowStyle(MODULE_ACCENT, defaultView === option.value)}
+          >
+            <FieldMedia icon={option.icon} color={MODULE_ACCENT} />
+            <FieldContent>
+              <FieldTitle className="text-sm">{option.label}</FieldTitle>
+            </FieldContent>
+            <RadioGroupItem value={option.value} />
+          </FieldLabel>
         ))}
       </RadioGroup>
     </SummarySection>

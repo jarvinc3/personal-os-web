@@ -21,11 +21,18 @@ import type {
   FinanceSubscriptionAlertKind,
 } from "@/src/modules/finance/shared/types/entities"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
@@ -43,6 +50,7 @@ import {
   ClockIcon,
   TrendingUpIcon,
   TriangleAlertIcon,
+  XIcon,
   type LucideIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -108,17 +116,61 @@ export function AlertsSheet({
   }
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      helpAction={
-        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionAlerts} />
-      }
-      title="Alertas"
-      description="Subidas de precio, cobros que no cuadran y avisos de renovación"
-      actions={{
-        submit: (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Alertas"
+          description="Subidas de precio, cobros que no cuadran y avisos de renovación"
+          actions={
+            <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscriptionAlerts} />
+          }
+        />
+        <SheetBody>
+          {query.isError ? (
+            <ErrorState
+              message={financeErrorMessage(query.error)}
+              onRetry={() => void query.refetch()}
+              isRetrying={query.isFetching}
+            />
+          ) : null}
+          {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
+          {!query.isPending && alerts.length === 0 ? (
+            <Empty className="py-6">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <BellOffIcon />
+                </EmptyMedia>
+                <EmptyTitle>Sin alertas</EmptyTitle>
+                <EmptyDescription>
+                  Los precios y los cobros de tus suscripciones están en orden.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : null}
+          <div className="flex flex-col gap-2">
+            {alerts.map((alert) => (
+              <SubscriptionAlertNotice
+                key={alert.id}
+                alert={alert}
+                display={display}
+                today={today}
+                windowDays={windowDays}
+                isEnabled={isEnabled && open}
+                onReview={() => reviewAlert(alert)}
+              />
+            ))}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
           <Button
             className="flex-1"
             disabled={alerts.length === 0 || dismissAll.isPending}
@@ -131,44 +183,9 @@ export function AlertsSheet({
             )}
             Marcar vistas
           </Button>
-        ),
-      }}
-    >
-      {query.isError ? (
-        <ErrorState
-          message={financeErrorMessage(query.error)}
-          onRetry={() => void query.refetch()}
-          isRetrying={query.isFetching}
-        />
-      ) : null}
-      {query.isPending && !query.data ? <ListSkeleton rows={3} /> : null}
-      {!query.isPending && alerts.length === 0 ? (
-        <Empty className="py-6">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <BellOffIcon />
-            </EmptyMedia>
-            <EmptyTitle>Sin alertas</EmptyTitle>
-            <EmptyDescription>
-              Los precios y los cobros de tus suscripciones están en orden.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
-      <div className="flex flex-col gap-2">
-        {alerts.map((alert) => (
-          <SubscriptionAlertNotice
-            key={alert.id}
-            alert={alert}
-            display={display}
-            today={today}
-            windowDays={windowDays}
-            isEnabled={isEnabled && open}
-            onReview={() => reviewAlert(alert)}
-          />
-        ))}
-      </div>
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

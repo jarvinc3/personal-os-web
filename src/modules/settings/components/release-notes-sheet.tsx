@@ -1,7 +1,17 @@
 "use client"
 
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import {
+  FLOATING_SHEET_CONTENT_CLASS,
+  SHEET_FOOTER_CLASS,
+} from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   LATEST_RELEASE_VERSION,
   RELEASE_NOTES,
@@ -16,7 +26,7 @@ import {
   subscribeSeenVersion,
   writeCachedSeenVersion,
 } from "@/src/shared/lib/release-notes"
-import { CheckIcon, SparklesIcon } from "lucide-react"
+import { CheckIcon, SparklesIcon, XIcon } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react"
 
@@ -123,58 +133,75 @@ export function ReleaseNotesSheet({
   }, [open, markCurrentVersionSeen])
 
   return (
-    <BottomSheet
+    <Drawer
       open={open}
-      variant="floating"
+      swipeDirection="down"
       onOpenChange={(next) => {
         if (!next) {
           setSheetOpen(false)
         }
       }}
-      title="Novedades"
-      description={
-        outcome.action === "show"
-          ? `Cambios desde la versión ${outcome.sinceVersion}`
-          : undefined
-      }
     >
-      {outcome.action === "show" ? (
-        <div className="flex flex-col gap-4">
-          {outcome.entries.map((entry) => (
-            <section key={entry.version} className="flex flex-col gap-2">
-              <h3 className="text-sm font-semibold text-foreground">
-                Versión {entry.version}
-              </h3>
-              <ul className="flex flex-col gap-2">
-                {entry.highlights.map((highlight) => (
-                  <li
-                    key={highlight}
-                    className="flex items-start gap-2 rounded-md border border-border/30 bg-card p-2 text-sm shadow-sm"
-                  >
-                    <SparklesIcon
-                      className="mt-0.5 size-4 shrink-0 text-success"
-                      aria-hidden
-                    />
-                    <span>{highlight}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-          {outcome.olderCount > 0 ? (
-            <p className="text-xs text-muted-foreground">
-              {describeHiddenVersions(outcome.olderCount)}
-            </p>
+      <DrawerContent className={FLOATING_SHEET_CONTENT_CLASS}>
+        <SheetHeader
+          title="Novedades"
+          description={
+            outcome.action === "show"
+              ? `Cambios desde la versión ${outcome.sinceVersion}`
+              : undefined
+          }
+        />
+        <SheetBody>
+          {outcome.action === "show" ? (
+            <div className="flex flex-col gap-4">
+              {outcome.entries.map((entry) => (
+                <section key={entry.version} className="flex flex-col gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Versión {entry.version}
+                  </h3>
+                  <ul className="flex flex-col gap-2">
+                    {entry.highlights.map((highlight) => (
+                      <li
+                        key={highlight}
+                        className="flex items-start gap-2 rounded-md border border-border/30 bg-card p-2 text-sm shadow-sm"
+                      >
+                        <SparklesIcon
+                          className="mt-0.5 size-4 shrink-0 text-success"
+                          aria-hidden
+                        />
+                        <span>{highlight}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+              {outcome.olderCount > 0 ? (
+                <p className="text-xs text-muted-foreground">
+                  {describeHiddenVersions(outcome.olderCount)}
+                </p>
+              ) : null}
+            </div>
           ) : null}
-        </div>
-      ) : null}
-      <Button
-        className="flex-1 rounded-full py-2"
-        onClick={() => setSheetOpen(false)}
-      >
-        <CheckIcon data-icon="inline-start" />
-        Entendido
-      </Button>
-    </BottomSheet>
+          <Button
+            className="flex-1 rounded-full py-2"
+            onClick={() => setSheetOpen(false)}
+          >
+            <CheckIcon data-icon="inline-start" />
+            Entendido
+          </Button>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => setSheetOpen(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

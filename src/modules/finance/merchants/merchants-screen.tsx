@@ -12,7 +12,12 @@ import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-er
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
@@ -71,13 +76,25 @@ function MerchantsScreenBody() {
 
   return (
     <div className="flex flex-col gap-4">
-      <FormTextField
-        label="Buscar"
-        icon={SearchIcon}
-        value={search}
-        onChange={setSearch}
-        placeholder="Uber, Netflix…"
-      />
+      <Field className="gap-0.5">
+        <FieldLabel
+          htmlFor="merchant-search"
+          className="pl-2 text-sm text-muted-foreground"
+        >
+          Buscar
+        </FieldLabel>
+        <InputGroup className="h-10 overflow-hidden px-1">
+          <InputGroupAddon align="inline-start">
+            <SearchIcon className="text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupInput
+            id="merchant-search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Uber, Netflix…"
+          />
+        </InputGroup>
+      </Field>
 
       {listQuery.isError ? (
         <ErrorState

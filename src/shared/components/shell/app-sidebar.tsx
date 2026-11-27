@@ -10,6 +10,7 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
@@ -38,6 +39,7 @@ import { cn } from "@/src/shared/lib/utils"
 import type { ModuleNavItem, ModuleSlug } from "@/src/shared/types/module-nav"
 import {
   BellIcon,
+  BotIcon,
   BrainCircuit,
   ChevronRight,
   Home,
@@ -119,29 +121,25 @@ export function AppSidebar() {
   return (
     <Sidebar variant="floating" collapsible="icon">
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={
-                <Link
-                  href={APP_ROUTES.app.home}
-                  className="relative"
-                  onClick={closeSidebarOnNavigate}
-                />
-              }
-            >
-              <AppLogo size="xs" className="rounded" />
-              <span className="text-base font-semibold">Personal OS</span>
-              <Badge
-                variant="info"
-                className="ml-auto group-data-[collapsible=icon]:hidden"
-              >
-                Beta
-              </Badge>
-              <LinkPendingOverlay />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <SidebarMenuButton
+          render={
+            <Link
+              href={APP_ROUTES.app.home}
+              className="relative"
+              onClick={closeSidebarOnNavigate}
+            />
+          }
+        >
+          <AppLogo size="xs" className="rounded" />
+          <span className="text-base font-semibold">Personal OS</span>
+          <Badge
+            variant="info"
+            className="ml-auto group-data-[collapsible=icon]:hidden"
+          >
+            Beta
+          </Badge>
+          <LinkPendingOverlay />
+        </SidebarMenuButton>
       </SidebarHeader>
 
       <SidebarContent>
@@ -151,9 +149,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <Separator />
+        <SidebarMenu className="flex flex-col gap-2">
+          <SidebarMenuItem>
+            <SidebarMenuButton className="h-9 cursor-pointer bg-primary/10 font-semibold text-primary hover:bg-primary/20 hover:text-primary-foreground">
+              <BotIcon size={16} />
+              <span>Asistente IA</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
-        <SidebarMenu>
+          <Separator />
+
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => {
@@ -161,7 +166,7 @@ export function AppSidebar() {
                 logoutMutation.mutate()
               }}
               size="default"
-              className="hover:text-destructive-foreground h-9 bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40 [&_svg]:text-destructive"
+              className="hover:text-destructive-foreground h-9 cursor-pointer bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40 [&_svg]:text-destructive"
             >
               <LogOutIcon className="text-destructive" size={16} />
               Cerrar sesión
@@ -212,8 +217,6 @@ function NavMain({
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     isActive={isUnderRoot}
-                    size="default"
-                    className="h-9"
                     render={
                       <Link
                         href={item.url}
@@ -289,22 +292,24 @@ function NavMainCollapsibleItem({
             sideOffset={8}
             className="min-w-48"
           >
-            <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
-            {sections.map((section) => (
-              <DropdownMenuItem
-                key={section.href}
-                render={<Link href={section.href} className="relative" />}
-                className={
-                  isModuleSectionActive(section, pathname)
-                    ? "bg-accent text-accent-foreground"
-                    : undefined
-                }
-              >
-                {section.icon && <section.icon />}
-                <span>{section.label}</span>
-                <LinkPendingOverlay />
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{item.title}</DropdownMenuLabel>
+              {sections.map((section) => (
+                <DropdownMenuItem
+                  key={section.href}
+                  render={<Link href={section.href} className="relative" />}
+                  className={
+                    isModuleSectionActive(section, pathname)
+                      ? "bg-accent text-accent-foreground"
+                      : undefined
+                  }
+                >
+                  {section.icon && <section.icon />}
+                  <span>{section.label}</span>
+                  <LinkPendingOverlay />
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

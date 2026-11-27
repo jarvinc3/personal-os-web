@@ -10,14 +10,18 @@ import {
   type ReviewView,
 } from "@/src/modules/intelligence/review-view"
 import {
-  SegmentedControl,
-  type SegmentOption,
-} from "@/src/shared/components/forms/segmented-control"
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { withTabQuery } from "@/src/shared/lib/tab-query"
 import { Layers3, Mail } from "lucide-react"
 
-const REVIEW_VIEW_OPTIONS: SegmentOption<ReviewView>[] = [
+const REVIEW_VIEW_OPTIONS: {
+  value: ReviewView
+  label: string
+  icon: typeof Layers3
+}[] = [
   { value: "groups", label: "Grupos", icon: Layers3 },
   { value: "messages", label: "Correos", icon: Mail },
 ]
@@ -59,13 +63,32 @@ export function ReviewSection({ enabled, onOpenMessage }: ReviewSectionProps) {
         Confirma la propuesta si es correcta o corrígela con las etiquetas; los
         correos de muestra (HOLDOUT) no entran en los lotes.
       </p>
-      <SegmentedControl
-        ariaLabel="Vista de revisión"
-        value={view}
-        onChange={changeView}
-        options={REVIEW_VIEW_OPTIONS}
-        fullWidth
-      />
+      <ToggleGroup
+        value={[view]}
+        onValueChange={(next) => {
+          if (next.length > 0) {
+            changeView(next[0])
+          }
+        }}
+        variant="outline"
+        size="sm"
+        aria-label="Vista de revisión"
+        className="w-full"
+      >
+        {REVIEW_VIEW_OPTIONS.map((option) => {
+          const OptionIcon = option.icon
+          return (
+            <ToggleGroupItem
+              key={option.value}
+              value={option.value}
+              className="h-11 flex-1 rounded-full text-base"
+            >
+              <OptionIcon />
+              {option.label}
+            </ToggleGroupItem>
+          )
+        })}
+      </ToggleGroup>
       {view === "groups" ? (
         <ReviewGroupsSection enabled={enabled} onOpenMessage={onOpenMessage} />
       ) : (

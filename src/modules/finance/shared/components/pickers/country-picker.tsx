@@ -11,10 +11,29 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
+import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
-import { CheckIcon, ChevronDownIcon, GlobeIcon, SearchIcon } from "lucide-react"
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  GlobeIcon,
+  SearchIcon,
+  XIcon,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 
 type CountryTriggerProps = {
@@ -83,52 +102,73 @@ export function CountryPickerSheet({
   }, [open])
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="País">
-      <div className="sticky top-0 z-10 shrink-0 bg-background">
-        <FormTextField
-          icon={SearchIcon}
-          type="search"
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar país"
-          ariaLabel="Buscar país"
-          autoComplete="off"
-          className="min-h-10"
-        />
-      </div>
-      {visible.length === 0 ? (
-        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-          <EmptyHeader>
-            <EmptyTitle>Ningún país coincide</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {visible.map((option) => {
-            const selected = option.code === current
-            return (
-              <button
-                key={option.code}
-                type="button"
-                className={cn(
-                  "flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left",
-                  PRESSABLE_CLASS,
-                  selected && "border-primary"
-                )}
-                onClick={() => {
-                  onSelect(option.code)
-                  onOpenChange(false)
-                }}
-              >
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                  {option.name}
-                </span>
-                {selected ? <CheckIcon className="size-4" /> : null}
-              </button>
-            )
-          })}
-        </div>
-      )}
-    </BottomSheet>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader title="País" />
+        <SheetBody>
+          <div className="sticky top-0 z-10 shrink-0 bg-background">
+            <Field className="gap-0.5">
+              <InputGroup className="h-10 min-h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <SearchIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Buscar país"
+                  aria-label="Buscar país"
+                  autoComplete="off"
+                />
+              </InputGroup>
+            </Field>
+          </div>
+          {visible.length === 0 ? (
+            <Empty className={EMPTY_COMPACT_CLASS_NAME}>
+              <EmptyHeader>
+                <EmptyTitle>Ningún país coincide</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {visible.map((option) => {
+                const selected = option.code === current
+                return (
+                  <button
+                    key={option.code}
+                    type="button"
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left",
+                      PRESSABLE_CLASS,
+                      selected && "border-primary"
+                    )}
+                    onClick={() => {
+                      onSelect(option.code)
+                      onOpenChange(false)
+                    }}
+                  >
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium">
+                      {option.name}
+                    </span>
+                    {selected ? <CheckIcon className="size-4" /> : null}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

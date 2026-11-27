@@ -30,7 +30,7 @@ Pausar suelta sentinel y congela tiempo; Continuar reacquire (countdown se despl
 
 ## Reminders
 
-Clock local; **nunca** pide Wake Lock solo. **Guardar** persiste y activa; **Quitar** lo apaga. `days: []` = todos los días. Dispara en una ventana de 5 min (`isReminderDue`). El aviso es un BottomSheet `floating` en Keep Awake; `Notification` si el permiso está granted. `TimePairWheels` (`HH:mm`, `minuteStep={1}`). Ver [ui-components.md](../../../architecture/ui-components.md).
+Clock local; **nunca** pide Wake Lock solo. **Guardar** persiste y activa; **Quitar** lo apaga. `days: []` = todos los días. Dispara en una ventana de 5 min (`isReminderDue`). El aviso es una hoja flotante (`Drawer` con `FLOATING_SHEET_CONTENT_CLASS`) en Keep Awake; `Notification` si el permiso está granted. `TimePairWheels` (`HH:mm`, `minuteStep={1}`). Ver [ui-components.md](../../../architecture/ui-components.md).
 
 ## UX
 

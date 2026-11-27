@@ -10,7 +10,10 @@ import {
 import { BrandPicker } from "@/src/modules/finance/shared/components/brand-picker"
 import { CategoryTrigger } from "@/src/modules/finance/shared/components/pickers/category-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { CATALOG_NONE } from "@/src/modules/finance/shared/constants/catalog"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -26,10 +29,11 @@ import type {
   FinanceMerchant,
 } from "@/src/modules/finance/shared/types/entities"
 import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import {
   Alert,
   AlertDescription,
@@ -37,8 +41,18 @@ import {
 } from "@/src/shared/components/ui/alert"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { cn } from "@/src/shared/lib/utils"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
@@ -272,237 +286,297 @@ export function MerchantEditSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={
-          <SheetHelpAction
-            sheetKey={
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isCreate ? "Nuevo comercio" : "Editar comercio"}
+            description={
               isCreate
-                ? FINANCE_SHEET_KEYS.merchantCreate
-                : FINANCE_SHEET_KEYS.merchantEdit
+                ? "Escribe el nombre y, si quieres, su categoría. El logo propio se añade después, al editar el comercio."
+                : "Cambia el nombre, el logo, la categoría y los nombres alternativos."
+            }
+            pending={isPending}
+            actions={
+              <SheetHelpAction
+                sheetKey={
+                  isCreate
+                    ? FINANCE_SHEET_KEYS.merchantCreate
+                    : FINANCE_SHEET_KEYS.merchantEdit
+                }
+              />
             }
           />
-        }
-        pending={isPending}
-        title={isCreate ? "Nuevo comercio" : "Editar comercio"}
-        description={
-          isCreate
-            ? "Escribe el nombre y, si quieres, su categoría. El logo propio se añade después, al editar el comercio."
-            : "Cambia el nombre, el logo, la categoría y los nombres alternativos."
-        }
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              className="flex-1"
-              disabled={isPending || (!isCreate && (!isDirty || !merchant))}
-              onClick={submitForm(onSubmit)}
-            >
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Comercio" icon={StoreIcon}>
-          <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
-            <BrandLogo
-              name={name.trim() || merchant?.name || "Comercio"}
-              logoUrl={previewLogo}
-              size={40}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
-                {name.trim() || "Comercio"}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">
-                {previewDomain ?? merchant?.normalizedKey ?? "—"}
-              </p>
-            </div>
-            {isCreate ? null : (
-              <>
+          <SheetBody pending={isPending}>
+            <SummarySection title="Comercio" icon={StoreIcon}>
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+                <BrandLogo
+                  name={name.trim() || merchant?.name || "Comercio"}
+                  logoUrl={previewLogo}
+                  size={40}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {name.trim() || "Comercio"}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {previewDomain ?? merchant?.normalizedKey ?? "—"}
+                  </p>
+                </div>
+                {isCreate ? null : (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <ImagePlusIcon className="size-4 shrink-0" />
+                      Imagen
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={(event) => {
+                        void onPickLogo(event.target.files?.[0])
+                        event.target.value = ""
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.name ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="merchant-name"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Nombre
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <StoreIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="merchant-name"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        aria-invalid={errors.name ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.name?.message ? (
+                      <FieldError>{errors.name.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+
+              {conflictMerchantId ? (
+                <Alert variant="destructive">
+                  <StoreIcon />
+                  <AlertTitle>Ese nombre ya existe</AlertTitle>
+                  <AlertDescription>
+                    Otro comercio usa ese nombre o uno de sus nombres
+                    alternativos.
+                  </AlertDescription>
+                  <div className="col-start-2 mt-2">
+                    <Link
+                      href={APP_ROUTES.app.financeMerchant(conflictMerchantId)}
+                      className={cn(
+                        buttonVariants({ size: "sm", variant: "outline" })
+                      )}
+                    >
+                      <StoreIcon className="size-4 shrink-0" />
+                      Abrir el comercio existente
+                    </Link>
+                  </div>
+                </Alert>
+              ) : null}
+            </SummarySection>
+
+            <SummarySection title="Logo" icon={ImagePlusIcon}>
+              <BrandPicker
+                onSelect={(brand) => {
+                  setValue("domain", brand.domain, { shouldDirty: true })
+                  setValue("removeLogo", false, { shouldDirty: true })
+                }}
+              />
+              {!isCreate && previewLogo ? (
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   disabled={isPending}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <ImagePlusIcon className="size-4 shrink-0" />
-                  Imagen
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={(event) => {
-                    void onPickLogo(event.target.files?.[0])
-                    event.target.value = ""
+                  onClick={() => {
+                    setValue("removeLogo", true, { shouldDirty: true })
+                    setValue("domain", null, { shouldDirty: true })
                   }}
-                />
-              </>
-            )}
-          </div>
-
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <FormTextField
-                label="Nombre"
-                icon={StoreIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-              />
-            )}
-          />
-
-          {conflictMerchantId ? (
-            <Alert variant="destructive">
-              <StoreIcon />
-              <AlertTitle>Ese nombre ya existe</AlertTitle>
-              <AlertDescription>
-                Otro comercio usa ese nombre o uno de sus nombres alternativos.
-              </AlertDescription>
-              <div className="col-start-2 mt-2">
-                <Link
-                  href={APP_ROUTES.app.financeMerchant(conflictMerchantId)}
-                  className={cn(
-                    buttonVariants({ size: "sm", variant: "outline" })
-                  )}
                 >
-                  <StoreIcon className="size-4 shrink-0" />
-                  Abrir el comercio existente
-                </Link>
-              </div>
-            </Alert>
-          ) : null}
-        </SummarySection>
+                  <Trash2Icon className="size-4 shrink-0" />
+                  Quitar logo
+                </Button>
+              ) : null}
+            </SummarySection>
 
-        <SummarySection title="Logo" icon={ImagePlusIcon}>
-          <BrandPicker
-            onSelect={(brand) => {
-              setValue("domain", brand.domain, { shouldDirty: true })
-              setValue("removeLogo", false, { shouldDirty: true })
-            }}
-          />
-          {!isCreate && previewLogo ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              onClick={() => {
-                setValue("removeLogo", true, { shouldDirty: true })
-                setValue("domain", null, { shouldDirty: true })
-              }}
-            >
-              <Trash2Icon className="size-4 shrink-0" />
-              Quitar logo
-            </Button>
-          ) : null}
-        </SummarySection>
-
-        <SummarySection title="Nombres alternativos" icon={TagsIcon}>
-          {aliases.length === 0 ? (
-            <p className="px-2 text-xs text-muted-foreground">
-              Sin nombres alternativos. Agrega las otras formas en que el banco
-              escribe este comercio.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2 px-2">
-              {aliases.map((alias) => (
-                <span
-                  key={alias}
-                  className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs"
+            <SummarySection title="Nombres alternativos" icon={TagsIcon}>
+              {aliases.length === 0 ? (
+                <p className="px-2 text-xs text-muted-foreground">
+                  Sin nombres alternativos. Agrega las otras formas en que el
+                  banco escribe este comercio.
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2 px-2">
+                  {aliases.map((alias) => (
+                    <span
+                      key={alias}
+                      className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-xs"
+                    >
+                      {alias}
+                      <button
+                        type="button"
+                        aria-label={`Quitar ${alias}`}
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => removeAlias(alias)}
+                      >
+                        <XIcon className="size-3.5" aria-hidden />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <Field className="gap-0.5">
+                <FieldLabel
+                  htmlFor="merchant-alias"
+                  className="pl-2 text-sm text-muted-foreground"
                 >
-                  {alias}
-                  <button
-                    type="button"
-                    aria-label={`Quitar ${alias}`}
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => removeAlias(alias)}
+                  Nuevo nombre
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <TagsIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="merchant-alias"
+                    value={aliasDraft}
+                    onChange={(event) => setAliasDraft(event.target.value)}
+                    onBlur={() => undefined}
+                    placeholder="Como aparece en el banco"
+                  />
+                </InputGroup>
+              </Field>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!aliasDraft.trim()}
+                onClick={addAlias}
+              >
+                <PlusIcon className="size-4 shrink-0" />
+                Agregar nombre
+              </Button>
+            </SummarySection>
+
+            <SummarySection title="Categoría" icon={StoreIcon}>
+              <ToggleGroup
+                value={[categoryType]}
+                onValueChange={(next) => {
+                  if (next.length === 0) {
+                    return
+                  }
+                  const nextType = next[0]
+                  setPickedType(nextType)
+                  setValue("categoryId", CATALOG_NONE, { shouldDirty: true })
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Tipo de categoría"
+              >
+                {CATEGORY_TYPE_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
                   >
-                    <XIcon className="size-3.5" aria-hidden />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          <FormTextField
-            icon={TagsIcon}
-            label="Nuevo nombre"
-            value={aliasDraft}
-            onChange={setAliasDraft}
-            onBlur={() => undefined}
-            placeholder="Como aparece en el banco"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!aliasDraft.trim()}
-            onClick={addAlias}
-          >
-            <PlusIcon className="size-4 shrink-0" />
-            Agregar nombre
-          </Button>
-        </SummarySection>
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
 
-        <SummarySection title="Categoría" icon={StoreIcon}>
-          <SegmentedControl
-            value={categoryType}
-            onChange={(next) => {
-              setPickedType(next)
-              setValue("categoryId", CATALOG_NONE, { shouldDirty: true })
-            }}
-            options={CATEGORY_TYPE_OPTIONS}
-          />
+              <Field className="gap-1">
+                <FieldLabel className="flex items-center gap-2 text-sm text-muted-foreground">
+                  Categoría por defecto
+                  {suggested ? <Badge variant="warning">Sugerida</Badge> : null}
+                </FieldLabel>
+                <CategoryTrigger
+                  category={selectedCategory}
+                  onClick={() => openPicker("category")}
+                />
+                {errors.categoryId?.message ? (
+                  <FieldError>{errors.categoryId.message}</FieldError>
+                ) : null}
+              </Field>
 
-          <Field className="gap-1">
-            <FieldLabel className="flex items-center gap-2 text-sm text-muted-foreground">
-              Categoría por defecto
-              {suggested ? <Badge variant="warning">Sugerida</Badge> : null}
-            </FieldLabel>
-            <CategoryTrigger
-              category={selectedCategory}
-              onClick={() => openPicker("category")}
-            />
-            {errors.categoryId?.message ? (
-              <FieldError>{errors.categoryId.message}</FieldError>
-            ) : null}
-          </Field>
-
-          {suggested ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isPending}
-              onClick={() => void confirmSuggestedCategory()}
-            >
-              <CircleCheckIcon className="size-4 shrink-0" />
-              Confirmar categoría
-            </Button>
+              {suggested ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={() => void confirmSuggestedCategory()}
+                >
+                  <CircleCheckIcon className="size-4 shrink-0" />
+                  Confirmar categoría
+                </Button>
+              ) : null}
+            </SummarySection>
+          </SheetBody>
+          {!isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                className="flex-1"
+                disabled={isPending || (!isCreate && (!isDirty || !merchant))}
+                onClick={submitForm(onSubmit)}
+              >
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {isPending ? "Guardando..." : "Guardar"}
+              </Button>
+            </DrawerFooter>
           ) : null}
-        </SummarySection>
-      </BottomSheet>
-
-      <CategoryPickerSheet
-        open={picker === "category"}
-        onOpenChange={closeHandlerFor("category")}
-        categories={categories}
-        categoryType={categoryType}
-        onSelect={(next) => setValue("categoryId", next, { shouldDirty: true })}
-      />
+        </DrawerContent>
+        <CategoryPickerSheet
+          open={picker === "category"}
+          onOpenChange={closeHandlerFor("category")}
+          categories={categories}
+          categoryType={categoryType}
+          onSelect={(next) =>
+            setValue("categoryId", next, { shouldDirty: true })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
     </>

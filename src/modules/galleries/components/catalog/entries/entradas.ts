@@ -129,6 +129,7 @@ import { Label } from "@/src/shared/components/ui/label"
       "FieldSeparator",
       "FieldContent",
       "FieldTitle",
+      "FieldMedia",
     ],
     anatomy: [
       {
@@ -143,6 +144,7 @@ import { Label } from "@/src/shared/components/ui/label"
     ],
     variants: [
       { name: "orientation", values: "vertical, horizontal, responsive" },
+      { name: "variant", values: "plain, card" },
       { name: "states", values: "normal, invalid, disabled" },
     ],
     props: [
@@ -150,6 +152,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "orientation",
         type: '"vertical" | "horizontal" | "responsive"',
         description: "Etiqueta arriba o al lado del control.",
+      },
+      {
+        name: "variant",
+        type: '"plain" | "card"',
+        description: "Sin fondo o como tarjeta con borde, relleno y radio.",
       },
       {
         name: "data-invalid",
@@ -203,7 +210,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description: "Grupo de opciones exclusivas.",
     whenToUse: "Elegir una sola opción entre pocas, con el nombre de cada una.",
     whenNotToUse:
-      "Un catálogo largo o con descripciones: OptionRow en una hoja. Tampoco para un encendido: Switch.",
+      "Un catálogo largo o con descripciones: filas de elección con `FieldLabel`, `FieldMedia` y `RadioGroupItem` en una hoja. Tampoco para un encendido: Switch.",
     importPath: "@/src/shared/components/ui/radio-group",
     snippet: `import { RadioGroup, RadioGroupItem } from "@/src/shared/components/ui/radio-group"
 
@@ -248,7 +255,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description: "Interruptor de encendido que aplica al instante.",
     whenToUse: "Un ajuste binario con efecto inmediato.",
     whenNotToUse:
-      "Una opción que se confirma al guardar: Checkbox. Tampoco dentro de una fila sin icono: SwitchFieldRow.",
+      'Una opción que se confirma al guardar: Checkbox. Tampoco dentro de una fila con icono: `Field` con `variant="card"`.',
     importPath: "@/src/shared/components/ui/switch",
     snippet: `import { Switch } from "@/src/shared/components/ui/switch"
 
@@ -275,51 +282,6 @@ import { Label } from "@/src/shared/components/ui/label"
     ],
   },
   {
-    id: "switch-field-row",
-    name: "SwitchFieldRow",
-    category: "entradas",
-    kind: "domain",
-    description:
-      "Fila de ajuste con icono, título, descripción y switch obligatorio.",
-    whenToUse:
-      "Un encendido binario dentro de un formulario o una sección de ajustes.",
-    whenNotToUse:
-      "Un ajuste que depende de otro: se oculta hasta que el padre se active.",
-    importPath: "@/src/shared/components/forms/switch-field-row",
-    snippet: `import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
-
-<SwitchFieldRow
-  label="Avisos"
-  description="Recibir un aviso al llegar un cobro"
-  icon={BellIcon}
-  checked={notify}
-  onCheckedChange={setNotify}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "SwitchFieldRow" }],
-    variants: [
-      { name: "states", values: "checked, unchecked, disabled" },
-      { name: "accentColor", values: "color del módulo cuando está activo" },
-    ],
-    props: [
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono obligatorio a la izquierda del título.",
-      },
-      {
-        name: "checked / onCheckedChange",
-        type: "boolean / (checked: boolean) => void",
-        description: "Estado y cambio.",
-      },
-      {
-        name: "disabled",
-        type: "boolean",
-        description: "Bloquea el switch y la fila.",
-      },
-    ],
-  },
-  {
     id: "input-group",
     name: "InputGroup",
     category: "entradas",
@@ -327,7 +289,7 @@ import { Label } from "@/src/shared/components/ui/label"
     description:
       "Envuelve un campo con iconos, texto o botones dentro del mismo control.",
     whenToUse:
-      "Un campo que necesita un icono líder, un sufijo o una acción pegada.",
+      "Un campo de dato: `Field` + `FieldLabel` + `InputGroup` con el icono líder, y `FieldError` debajo. También un campo que necesita un sufijo o una acción pegada.",
     whenNotToUse: "Un campo simple sin adornos: Input directo dentro de Field.",
     importPath: "@/src/shared/components/ui/input-group",
     snippet: `import {
@@ -364,6 +326,7 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "align",
         values: "inline-start, inline-end, block-start, block-end",
       },
+      { name: "size (Button)", values: "xs, sm, icon-xs, icon-sm" },
       { name: "states", values: "normal, focus, invalid, disabled" },
     ],
     props: [
@@ -377,54 +340,10 @@ import { Label } from "@/src/shared/components/ui/label"
         type: "string",
         description: "Alto y ancho del grupo.",
       },
-    ],
-  },
-  {
-    id: "form-text-field",
-    name: "FormTextField",
-    category: "entradas",
-    kind: "domain",
-    description:
-      "Campo de texto de Finanzas con etiqueta, icono, error y revelar contraseña.",
-    whenToUse:
-      "Hoy, un campo de texto dentro de un formulario existente de Finanzas.",
-    whenNotToUse:
-      "En código nuevo: la Ola 1 lo reemplaza por Field + InputGroup. No agregues usos.",
-    importPath: "@/src/shared/components/forms/form-text-field",
-    snippet: `import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-
-<FormTextField
-  label="Nombre"
-  value={name}
-  onChange={setName}
-  icon={StoreIcon}
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "FormTextField" }],
-    variants: [
-      { name: "states", values: "normal, invalid, disabled, revealable" },
-      { name: "type", values: "text, email, password, search" },
-    ],
-    props: [
       {
-        name: "label",
-        type: "string",
-        description: "Etiqueta arriba del campo.",
-      },
-      {
-        name: "value / onChange",
-        type: "string / (value: string) => void",
-        description: "Valor controlado y su cambio.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono líder del tipo de dato.",
-      },
-      {
-        name: "error",
-        type: "string",
-        description: "Error pegado al campo.",
+        name: "size (InputGroupButton)",
+        type: '"xs" | "sm" | "icon-xs" | "icon-sm"',
+        description: "Alto del botón que vive dentro del grupo.",
       },
     ],
   },
@@ -449,7 +368,9 @@ import { Label } from "@/src/shared/components/ui/label"
 } from "@/src/shared/components/ui/select"
 
 <Select defaultValue="comfortable">
-  <SelectTrigger><SelectValue placeholder="Elige" /></SelectTrigger>
+  <SelectTrigger icon={SlidersHorizontalIcon}>
+    <SelectValue placeholder="Elige" />
+  </SelectTrigger>
   <SelectContent>
     <SelectGroup>
       <SelectItem value="comfortable">Cómoda</SelectItem>
@@ -495,6 +416,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "items",
         type: "{ value, label }[]",
         description: "Etiquetas que muestra el disparador.",
+      },
+      {
+        name: "icon (trigger)",
+        type: "LucideIcon",
+        description: "Icono líder del dato dentro del SelectTrigger.",
       },
       {
         name: "disabled",
@@ -554,6 +480,7 @@ import { Label } from "@/src/shared/components/ui/label"
       { name: "state", values: "idle, uploading, processing, error, done" },
       { name: "size", values: "default, sm, xs" },
       { name: "orientation", values: "horizontal, vertical" },
+      { name: "variant (Media)", values: "icon, image" },
     ],
     props: [
       {
@@ -570,6 +497,11 @@ import { Label } from "@/src/shared/components/ui/label"
         name: "orientation",
         type: '"horizontal" | "vertical"',
         description: "Fila compacta o tarjeta de archivo.",
+      },
+      {
+        name: "variant (AttachmentMedia)",
+        type: '"icon" | "image"',
+        description: "Icono del tipo de archivo o una miniatura de imagen.",
       },
     ],
   },

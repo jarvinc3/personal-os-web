@@ -7,7 +7,17 @@ import type {
   AiRoleRow,
 } from "@/src/modules/intelligence/types/intelligence.types"
 import { Button } from "@/src/shared/components/ui/button"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
   EmptyDescription,
@@ -21,7 +31,13 @@ import {
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { AlertCircle, RefreshCw, ShieldCheck, UserRound } from "lucide-react"
+import {
+  AlertCircle,
+  RefreshCw,
+  ShieldCheck,
+  UserRound,
+  XIcon,
+} from "lucide-react"
 import { useState } from "react"
 
 type RoleChangeRequest = {
@@ -127,60 +143,81 @@ export function AdminRolesScreen() {
         </p>
       </SummarySection>
 
-      <ConfirmDialog
+      <AlertDialog
         open={request !== null}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !updateRoleMutation.isPending) {
             setRequest(null)
           }
         }}
-        icon={ShieldCheck}
-        wide
-        title={`¿Cambiar a ${request ? ROLE_LABELS[request.role] : ""} la cuenta de ${request ? accountName(request.account) : ""}?`}
-        description="El cambio se aplica de inmediato. Cancelar deja el rol como está."
-        confirmLabel="Cambiar rol"
-        confirmIcon={ShieldCheck}
-        pending={updateRoleMutation.isPending}
-        pendingLabel="Cambiando..."
-        closeOnConfirm={false}
-        onConfirm={() => {
-          if (!request) {
-            return
-          }
-          updateRoleMutation.mutate(
-            { userId: request.account.id, role: request.role },
-            { onSettled: () => setRequest(null) }
-          )
-        }}
       >
-        {change && change.gains.length === 0 && change.loses.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            El rol no cambia lo que la cuenta puede hacer.
-          </p>
-        ) : null}
-        {change && change.gains.length > 0 ? (
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">Podrá:</p>
-            <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
-              {change.gains.map((capability) => (
-                <li key={capability}>{capability}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-        {change && change.loses.length > 0 ? (
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium text-foreground">
-              Dejará de poder:
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ShieldCheck aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Cambiar a {request ? ROLE_LABELS[request.role] : ""} la cuenta de{" "}
+              {request ? accountName(request.account) : ""}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              El cambio se aplica de inmediato. Cancelar deja el rol como está.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {change && change.gains.length === 0 && change.loses.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              El rol no cambia lo que la cuenta puede hacer.
             </p>
-            <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
-              {change.loses.map((capability) => (
-                <li key={capability}>{capability}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </ConfirmDialog>
+          ) : null}
+          {change && change.gains.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-foreground">Podrá:</p>
+              <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
+                {change.gains.map((capability) => (
+                  <li key={capability}>{capability}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {change && change.loses.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-foreground">
+                Dejará de poder:
+              </p>
+              <ul className="flex list-disc flex-col gap-1 pl-5 text-sm text-muted-foreground">
+                {change.loses.map((capability) => (
+                  <li key={capability}>{capability}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={updateRoleMutation.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <Button
+              disabled={updateRoleMutation.isPending}
+              onClick={() => {
+                if (!request) {
+                  return
+                }
+                updateRoleMutation.mutate(
+                  { userId: request.account.id, role: request.role },
+                  { onSettled: () => setRequest(null) }
+                )
+              }}
+            >
+              {updateRoleMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ShieldCheck className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {updateRoleMutation.isPending ? "Cambiando..." : "Cambiar rol"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   )
 }

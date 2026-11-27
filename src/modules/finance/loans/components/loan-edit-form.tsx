@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   CalendarIcon,
@@ -17,7 +20,6 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceFormScreen } from "@/src/modules/finance/shared/components/forms/form-screen"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
@@ -52,8 +54,17 @@ import {
   loanSchema,
   type LoanFormValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -181,30 +192,66 @@ export function LoanEditForm({
             control={control}
             name="name"
             render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Nombre (opcional)"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
-                placeholder="Carro"
-              />
+              <Field
+                data-invalid={errors.name ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="loan-name"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Nombre (opcional)
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <NotebookPenIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loan-name"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="Carro"
+                    aria-invalid={errors.name ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.name?.message ? (
+                  <FieldError>{errors.name.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
             control={control}
             name="lenderName"
             render={({ field }) => (
-              <FormTextField
-                icon={LandmarkIcon}
-                label="Prestamista"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.lenderName?.message}
-                placeholder="Banco Popular"
-              />
+              <Field
+                data-invalid={errors.lenderName ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="loan-lender"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Prestamista
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <LandmarkIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loan-lender"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="Banco Popular"
+                    aria-invalid={errors.lenderName ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.lenderName?.message ? (
+                  <FieldError>{errors.lenderName.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Field className="gap-1">
@@ -308,42 +355,94 @@ export function LoanEditForm({
             control={control}
             name="installmentFreq"
             render={({ field }) => (
-              <SegmentedControl
-                label="Frecuencia"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceInstallmentFreq)
-                }
-                options={FREQ_OPTIONS}
-              />
+              <Field className="gap-1">
+                <FieldLabel>Frecuencia</FieldLabel>
+                <ToggleGroup
+                  value={[field.value]}
+                  onValueChange={(next) => {
+                    if (next.length > 0) {
+                      field.onChange(next[0])
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  aria-label="Frecuencia"
+                >
+                  {FREQ_OPTIONS.map((option) => (
+                    <ToggleGroupItem
+                      key={option.value}
+                      value={option.value}
+                      className="rounded-full"
+                    >
+                      {option.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </Field>
             )}
           />
           <Controller
             control={control}
             name="totalInstallments"
             render={({ field }) => (
-              <FormTextField
-                icon={HashIcon}
-                label="Cuotas totales"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.totalInstallments?.message}
-              />
+              <Field
+                data-invalid={errors.totalInstallments ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="loan-total-installments"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Cuotas totales
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <HashIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loan-total-installments"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.totalInstallments ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.totalInstallments?.message ? (
+                  <FieldError>{errors.totalInstallments.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
             control={control}
             name="paidInstallments"
             render={({ field }) => (
-              <FormTextField
-                icon={HashIcon}
-                label="Cuotas pagadas"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.paidInstallments?.message}
-              />
+              <Field
+                data-invalid={errors.paidInstallments ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="loan-paid-installments"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Cuotas pagadas
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <HashIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loan-paid-installments"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.paidInstallments ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.paidInstallments?.message ? (
+                  <FieldError>{errors.paidInstallments.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
           <Controller
@@ -371,16 +470,40 @@ export function LoanEditForm({
             name="interestRatePercent"
             render={({ field }) => (
               <div className="flex flex-col gap-1">
-                <FormTextField
-                  icon={PercentIcon}
-                  label="Tasa anual (%)"
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.interestRatePercent?.message}
-                  placeholder="12"
-                />
-                <FinanceHelpText>Vacío = sin tasa.</FinanceHelpText>
+                <Field
+                  data-invalid={errors.interestRatePercent ? true : undefined}
+                  className="gap-0.5"
+                >
+                  <FieldLabel
+                    htmlFor="loan-rate"
+                    className="pl-2 text-sm text-muted-foreground"
+                  >
+                    Tasa anual (%)
+                  </FieldLabel>
+                  <InputGroup className="h-10 overflow-hidden px-1">
+                    <InputGroupAddon align="inline-start">
+                      <PercentIcon className="text-muted-foreground" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="loan-rate"
+                      value={field.value}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      onBlur={field.onBlur}
+                      placeholder="12"
+                      aria-invalid={
+                        errors.interestRatePercent ? true : undefined
+                      }
+                    />
+                  </InputGroup>
+                  {errors.interestRatePercent?.message ? (
+                    <FieldError>
+                      {errors.interestRatePercent.message}
+                    </FieldError>
+                  ) : null}
+                </Field>
+                <FieldDescription className="text-xs">
+                  Vacío = sin tasa.
+                </FieldDescription>
               </div>
             )}
           />
@@ -388,14 +511,32 @@ export function LoanEditForm({
             control={control}
             name="notes"
             render={({ field }) => (
-              <FormTextField
-                icon={NotebookPenIcon}
-                label="Notas"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.notes?.message}
-              />
+              <Field
+                data-invalid={errors.notes ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="loan-notes"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Notas
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <NotebookPenIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="loan-notes"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.notes ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.notes?.message ? (
+                  <FieldError>{errors.notes.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         </SummarySection>

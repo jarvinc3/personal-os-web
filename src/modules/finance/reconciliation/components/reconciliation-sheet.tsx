@@ -28,8 +28,15 @@ import {
   type FinanceReconciliationKind,
   type FinanceReconciliationLineDraft,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import {
   Select,
   SelectContent,
@@ -47,6 +54,7 @@ import {
   ScaleIcon,
   TagsIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -171,157 +179,173 @@ export function ReconciliationSheet({
   }
 
   return (
-    <BottomSheet
-      open={open}
-      onOpenChange={onOpenChange}
-      pending={createMutation.isPending}
-      helpAction={<SheetHelpAction sheetKey={helpSheetKey} />}
-      title={`Conciliar · ${target.name}`}
-      description="Escribe el saldo que ves en el banco. La diferencia queda como ajustes categorizados."
-      actions={{
-        submit: (
-          <Button
-            className="flex-1"
-            disabled={!canSubmit}
-            onClick={() => void onSubmit()}
-          >
-            {createMutation.isPending ? (
-              <Spinner data-icon="inline-start" />
-            ) : (
-              <SaveIcon className="size-4 shrink-0" />
-            )}
-            {createMutation.isPending ? "Guardando..." : "Conciliar"}
-          </Button>
-        ),
-      }}
-    >
-      <SummarySection title="Saldo" icon={ScaleIcon}>
-        <p className="px-1 text-sm text-muted-foreground">
-          Saldo en la app{" "}
-          <span className="font-medium text-foreground tabular-nums">
-            {formatFinanceMoney(appBalance, moneyDisplay)}
-          </span>
-        </p>
-        <FinanceMoneyField
-          calculatorKey="reconciliation-real-balance"
-          label="Saldo real del banco"
-          amount={realBalance}
-          onAmountChange={setRealBalance}
-          onAmountCommit={setRealBalance}
-          currency={target.currency}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title={`Conciliar · ${target.name}`}
+          description="Escribe el saldo que ves en el banco. La diferencia queda como ajustes categorizados."
+          pending={createMutation.isPending}
+          actions={<SheetHelpAction sheetKey={helpSheetKey} />}
         />
-        <FinanceDateField
-          label="Fecha de corte"
-          value={asOfDate}
-          onChange={setAsOfDate}
-        />
-        {difference !== null ? (
-          <p className="px-1 text-sm text-muted-foreground">
-            Diferencia{" "}
-            <span
-              className={
-                difference === 0
-                  ? "font-medium text-foreground tabular-nums"
-                  : "font-medium text-destructive tabular-nums"
-              }
-            >
-              {formatFinanceMoney(difference, {
-                ...moneyDisplay,
-                leadingSign: true,
-              })}
-            </span>
-          </p>
-        ) : null}
-      </SummarySection>
+        <SheetBody pending={createMutation.isPending}>
+          <SummarySection title="Saldo" icon={ScaleIcon}>
+            <p className="px-1 text-sm text-muted-foreground">
+              Saldo en la app{" "}
+              <span className="font-medium text-foreground tabular-nums">
+                {formatFinanceMoney(appBalance, moneyDisplay)}
+              </span>
+            </p>
+            <FinanceMoneyField
+              calculatorKey="reconciliation-real-balance"
+              label="Saldo real del banco"
+              amount={realBalance}
+              onAmountChange={setRealBalance}
+              onAmountCommit={setRealBalance}
+              currency={target.currency}
+            />
+            <FinanceDateField
+              label="Fecha de corte"
+              value={asOfDate}
+              onChange={setAsOfDate}
+            />
+            {difference !== null ? (
+              <p className="px-1 text-sm text-muted-foreground">
+                Diferencia{" "}
+                <span
+                  className={
+                    difference === 0
+                      ? "font-medium text-foreground tabular-nums"
+                      : "font-medium text-destructive tabular-nums"
+                  }
+                >
+                  {formatFinanceMoney(difference, {
+                    ...moneyDisplay,
+                    leadingSign: true,
+                  })}
+                </span>
+              </p>
+            ) : null}
+          </SummarySection>
 
-      {needsLines ? (
-        <SummarySection title="Reparto" icon={LandmarkIcon}>
-          <p className="px-1 text-sm text-muted-foreground">
-            Los ajustes deben sumar{" "}
-            <span className="font-medium text-foreground tabular-nums">
-              {formatFinanceMoney(difference ?? 0, {
-                ...moneyDisplay,
-                leadingSign: true,
-              })}
-            </span>
-            . Llevas{" "}
-            <span
-              className={
-                matches
-                  ? "font-medium text-[var(--success)] tabular-nums"
-                  : "font-medium text-destructive tabular-nums"
-              }
-            >
-              {formatFinanceMoney(linesTotal, {
-                ...moneyDisplay,
-                leadingSign: true,
-              })}
-            </span>
-            .
-          </p>
-          {lines.map((line, index) => (
-            <div key={index} className="flex flex-col gap-2 px-1">
-              <div className="flex items-center gap-2">
-                <div className="min-w-0 flex-1">
-                  <Select
-                    value={line.kind}
-                    onValueChange={(value) =>
-                      updateLine(index, {
-                        kind: value as FinanceReconciliationKind,
-                      })
+          {needsLines ? (
+            <SummarySection title="Reparto" icon={LandmarkIcon}>
+              <p className="px-1 text-sm text-muted-foreground">
+                Los ajustes deben sumar{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  {formatFinanceMoney(difference ?? 0, {
+                    ...moneyDisplay,
+                    leadingSign: true,
+                  })}
+                </span>
+                . Llevas{" "}
+                <span
+                  className={
+                    matches
+                      ? "font-medium text-[var(--success)] tabular-nums"
+                      : "font-medium text-destructive tabular-nums"
+                  }
+                >
+                  {formatFinanceMoney(linesTotal, {
+                    ...moneyDisplay,
+                    leadingSign: true,
+                  })}
+                </span>
+                .
+              </p>
+              {lines.map((line, index) => (
+                <div key={index} className="flex flex-col gap-2 px-1">
+                  <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Select
+                        value={line.kind}
+                        onValueChange={(value) =>
+                          updateLine(index, {
+                            kind: value as FinanceReconciliationKind,
+                          })
+                        }
+                        items={RECONCILIATION_KIND_ITEMS}
+                      >
+                        <SelectTrigger className="relative w-full cursor-pointer pl-9">
+                          <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FINANCE_RECONCILIATION_KINDS.map((kind) => (
+                            <SelectItem key={kind} value={kind}>
+                              {FINANCE_RECONCILIATION_KIND_LABEL[kind]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {lines.length > 1 ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Quitar línea"
+                        onClick={() =>
+                          setEditedLines(
+                            lines.filter((_, position) => position !== index)
+                          )
+                        }
+                      >
+                        <Trash2Icon className="size-4" />
+                      </Button>
+                    ) : null}
+                  </div>
+                  <FinanceMoneyField
+                    calculatorKey="reconciliation-line-amount"
+                    label="Monto"
+                    amount={line.amount}
+                    onAmountChange={(value) =>
+                      updateLine(index, { amount: value })
                     }
-                    items={RECONCILIATION_KIND_ITEMS}
-                  >
-                    <SelectTrigger className="relative w-full cursor-pointer pl-9">
-                      <TagsIcon className="pointer-events-none absolute left-3 size-4.5 text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {FINANCE_RECONCILIATION_KINDS.map((kind) => (
-                        <SelectItem key={kind} value={kind}>
-                          {FINANCE_RECONCILIATION_KIND_LABEL[kind]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onAmountCommit={(value) =>
+                      updateLine(index, { amount: value })
+                    }
+                    currency={target.currency}
+                  />
                 </div>
-                {lines.length > 1 ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Quitar línea"
-                    onClick={() =>
-                      setEditedLines(
-                        lines.filter((_, position) => position !== index)
-                      )
-                    }
-                  >
-                    <Trash2Icon className="size-4" />
-                  </Button>
-                ) : null}
-              </div>
-              <FinanceMoneyField
-                calculatorKey="reconciliation-line-amount"
-                label="Monto"
-                amount={line.amount}
-                onAmountChange={(value) => updateLine(index, { amount: value })}
-                onAmountCommit={(value) => updateLine(index, { amount: value })}
-                currency={target.currency}
-              />
-            </div>
-          ))}
-          <Button
-            variant="outline"
-            className="mx-1"
-            onClick={() =>
-              setEditedLines([...lines, { ...EMPTY_RECONCILIATION_LINE }])
-            }
-          >
-            <PlusIcon className="size-4 shrink-0" />
-            Añadir línea
-          </Button>
-        </SummarySection>
-      ) : null}
-    </BottomSheet>
+              ))}
+              <Button
+                variant="outline"
+                className="mx-1"
+                onClick={() =>
+                  setEditedLines([...lines, { ...EMPTY_RECONCILIATION_LINE }])
+                }
+              >
+                <PlusIcon className="size-4 shrink-0" />
+                Añadir línea
+              </Button>
+            </SummarySection>
+          ) : null}
+        </SheetBody>
+        {!createMutation.isPending ? (
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={!canSubmit}
+              onClick={() => void onSubmit()}
+            >
+              {createMutation.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <SaveIcon className="size-4 shrink-0" />
+              )}
+              {createMutation.isPending ? "Guardando..." : "Conciliar"}
+            </Button>
+          </DrawerFooter>
+        ) : null}
+      </DrawerContent>
+    </Drawer>
   )
 }

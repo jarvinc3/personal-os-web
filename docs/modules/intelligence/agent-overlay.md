@@ -8,7 +8,7 @@ El chat con el agente es una superficie global de la web autenticada. Se abre de
 - Clic derecho y pulsación larga con el clic izquierdo en desktop.
 - `Ctrl/Cmd+K`.
 - Si la vista con tab bar no registra acciones para el `+`, el tab bar muestra un botón del agente en su lugar, para que el overlay siga teniendo entrada en móvil.
-- Botón del agente a la derecha del header de cualquier `BottomSheet` (`AgentChatTriggerButton`).
+- El header de las hojas que ya declaran ayuda muestra `SheetHelpAction`; cuando la clave no tiene términos, cae en `AgentChatTriggerButton`. El resto de las hojas no lleva el botón del agente.
 - `AgentChatLauncherProvider` conecta esos controles del shell con `AgentChatHost` sin que `src/shared` importe el feature.
 
 ## Aspecto y cierre
@@ -28,7 +28,7 @@ El contexto se serializa en base64url para que recargar la página reabra el mis
 ## Conversaciones
 
 - La última conversación del contexto se retoma al abrir. Si no hay, el overlay arranca vacío.
-- El historial abre un `BottomSheet` por URL (`?picker=agent-history`) con las conversaciones del dueño; elegir una cambia `sheetId` y nuevo chat deja el overlay sin conversación.
+- El historial abre una hoja (`Drawer`) por URL (`?picker=agent-history`) con las conversaciones del dueño; elegir una cambia `sheetId` y nuevo chat deja el overlay sin conversación.
 - Un chat nuevo usa el contexto actual por defecto y permite quitarlo antes del primer mensaje. Sin contexto, la conversación no se agrupa por la vista.
 - El título sale del primer mensaje; el header lo muestra cuando existe.
 

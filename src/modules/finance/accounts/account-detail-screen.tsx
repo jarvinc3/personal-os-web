@@ -56,12 +56,22 @@ import {
   visibleTransactionTotals,
   mergeTransactionsById,
 } from "@/src/modules/finance/shared/lib/transactions-query"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
-import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   APP_ROUTES,
   financeTransactionNewHref,
@@ -69,6 +79,7 @@ import {
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   ArchiveIcon,
   HistoryIcon,
@@ -78,6 +89,7 @@ import {
   ScaleIcon,
   Trash2Icon,
   WalletIcon,
+  XIcon,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useQueries } from "@tanstack/react-query"
@@ -439,27 +451,94 @@ function AccountDetailScreenBody({ accountId }: AccountDetailScreenProps) {
         ]}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={account.name}
-        pending={deleteAccount.isPending}
-        consequences="Se eliminan sus movimientos, tarjetas débito y saldos. No se puede deshacer."
-        onConfirm={() => void onDeleteAccount()}
-        archive={{
-          label: "¿Solo ocultarla? Archivar",
-          pending: archiveAccount.isPending,
-          onArchive: () => void onArchiveAccount(),
+        onOpenChange={(open) => {
+          if (!open && !deleteAccount.isPending) {
+            setConfirmOpen(false)
+          }
         }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{account.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan sus movimientos, tarjetas débito y saldos. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={deleteAccount.isPending || archiveAccount.isPending}
+            className={cn("justify-start", PRESSABLE_CLASS)}
+            onClick={() => void onArchiveAccount()}
+          >
+            <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+            ¿Solo ocultarla? Archivar
+          </Button>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAccount.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteAccount.isPending}
+              onClick={() => void onDeleteAccount()}
+            >
+              {deleteAccount.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteAccount.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-      <ArchiveRecordDialog
+      <AlertDialog
         open={archiveConfirmOpen}
-        onOpenChange={setArchiveConfirmOpen}
-        recordName={account.name}
-        pending={archiveAccount.isPending}
-        onConfirm={() => void onArchiveAccount()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !archiveAccount.isPending) {
+            setArchiveConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ArchiveIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Archivar “{account.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deja de aparecer en las listas. Puedes restaurarlo desde la
+              papelera de reciclaje o con Deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archiveAccount.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={archiveAccount.isPending}
+              onClick={() => void onArchiveAccount()}
+            >
+              {archiveAccount.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {archiveAccount.isPending ? "Archivando..." : "Archivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AccountSheet
         open={openAccountSheet}

@@ -34,11 +34,22 @@ import {
   FINANCE_RECEIVABLE_STATUS_LABEL,
   FINANCE_RECEIVABLE_STATUS_VARIANT,
 } from "@/src/modules/finance/shared/types/entities"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Empty,
   EmptyDescription,
@@ -61,6 +72,7 @@ import {
   PencilIcon,
   PlusIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -379,14 +391,46 @@ function ReceivableDetailScreenBody({
         ]}
       />
 
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={receivable.debtorName}
-        pending={deleteReceivable.isPending}
-        consequences="Se borra su historial de cobros. No se puede deshacer."
-        onConfirm={() => void onDeleteReceivable()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !deleteReceivable.isPending) {
+            setConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>
+              ¿Eliminar “{receivable.debtorName}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Se borra su historial de cobros. No se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteReceivable.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteReceivable.isPending}
+              onClick={() => void onDeleteReceivable()}
+            >
+              {deleteReceivable.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteReceivable.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <ReceivablePaymentSheet
         open={openPaymentSheet}

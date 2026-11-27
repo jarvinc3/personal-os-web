@@ -12,6 +12,14 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Cambiado
 
+- Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. Las filas de switch y las de elección resaltan con el fondo del acento de su módulo al 10 %, sin borde de color. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
+
+- Las rutas de Agenda, Proyectos y Salud componen `Empty` con el enlace a su ajuste, y las pilas de cards y el conocimiento componen `Skeleton`. Se retiran `ModuleComingSoon`, `CardSkeleton` y `KnowledgeListSkeleton`. Sin cambio visible ni de contrato (#419).
+
+- El campo de monto de Finanzas compone `InputGroup` directamente, y el vacío y la carga de Notificaciones componen `Empty` y `Skeleton`. Se retiran los wrappers `FinanceAmountInput`, `NotificationEmptyState` y `NotificationListSkeleton`, cada uno con un solo uso. Sin cambio visible ni de contrato (#419).
+
+- Las hojas de producto componen `Drawer`, `SheetHeader`, `SheetBody` y su pie; los selectores abiertos desde una hoja se apilan como drawers anidados y el botón del agente queda solo en las hojas que ya declaran ayuda. Se retira el wrapper `BottomSheet` y sus fichas de galería (#418).
+
 - Interno: los armadores de cuenta, institución y tarjeta del catálogo devuelven sus campos opcionales en vez de escribir en el cuerpo recibido; la composición queda en el armador y el resultado es el mismo (#620).
 
 - Interno: los armadores de formulario de Finanzas se parten por intención: identidad de tarjeta, datos de suscripción, campos y validaciones del asistente de préstamo, y validaciones de Ajustes. Mismos valores, mismos mensajes y mismos cuerpos (#584).
@@ -28,7 +36,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 - Interno: la galería de variantes resuelve el contenedor del portal en una sola función que usan los seis wrappers de overlay, da nombre al tipo de los ejemplos por grupo y arma sus dos pruebas con una sola lista de fichas cubiertas. Sin cambio visible (#613).
 
 - La ficha de la galería dice «No tiene una composición anidada» y no pinta el árbol cuando la anatomía no tiene hijos; las fichas con hijos conservan el árbol completo (#607).
-- La sección Variantes y estados pinta también las variantes y los estados de entradas, selectores y overlays (30 fichas): campos con su tipo, su error, su estado deshabilitado y su modo de entrada, casillas marcadas e indeterminadas, ruedas de hora y listas de días, y cada hoja, diálogo, menú, tooltip y paleta abiertos dentro de su recuadro. Los portales de esos componentes aceptan un contenedor propio, así el overlay se monta en su ejemplo y no tapa la galería (#601).
+- La sección Variantes y estados pinta también las variantes y los estados de entradas, selectores y overlays (30 fichas): campos con su tipo, su error, su estado deshabilitado y su modo de entrada, casillas marcadas e indeterminadas, ruedas de hora y listas de días, y cada hoja, diálogo, menú, tooltip y paleta desde su disparador. Los portales de esos componentes aceptan un contenedor propio (#601).
 - #610: el CI corre en los runners de GitHub (`ubuntu-latest`) en lugar de los runners self-hosted de la PC de casa, ahora que los repos son públicos. Mismas validaciones; el job `contract` lee el `swagger-spec.json` de `personal-os-back` sin `BACK_REPO_TOKEN` y un push nuevo a un PR cancela su corrida anterior sin cancelar los push a `develop`.
 
 - La sección Variantes y estados pinta también las variantes y los estados de listas, encabezados, montos y estados (26 fichas): filas de Item con sus tamaños y su estado deshabilitado por el padre, acordeón abierto y cerrado, avatar con imagen o iniciales, montos con su tono y su signo, campos de monto y fecha con su error, y los estados vacío, carga, error y reintento (#600).
@@ -158,6 +166,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 ### Corregido
 
+- La cuenta del ingreso fijo y la cuenta por defecto de Finanzas se eligen con el selector de instituciones y cuentas que usa el resto de la app, con una fila para dejarlas sin cuenta, en vez de una lista de cuentas dentro de Ajustes (#419).
+
+- Las hojas, diálogos, menús y tooltips vuelven a abrirse en toda la app: el portal monta en `document.body` cuando no hay un contenedor propio, en vez de quedarse esperando uno que nunca llega. La regresión venía de la resolución única del portal en #613.
+- La galería de Diálogos y sheets muestra solo el disparador de cada variante y abre el componente real al pulsarlo, a pantalla completa. Ya no aparecen abiertos en su recuadro: las hojas y el drawer se abren por ruta y el menú lateral móvil deja de abrirse solo.
 - #574: la CSP permite las imágenes de avatar que la app ya usaba: `www.gravatar.com` para las opciones de Ajustes → Cuenta y `*.googleusercontent.com` para la foto de quien entra con Google, que desde #569 quedaban bloqueadas por `img-src`.
 - #571: la primera vez que se abre el chat del agente se ve un esqueleto con la forma de la hoja (cabecera, mensajes y composer) mientras llega el trozo que la carga bajo demanda, en vez de nada; anuncia «Cargando el chat» y mantiene el diálogo con su nombre.
 - #557: la guía de Ayuda documenta el esquema vigente del glosario, `?picker=sheet-glossary:<clave>`, el mismo que usa el header de una hoja.

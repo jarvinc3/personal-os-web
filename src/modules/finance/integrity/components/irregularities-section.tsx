@@ -11,11 +11,28 @@ import type {
   FinanceBalanceDrift,
   FinanceReconciliationStatusItem,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
-import { ConfirmDialog } from "@/src/shared/components/feedback/confirm-dialog"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
@@ -24,6 +41,7 @@ import {
   RefreshCwIcon,
   ScaleIcon,
   TriangleAlertIcon,
+  XIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
@@ -237,81 +255,137 @@ export function IrregularitiesSection({
         ) : null}
       </div>
 
-      <BottomSheet
+      <Drawer
         open={driftSheet.open}
-        onOpenChange={driftSheet.setOpen}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.balanceDrifts} />
-        }
-        title={`Descuadres (${drifts.length})`}
-        description="El saldo guardado no coincide con la suma de los movimientos confirmados."
+        onOpenChange={(next) => driftSheet.setOpen(next)}
       >
-        {drifts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No queda ningún descuadre abierto.
-          </p>
-        ) : (
-          drifts.map((drift) => (
-            <DriftCard
-              key={drift.id}
-              drift={drift}
-              display={display}
-              href={driftHref(drift)}
-              pending={recalculatePending}
-              onRecalculate={() => setConfirmDrift(drift)}
-            />
-          ))
-        )}
-      </BottomSheet>
-
-      <BottomSheet
-        open={reconciliationSheet.open}
-        onOpenChange={reconciliationSheet.setOpen}
-        helpAction={
-          <SheetHelpAction
-            sheetKey={FINANCE_SHEET_KEYS.pendingReconciliations}
+        <DrawerContent>
+          <SheetHeader
+            title={`Descuadres (${drifts.length})`}
+            description="El saldo guardado no coincide con la suma de los movimientos confirmados."
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.balanceDrifts} />
+            }
           />
-        }
-        title={`Sin conciliar (${pendingReconciliations.length})`}
-        description="Productos que todavía no cerraste contra el banco este mes."
-      >
-        {pendingReconciliations.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Todos los productos están conciliados este mes.
-          </p>
-        ) : (
-          pendingReconciliations.map((item) => (
-            <ReconciliationCard
-              key={item.key}
-              item={item}
-              display={display}
-              href={reconciliationHref(item)}
-            />
-          ))
-        )}
-      </BottomSheet>
+          <SheetBody>
+            {drifts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No queda ningún descuadre abierto.
+              </p>
+            ) : (
+              drifts.map((drift) => (
+                <DriftCard
+                  key={drift.id}
+                  drift={drift}
+                  display={display}
+                  href={driftHref(drift)}
+                  pending={recalculatePending}
+                  onRecalculate={() => setConfirmDrift(drift)}
+                />
+              ))
+            )}
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => driftSheet.setOpen(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
-      <ConfirmDialog
+      <Drawer
+        open={reconciliationSheet.open}
+        onOpenChange={(next) => reconciliationSheet.setOpen(next)}
+      >
+        <DrawerContent>
+          <SheetHeader
+            title={`Sin conciliar (${pendingReconciliations.length})`}
+            description="Productos que todavía no cerraste contra el banco este mes."
+            actions={
+              <SheetHelpAction
+                sheetKey={FINANCE_SHEET_KEYS.pendingReconciliations}
+              />
+            }
+          />
+          <SheetBody>
+            {pendingReconciliations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Todos los productos están conciliados este mes.
+              </p>
+            ) : (
+              pendingReconciliations.map((item) => (
+                <ReconciliationCard
+                  key={item.key}
+                  item={item}
+                  display={display}
+                  href={reconciliationHref(item)}
+                />
+              ))
+            )}
+          </SheetBody>
+          <DrawerFooter className={SHEET_FOOTER_CLASS}>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => reconciliationSheet.setOpen(false)}
+            >
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <AlertDialog
         open={confirmDrift !== null}
         onOpenChange={(open) => {
           if (!open && !recalculatePending) {
             setConfirmDrift(null)
           }
         }}
-        icon={RefreshCwIcon}
-        title="¿Recalcular el saldo?"
-        description="El saldo guardado se corrige a la suma de los movimientos confirmados. No se crea ningún movimiento."
-        confirmLabel="Recalcular"
-        confirmIcon={RefreshCwIcon}
-        pending={recalculatePending}
-        pendingLabel="Recalculando..."
-        onConfirm={() => {
-          if (confirmDrift) {
-            onRecalculate(confirmDrift)
-            setConfirmDrift(null)
-          }
-        }}
-      />
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <RefreshCwIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Recalcular el saldo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              El saldo guardado se corrige a la suma de los movimientos
+              confirmados. No se crea ningún movimiento.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={recalculatePending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={recalculatePending}
+              onClick={() => {
+                if (confirmDrift) {
+                  onRecalculate(confirmDrift)
+                  setConfirmDrift(null)
+                }
+              }}
+            >
+              {recalculatePending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <RefreshCwIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {recalculatePending ? "Recalculando..." : "Recalcular"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

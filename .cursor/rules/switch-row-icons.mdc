@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Icono en switches
 
-`SettingsRow` con `onSwitchChange` y `SwitchFieldRow` llevan un icono a la izquierda del título (`icon={TypeIcon}`), con el color de acento de la sección. El texto de ayuda va debajo del título.
+`SettingsRow` con `onSwitchChange` y una fila de `Field` con `variant="card"` y `Switch` llevan un icono a la izquierda del título, con el color de acento de la sección. El texto de ayuda va debajo del título.
 
 ```tsx
 <SettingsRow
@@ -16,5 +16,15 @@ alwaysApply: false
   switchValue={push}
   onSwitchChange={setPush}
 />
-<SwitchFieldRow icon={Bell} iconColor={accent} label="Push" checked={push} onCheckedChange={setPush} />
+<Field
+  variant="card"
+  orientation="horizontal"
+  style={push ? { borderColor: accent } : undefined}
+>
+  <FieldMedia icon={Bell} color={accent} />
+  <FieldContent>
+    <FieldLabel htmlFor={id}>Push</FieldLabel>
+  </FieldContent>
+  <Switch id={id} checked={push} onCheckedChange={setPush} />
+</Field>
 ```

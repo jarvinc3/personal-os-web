@@ -9,8 +9,18 @@ import {
   subscribeReminder,
   writeReminder,
 } from "@/src/modules/keep-awake/lib/reminders"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import {
+  FLOATING_SHEET_CONTENT_CLASS,
+  SHEET_FOOTER_CLASS,
+} from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { PRESSABLE_CLASS, cn } from "@/src/shared/lib/utils"
 import { Bell, CheckIcon, XIcon } from "lucide-react"
@@ -104,13 +114,24 @@ export function KeepAwakeReminderPrompt({
   }, [locale, setPromptOpen])
 
   return (
-    <BottomSheet
+    <Drawer
       open={promptOpen}
-      variant="floating"
-      onOpenChange={setPromptOpen}
-      title="Llegó la hora"
-      actions={{
-        close: (
+      swipeDirection="down"
+      onOpenChange={(next) => setPromptOpen(next)}
+    >
+      <DrawerContent className={FLOATING_SHEET_CONTENT_CLASS}>
+        <SheetHeader title="Llegó la hora" />
+        <SheetBody>
+          <div className="flex flex-col items-center gap-5 py-4 text-center">
+            <span className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground motion-safe:animate-pulse [&_svg]:size-7">
+              <Bell aria-hidden />
+            </span>
+            <p className="font-heading text-5xl font-bold tracking-tight tabular-nums">
+              {dueLabel}
+            </p>
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
           <Button
             type="button"
             variant="ghost"
@@ -120,8 +141,6 @@ export function KeepAwakeReminderPrompt({
             <XIcon className="size-4 shrink-0" />
             Ahora no
           </Button>
-        ),
-        submit: (
           <Button
             type="button"
             className={cn(PRESSABLE_CLASS, "flex-1")}
@@ -133,17 +152,8 @@ export function KeepAwakeReminderPrompt({
             <CheckIcon className="size-4 shrink-0" />
             Activar
           </Button>
-        ),
-      }}
-    >
-      <div className="flex flex-col items-center gap-5 py-4 text-center">
-        <span className="flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground motion-safe:animate-pulse [&_svg]:size-7">
-          <Bell aria-hidden />
-        </span>
-        <p className="font-heading text-5xl font-bold tracking-tight tabular-nums">
-          {dueLabel}
-        </p>
-      </div>
-    </BottomSheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

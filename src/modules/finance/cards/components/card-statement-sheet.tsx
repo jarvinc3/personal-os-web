@@ -23,7 +23,9 @@ import {
   FINANCE_CARD_STATEMENT_STATUS_LABEL,
   type FinanceCardStatementMovement,
 } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import {
@@ -39,7 +41,17 @@ import {
 } from "@/src/modules/finance/transactions"
 import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
   CalendarIcon,
@@ -159,176 +171,228 @@ export function CardStatementSheet({
   }, [open, defaultEditing, editing, detail, startEdit])
 
   return (
-    <BottomSheet
-      closeLabel="Cerrar"
-      open={open}
-      onOpenChange={onOpenChange}
-      helpAction={
-        <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardStatement} />
-      }
-      title="Estado de cuenta"
-      description={
-        detail
-          ? joinPlanningCaption(
-              `Corte ${formatCalendarDate(detail.statement.cycleEnd, display.locale)}`,
-              detail.statement.dueDate
-                ? `Vence ${formatCalendarDate(detail.statement.dueDate, display.locale)}`
-                : undefined,
-              FINANCE_CARD_STATEMENT_STATUS_LABEL[detail.statement.status]
-            )
-          : undefined
-      }
-      headerAction={
-        detail ? (
-          <div className="flex items-center gap-2">
-            {!editing ? (
-              <Button type="button" variant="outline" onClick={startEdit}>
-                <CalendarIcon className="size-4 shrink-0" />
-                Registrar corte
-              </Button>
-            ) : null}
-          </div>
-        ) : undefined
-      }
-    >
-      {detailQuery.isError ? (
-        <ErrorState
-          message={financeLoadErrorMessage(detailQuery.error)}
-          onRetry={() => void detailQuery.refetch()}
-          isRetrying={detailQuery.isFetching}
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <SheetHeader
+          title="Estado de cuenta"
+          description={
+            detail
+              ? joinPlanningCaption(
+                  `Corte ${formatCalendarDate(detail.statement.cycleEnd, display.locale)}`,
+                  detail.statement.dueDate
+                    ? `Vence ${formatCalendarDate(detail.statement.dueDate, display.locale)}`
+                    : undefined,
+                  FINANCE_CARD_STATEMENT_STATUS_LABEL[detail.statement.status]
+                )
+              : undefined
+          }
+          actions={
+            <>
+              {detail && !editing ? (
+                <Button type="button" variant="outline" onClick={startEdit}>
+                  <CalendarIcon className="size-4 shrink-0" />
+                  Registrar corte
+                </Button>
+              ) : null}
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.cardStatement} />
+            </>
+          }
         />
-      ) : null}
+        <SheetBody>
+          {detailQuery.isError ? (
+            <ErrorState
+              message={financeLoadErrorMessage(detailQuery.error)}
+              onRetry={() => void detailQuery.refetch()}
+              isRetrying={detailQuery.isFetching}
+            />
+          ) : null}
 
-      <AsyncRegion
-        pending={detailQuery.isPending}
-        pendingFallback={<ListSkeleton rows={4} />}
-        empty={!detailQuery.isError && !detail}
-        emptyFallback={
-          <Empty className="py-10">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <CalendarIcon />
-              </EmptyMedia>
-              <EmptyTitle>Sin detalle del corte</EmptyTitle>
-              <EmptyDescription>
-                Este estado de cuenta todavía no tiene movimientos.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        }
-      >
-        {detail ? (
-          <div className="flex flex-col gap-5">
-            {editing ? (
-              <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3">
-                <FormTextField
-                  label="Mínimo"
-                  icon={CoinsIcon}
-                  value={minimumPayment}
-                  onChange={setMinimumPayment}
-                />
-                <FormTextField
-                  label="Balance al corte"
-                  icon={WalletIcon}
-                  value={closingBalance}
-                  onChange={setClosingBalance}
-                />
-                <FormTextField
-                  label="Vence (AAAA-MM-DD)"
-                  icon={CalendarIcon}
-                  value={dueDate}
-                  onChange={setDueDate}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    className="flex-1"
-                    disabled={updateMutation.isPending}
-                    onClick={saveEdit}
-                  >
-                    <SaveIcon className="size-4 shrink-0" />
-                    Guardar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setEditing(false)}
-                  >
-                    <XIcon className="size-4 shrink-0" />
-                    Cancelar
-                  </Button>
+          <AsyncRegion
+            pending={detailQuery.isPending}
+            pendingFallback={<ListSkeleton rows={4} />}
+            empty={!detailQuery.isError && !detail}
+            emptyFallback={
+              <Empty className="py-10">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <CalendarIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Sin detalle del corte</EmptyTitle>
+                  <EmptyDescription>
+                    Este estado de cuenta todavía no tiene movimientos.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            }
+          >
+            {detail ? (
+              <div className="flex flex-col gap-5">
+                {editing ? (
+                  <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-3">
+                    <Field className="gap-0.5">
+                      <FieldLabel
+                        htmlFor="statement-minimum"
+                        className="pl-2 text-sm text-muted-foreground"
+                      >
+                        Mínimo
+                      </FieldLabel>
+                      <InputGroup className="h-10 overflow-hidden px-1">
+                        <InputGroupAddon align="inline-start">
+                          <CoinsIcon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="statement-minimum"
+                          value={minimumPayment}
+                          onChange={(event) =>
+                            setMinimumPayment(event.target.value)
+                          }
+                        />
+                      </InputGroup>
+                    </Field>
+                    <Field className="gap-0.5">
+                      <FieldLabel
+                        htmlFor="statement-closing-balance"
+                        className="pl-2 text-sm text-muted-foreground"
+                      >
+                        Balance al corte
+                      </FieldLabel>
+                      <InputGroup className="h-10 overflow-hidden px-1">
+                        <InputGroupAddon align="inline-start">
+                          <WalletIcon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="statement-closing-balance"
+                          value={closingBalance}
+                          onChange={(event) =>
+                            setClosingBalance(event.target.value)
+                          }
+                        />
+                      </InputGroup>
+                    </Field>
+                    <Field className="gap-0.5">
+                      <FieldLabel
+                        htmlFor="statement-due-date"
+                        className="pl-2 text-sm text-muted-foreground"
+                      >
+                        Vence (AAAA-MM-DD)
+                      </FieldLabel>
+                      <InputGroup className="h-10 overflow-hidden px-1">
+                        <InputGroupAddon align="inline-start">
+                          <CalendarIcon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                        <InputGroupInput
+                          id="statement-due-date"
+                          value={dueDate}
+                          onChange={(event) => setDueDate(event.target.value)}
+                        />
+                      </InputGroup>
+                    </Field>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        className="flex-1"
+                        disabled={updateMutation.isPending}
+                        onClick={saveEdit}
+                      >
+                        <SaveIcon className="size-4 shrink-0" />
+                        Guardar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setEditing(false)}
+                      >
+                        <XIcon className="size-4 shrink-0" />
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-border bg-card p-3">
+                    <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                      Balance al corte
+                    </p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFinanceMoney(
+                        detail.statement.closingBalance,
+                        moneyDisplay
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-3">
+                    <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                      Mínimo
+                    </p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFinanceMoney(
+                        detail.statement.minimumPayment,
+                        moneyDisplay
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-3">
+                    <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                      Pagado
+                    </p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFinanceMoney(
+                        detail.statement.paidAmount,
+                        moneyDisplay
+                      )}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-3">
+                    <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                      Saldo del corte
+                    </p>
+                    <p className="text-lg font-semibold tabular-nums">
+                      {formatFinanceMoney(
+                        detail.statement.remaining,
+                        moneyDisplay
+                      )}
+                    </p>
+                  </div>
                 </div>
+
+                <p className="text-xs text-muted-foreground">
+                  El saldo del corte es acumulativo: incluye los cortes
+                  anteriores y no se suma como una deuda aparte.
+                </p>
+
+                <SettingsSection title="Movimientos del ciclo" bare>
+                  <MovementList
+                    movements={detail.movements}
+                    display={moneyDisplay}
+                    emptyLabel="Sin movimientos en este ciclo."
+                  />
+                </SettingsSection>
+
+                <SettingsSection title="Pagos aplicados" bare>
+                  <MovementList
+                    movements={detail.payments}
+                    display={moneyDisplay}
+                    emptyLabel="Sin pagos aplicados."
+                  />
+                </SettingsSection>
               </div>
             ) : null}
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-border bg-card p-3">
-                <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                  Balance al corte
-                </p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatFinanceMoney(
-                    detail.statement.closingBalance,
-                    moneyDisplay
-                  )}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-3">
-                <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                  Mínimo
-                </p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatFinanceMoney(
-                    detail.statement.minimumPayment,
-                    moneyDisplay
-                  )}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-3">
-                <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                  Pagado
-                </p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatFinanceMoney(
-                    detail.statement.paidAmount,
-                    moneyDisplay
-                  )}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-3">
-                <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
-                  Saldo del corte
-                </p>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatFinanceMoney(detail.statement.remaining, moneyDisplay)}
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-muted-foreground">
-              El saldo del corte es acumulativo: incluye los cortes anteriores y
-              no se suma como una deuda aparte.
-            </p>
-
-            <SettingsSection title="Movimientos del ciclo" bare>
-              <MovementList
-                movements={detail.movements}
-                display={moneyDisplay}
-                emptyLabel="Sin movimientos en este ciclo."
-              />
-            </SettingsSection>
-
-            <SettingsSection title="Pagos aplicados" bare>
-              <MovementList
-                movements={detail.payments}
-                display={moneyDisplay}
-                emptyLabel="Sin pagos aplicados."
-              />
-            </SettingsSection>
-          </div>
-        ) : null}
-      </AsyncRegion>
-    </BottomSheet>
+          </AsyncRegion>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cerrar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

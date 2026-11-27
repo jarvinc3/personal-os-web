@@ -10,8 +10,12 @@ import type {
   FinanceInstitution,
 } from "@/src/modules/finance/shared/types/entities"
 import type { CardFormValues } from "@/src/modules/finance/cards/lib/card-form"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { CreditCardIcon, HashIcon } from "lucide-react"
 import { Controller, type Control, type FieldErrors } from "react-hook-form"
@@ -65,30 +69,66 @@ export function CardIdentitySection({
         control={control}
         name="name"
         render={({ field }) => (
-          <FormTextField
-            icon={CreditCardIcon}
-            label="Nombre"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.name?.message}
-            placeholder="Visa principal"
-          />
+          <Field
+            data-invalid={errors.name ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor="card-name"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Nombre
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <CreditCardIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="card-name"
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                onBlur={field.onBlur}
+                placeholder="Visa principal"
+                aria-invalid={errors.name ? true : undefined}
+              />
+            </InputGroup>
+            {errors.name?.message ? (
+              <FieldError>{errors.name.message}</FieldError>
+            ) : null}
+          </Field>
         )}
       />
       <Controller
         control={control}
         name="lastFour"
         render={({ field }) => (
-          <FormTextField
-            icon={HashIcon}
-            label="Últimos 4 dígitos"
-            value={field.value}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            error={errors.lastFour?.message}
-            placeholder="1234"
-          />
+          <Field
+            data-invalid={errors.lastFour ? true : undefined}
+            className="gap-0.5"
+          >
+            <FieldLabel
+              htmlFor="card-last-four"
+              className="pl-2 text-sm text-muted-foreground"
+            >
+              Últimos 4 dígitos
+            </FieldLabel>
+            <InputGroup className="h-10 overflow-hidden px-1">
+              <InputGroupAddon align="inline-start">
+                <HashIcon className="text-muted-foreground" />
+              </InputGroupAddon>
+              <InputGroupInput
+                id="card-last-four"
+                value={field.value}
+                onChange={(event) => field.onChange(event.target.value)}
+                onBlur={field.onBlur}
+                placeholder="1234"
+                aria-invalid={errors.lastFour ? true : undefined}
+              />
+            </InputGroup>
+            {errors.lastFour?.message ? (
+              <FieldError>{errors.lastFour.message}</FieldError>
+            ) : null}
+          </Field>
         )}
       />
       {cardType === "DEBIT" ? (

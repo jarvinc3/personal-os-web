@@ -1,19 +1,22 @@
-import {
-  EMPTY_COMPACT_CLASS_NAME,
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/src/shared/components/ui/empty"
-import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
-import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
-import { getModule } from "@/src/shared/constants/module-registry"
-import { Wallet } from "lucide-react"
+"use client"
 
-const MODULE_ACCENT = getModule("finance").accent
+import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/pickers/destination-picker-sheet"
+import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
+import {
+  encodeLedgerTarget,
+  splitLedgerTarget,
+} from "@/src/modules/finance/shared/lib/ledger-payloads"
+import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
+import { usePicker } from "@/src/shared/hooks/use-picker"
 
 type AccountChoiceListProps = {
+  /** Clave del selector en la ruta; cada lista usa la suya. */
+  pickerKey: string
+  institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   display: FinanceMoneyDisplay
   selectedId: string
@@ -22,39 +25,39 @@ type AccountChoiceListProps = {
 }
 
 export function AccountChoiceList({
+  pickerKey,
+  institutions,
   accounts,
   display,
   selectedId,
   onSelect,
   noneLabel,
 }: AccountChoiceListProps) {
+  const { picker, openPicker, closeHandlerFor } = usePicker<string>("none")
+
   return (
     <>
-      <OptionRow
-        icon={Wallet}
-        iconColor={MODULE_ACCENT}
-        accentColor={MODULE_ACCENT}
-        label={noneLabel}
-        selected={selectedId === ""}
-        onPress={() => onSelect("")}
+      <DestinationTrigger
+        destination={
+          selectedId ? encodeLedgerTarget("account", selectedId) : ""
+        }
+        accounts={accounts}
+        cards={[]}
+        display={display}
+        placeholder={noneLabel}
+        onClick={() => openPicker(pickerKey)}
       />
-      {accounts.map((account) => (
-        <AccountProductRow
-          key={account.id}
-          account={account}
-          display={display}
-          variant="compact"
-          selected={selectedId === account.id}
-          onPress={() => onSelect(account.id)}
-        />
-      ))}
-      {accounts.length === 0 ? (
-        <Empty className={EMPTY_COMPACT_CLASS_NAME}>
-          <EmptyHeader>
-            <EmptyTitle>No hay cuentas todavía</EmptyTitle>
-          </EmptyHeader>
-        </Empty>
-      ) : null}
+      <DestinationPickerSheet
+        open={picker === pickerKey}
+        onOpenChange={closeHandlerFor(pickerKey)}
+        institutions={institutions}
+        accounts={accounts}
+        cards={[]}
+        display={display}
+        accountsOnly
+        noneLabel={noneLabel}
+        onSelect={(next) => onSelect(splitLedgerTarget(next).accountId ?? "")}
+      />
     </>
   )
 }

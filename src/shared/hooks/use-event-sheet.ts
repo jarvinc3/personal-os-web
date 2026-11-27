@@ -9,7 +9,7 @@ type EventSheet = {
   /** Opens the sheet and remembers that this render knows its content. */
   openSheet: () => void
   closeSheet: () => void
-  /** For `BottomSheet` `onOpenChange`. */
+  /** For the `onOpenChange` of a `Drawer`. */
   onOpenChange: (open: boolean) => void
 }
 

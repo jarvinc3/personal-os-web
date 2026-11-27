@@ -9,6 +9,7 @@ import {
   SaveIcon,
   StickyNoteIcon,
   TagIcon,
+  XIcon,
 } from "lucide-react"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -25,7 +26,10 @@ import { DestinationPickerSheet } from "@/src/modules/finance/shared/components/
 import { FinanceCurrencyPickerSheet } from "@/src/modules/finance/shared/components/pickers/finance-currency-picker-sheet"
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useDiscardChanges } from "@/src/modules/finance/shared/hooks/use-discard-changes"
@@ -53,12 +57,23 @@ import {
   type SubscriptionFormValues,
 } from "@/src/modules/finance/subscriptions/lib/subscription-form"
 import type { FinanceSubscription } from "@/src/modules/finance/shared/types/entities"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { usePicker } from "@/src/shared/hooks/use-picker"
@@ -183,229 +198,340 @@ export function SubscriptionSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={
-          <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscription} />
-        }
-        pending={isPending}
-        title={isEdit ? "Editar suscripción" : "Nueva suscripción"}
-        description="Monto fijo, ciclo de facturación y próximo cobro."
-        actions={{
-          submit: (
-            <Button
-              key="submit"
-              className="flex-1"
-              disabled={isPending}
-              onClick={onSubmit}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isEdit ? "Editar suscripción" : "Nueva suscripción"}
+            description="Monto fijo, ciclo de facturación y próximo cobro."
+            pending={isPending}
+            actions={
+              <SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.subscription} />
+            }
+          />
+          <SheetBody pending={isPending}>
+            <div className="flex items-center gap-3">
+              <BrandLogo
+                name={name || "Suscripción"}
+                logoUrl={logoUrl}
+                size={44}
+              />
+              <div className="min-w-0 flex-1">
+                <BrandPicker
+                  onSelect={(brand) => {
+                    setValue("name", brand.name, { shouldDirty: true })
+                    setValue("domain", brand.domain, { shouldDirty: true })
+                  }}
+                />
+              </div>
+            </div>
+
+            <SummarySection title="Cobro" icon={RepeatIcon}>
+              <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.name ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="subscription-name"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Nombre
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <TagIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="subscription-name"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        onBlur={field.onBlur}
+                        aria-invalid={errors.name ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.name?.message ? (
+                      <FieldError>{errors.name.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="amount"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="subscription-amount"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={field.onChange}
+                    amountError={errors.amount?.message}
+                    currency={currency || display.currency}
+                    currencyError={errors.currency?.message}
+                    onCurrencyPress={() => openPicker("currency")}
+                    disabled={isPending}
+                    entryMode={amountEntry}
+                    onEntryModeChange={setAmountEntry}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="billingCycle"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel>Ciclo</FieldLabel>
+                    <ToggleGroup
+                      value={[field.value]}
+                      onValueChange={(next) => {
+                        if (next.length > 0) {
+                          field.onChange(next[0])
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      aria-label="Ciclo"
+                    >
+                      {BILLING_CYCLE_OPTIONS.map((option) => (
+                        <ToggleGroupItem
+                          key={option.value}
+                          value={option.value}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="billingInterval"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.billingInterval ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="subscription-interval"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Cada cuántos ciclos
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <RepeatIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="subscription-interval"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        aria-invalid={errors.billingInterval ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.billingInterval?.message ? (
+                      <FieldError>{errors.billingInterval.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="anchorDate"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Primer cobro"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.anchorDate?.message}
+                  />
+                )}
+              />
+              <div className="flex flex-col gap-1">
+                <Field className="gap-1">
+                  <FieldLabel className="text-sm text-muted-foreground">
+                    Cuenta o tarjeta
+                  </FieldLabel>
+                  <DestinationTrigger
+                    destination={destination}
+                    accounts={accounts}
+                    cards={cards}
+                    display={display}
+                    disabled={isPending}
+                    onClick={() => openPicker("destination")}
+                  />
+                </Field>
+                {hasPaymentMethod ? null : (
+                  <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
+                    <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
+                    Sin método de pago: registrar un pago no moverá ningún
+                    saldo.
+                  </p>
+                )}
+              </div>
+            </SummarySection>
+
+            <SummarySection
+              title="Detalles opcionales"
+              icon={InfoIcon}
+              collapsible
             >
-              {isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <SaveIcon className="size-4 shrink-0" />
-              )}
-              {isPending ? "Guardando..." : "Guardar"}
-            </Button>
-          ),
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <BrandLogo name={name || "Suscripción"} logoUrl={logoUrl} size={44} />
-          <div className="min-w-0 flex-1">
-            <BrandPicker
-              onSelect={(brand) => {
-                setValue("name", brand.name, { shouldDirty: true })
-                setValue("domain", brand.domain, { shouldDirty: true })
-              }}
-            />
-          </div>
-        </div>
-
-        <SummarySection title="Cobro" icon={RepeatIcon}>
-          <Controller
-            control={control}
-            name="name"
-            render={({ field }) => (
-              <FormTextField
-                label="Nombre"
-                icon={TagIcon}
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.name?.message}
+              <Controller
+                control={control}
+                name="trialEndsAt"
+                render={({ field }) => (
+                  <FinanceDateField
+                    label="Fin de la prueba"
+                    value={field.value}
+                    onChange={field.onChange}
+                    error={errors.trialEndsAt?.message}
+                  />
+                )}
               />
-            )}
-          />
-          <Controller
-            control={control}
-            name="amount"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="subscription-amount"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={field.onChange}
-                amountError={errors.amount?.message}
-                currency={currency || display.currency}
-                currencyError={errors.currency?.message}
-                onCurrencyPress={() => openPicker("currency")}
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Categoría
+                </FieldLabel>
+                <CategoryTrigger
+                  category={category}
+                  disabled={isPending}
+                  onClick={() => openPicker("category")}
+                />
+              </Field>
+              <Controller
+                control={control}
+                name="manageUrl"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.manageUrl ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="subscription-manage-url"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Enlace de gestión
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <LinkIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="subscription-manage-url"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        aria-invalid={errors.manageUrl ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.manageUrl?.message ? (
+                      <FieldError>{errors.manageUrl.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="notes"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.notes ? true : undefined}
+                    className="gap-0.5"
+                  >
+                    <FieldLabel
+                      htmlFor="subscription-notes"
+                      className="pl-2 text-sm text-muted-foreground"
+                    >
+                      Notas
+                    </FieldLabel>
+                    <InputGroup className="h-10 overflow-hidden px-1">
+                      <InputGroupAddon align="inline-start">
+                        <StickyNoteIcon className="text-muted-foreground" />
+                      </InputGroupAddon>
+                      <InputGroupInput
+                        id="subscription-notes"
+                        value={field.value}
+                        onChange={(event) => field.onChange(event.target.value)}
+                        aria-invalid={errors.notes ? true : undefined}
+                      />
+                    </InputGroup>
+                    {errors.notes?.message ? (
+                      <FieldError>{errors.notes.message}</FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+            </SummarySection>
+          </SheetBody>
+          {!isPending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                className="flex-1"
                 disabled={isPending}
-                entryMode={amountEntry}
-                onEntryModeChange={setAmountEntry}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="billingCycle"
-            render={({ field }) => (
-              <SegmentedControl
-                label="Ciclo"
-                value={field.value}
-                onChange={field.onChange}
-                options={BILLING_CYCLE_OPTIONS}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="billingInterval"
-            render={({ field }) => (
-              <FormTextField
-                label="Cada cuántos ciclos"
-                icon={RepeatIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.billingInterval?.message}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="anchorDate"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Primer cobro"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.anchorDate?.message}
-              />
-            )}
-          />
-          <div className="flex flex-col gap-1">
-            <Field className="gap-1">
-              <FieldLabel className="text-sm text-muted-foreground">
-                Cuenta o tarjeta
-              </FieldLabel>
-              <DestinationTrigger
-                destination={destination}
-                accounts={accounts}
-                cards={cards}
-                display={display}
-                disabled={isPending}
-                onClick={() => openPicker("destination")}
-              />
-            </Field>
-            {hasPaymentMethod ? null : (
-              <p className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-500">
-                <CircleAlertIcon className="mt-px size-3.5 shrink-0" />
-                Sin método de pago: registrar un pago no moverá ningún saldo.
-              </p>
-            )}
-          </div>
-        </SummarySection>
+                onClick={onSubmit}
+              >
+                {isPending ? (
+                  <Spinner data-icon="inline-start" />
+                ) : (
+                  <SaveIcon className="size-4 shrink-0" />
+                )}
+                {isPending ? "Guardando..." : "Guardar"}
+              </Button>
+            </DrawerFooter>
+          ) : null}
+        </DrawerContent>
+        <FinanceCurrencyPickerSheet
+          open={picker === "currency"}
+          onOpenChange={closeHandlerFor("currency")}
+          value={currency || display.currency}
+          onSelect={(next) =>
+            setValue("currency", next, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
+        />
 
-        <SummarySection title="Detalles opcionales" icon={InfoIcon} collapsible>
-          <Controller
-            control={control}
-            name="trialEndsAt"
-            render={({ field }) => (
-              <FinanceDateField
-                label="Fin de la prueba"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.trialEndsAt?.message}
-              />
-            )}
-          />
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Categoría
-            </FieldLabel>
-            <CategoryTrigger
-              category={category}
-              disabled={isPending}
-              onClick={() => openPicker("category")}
-            />
-          </Field>
-          <Controller
-            control={control}
-            name="manageUrl"
-            render={({ field }) => (
-              <FormTextField
-                label="Enlace de gestión"
-                icon={LinkIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.manageUrl?.message}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="notes"
-            render={({ field }) => (
-              <FormTextField
-                label="Notas"
-                icon={StickyNoteIcon}
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.notes?.message}
-              />
-            )}
-          />
-        </SummarySection>
-      </BottomSheet>
+        <DestinationPickerSheet
+          open={picker === "destination"}
+          onOpenChange={closeHandlerFor("destination")}
+          institutions={institutions}
+          accounts={accounts}
+          cards={cards}
+          display={display}
+          onSelect={(next) => {
+            const target = splitLedgerTarget(next)
+            setValue("cardId", target.cardId ?? CATALOG_NONE, {
+              shouldDirty: true,
+            })
+            setValue("accountId", target.accountId ?? CATALOG_NONE, {
+              shouldDirty: true,
+            })
+          }}
+        />
 
-      <FinanceCurrencyPickerSheet
-        open={picker === "currency"}
-        onOpenChange={closeHandlerFor("currency")}
-        value={currency || display.currency}
-        onSelect={(next) =>
-          setValue("currency", next, {
-            shouldDirty: true,
-            shouldValidate: true,
-          })
-        }
-      />
-
-      <DestinationPickerSheet
-        open={picker === "destination"}
-        onOpenChange={closeHandlerFor("destination")}
-        institutions={institutions}
-        accounts={accounts}
-        cards={cards}
-        display={display}
-        onSelect={(next) => {
-          const target = splitLedgerTarget(next)
-          setValue("cardId", target.cardId ?? CATALOG_NONE, {
-            shouldDirty: true,
-          })
-          setValue("accountId", target.accountId ?? CATALOG_NONE, {
-            shouldDirty: true,
-          })
-        }}
-      />
-
-      <CategoryPickerSheet
-        open={picker === "category"}
-        onOpenChange={closeHandlerFor("category")}
-        categories={categories}
-        categoryType="EXPENSE"
-        value={categoryId}
-        onSelect={(next) => setValue("categoryId", next, { shouldDirty: true })}
-      />
+        <CategoryPickerSheet
+          open={picker === "category"}
+          onOpenChange={closeHandlerFor("category")}
+          categories={categories}
+          categoryType="EXPENSE"
+          value={categoryId}
+          onSelect={(next) =>
+            setValue("categoryId", next, { shouldDirty: true })
+          }
+        />
+      </Drawer>
 
       {discardChangesDialog}
     </>

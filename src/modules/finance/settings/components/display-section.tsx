@@ -1,5 +1,12 @@
-import { SwitchFieldRow } from "@/src/shared/components/forms/switch-field-row"
 import { ChoiceGrid } from "@/src/shared/components/forms/choice-grid"
+import {
+  Field,
+  FieldContent,
+  FieldLabel,
+  FieldMedia,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
+import { Switch } from "@/src/shared/components/ui/switch"
 import {
   SummaryGroup,
   SummaryItem,
@@ -92,28 +99,44 @@ export function DisplaySection({ control, baseCurrency }: DisplaySectionProps) {
             control={control}
             name="showCents"
             render={({ field }) => (
-              <SwitchFieldRow
-                icon={Coins}
-                iconColor={MODULE_ACCENT}
-                accentColor={MODULE_ACCENT}
-                label="Mostrar centavos"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Field
+                variant="card"
+                orientation="horizontal"
+                style={activeRowStyle(MODULE_ACCENT, field.value)}
+              >
+                <FieldMedia icon={Coins} color={MODULE_ACCENT} />
+                <FieldContent>
+                  <FieldLabel htmlFor={field.name}>Mostrar centavos</FieldLabel>
+                </FieldContent>
+                <Switch
+                  id={field.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </Field>
             )}
           />
           <Controller
             control={control}
             name="compactNumbers"
             render={({ field }) => (
-              <SwitchFieldRow
-                icon={Shrink}
-                iconColor={MODULE_ACCENT}
-                accentColor={MODULE_ACCENT}
-                label="Números compactos"
-                checked={field.value}
-                onCheckedChange={field.onChange}
-              />
+              <Field
+                variant="card"
+                orientation="horizontal"
+                style={activeRowStyle(MODULE_ACCENT, field.value)}
+              >
+                <FieldMedia icon={Shrink} color={MODULE_ACCENT} />
+                <FieldContent>
+                  <FieldLabel htmlFor={field.name}>
+                    Números compactos
+                  </FieldLabel>
+                </FieldContent>
+                <Switch
+                  id={field.name}
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </Field>
             )}
           />
         </SummaryGroup>

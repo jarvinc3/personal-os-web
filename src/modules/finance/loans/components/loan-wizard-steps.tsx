@@ -1,6 +1,9 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import { format } from "date-fns"
 import {
   ArrowDownCircleIcon,
@@ -24,7 +27,6 @@ import {
 } from "react-hook-form"
 
 import { FinanceDateField } from "@/src/modules/finance/shared/components/forms/date-field"
-import { FinanceHelpText } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { DestinationTrigger } from "@/src/modules/finance/shared/components/pickers/destination-trigger"
 import { InstitutionTrigger } from "@/src/modules/finance/shared/components/pickers/institution-picker"
@@ -46,15 +48,31 @@ import {
   type LoanWizardValues,
 } from "@/src/modules/finance/loans/lib/loan-form"
 import type { LoanPlan } from "@/src/modules/finance/loans/lib/loan-wizard"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
-import { OptionRow } from "@/src/shared/components/forms/option-row"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
+import {
+  FIELD_CHOICE_CLASS_NAME,
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldMedia,
+  FieldTitle,
+  activeRowStyle,
+} from "@/src/shared/components/ui/field"
 import {
   SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
 import { Button } from "@/src/shared/components/ui/button"
 import { cn } from "@/src/shared/lib/utils"
+import { getModule } from "@/src/shared/constants/module-registry"
+
+const MODULE_ACCENT = getModule("finance").accent
 
 const TERM_OPTIONS = LOAN_WIZARD_TERMS.map((term) => ({
   value: String(term),
@@ -140,34 +158,64 @@ export function LoanWizardWhoStep({
   const who = values.who ?? "BANK"
   return (
     <SummarySection title="¿Con quién es el préstamo?" icon={LandmarkIcon}>
-      <OptionRow
-        label="Un banco o financiera"
-        description="Usa tus instituciones"
-        icon={LandmarkIcon}
-        selected={who === "BANK"}
-        onPress={() => onSelectWho("BANK")}
-      />
-      <OptionRow
-        label="Una persona"
-        description="Familiar o amigo"
-        icon={UserIcon}
-        selected={who === "PERSON"}
-        onPress={() => onSelectWho("PERSON")}
-      />
+      <FieldLabel
+        onClick={() => onSelectWho("BANK")}
+        className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+        style={activeRowStyle(MODULE_ACCENT, who === "BANK")}
+      >
+        <FieldMedia icon={LandmarkIcon} />
+        <FieldContent>
+          <FieldTitle className="text-sm">Un banco o financiera</FieldTitle>
+          <FieldDescription className="text-xs text-muted-foreground">
+            Usa tus instituciones
+          </FieldDescription>
+        </FieldContent>
+      </FieldLabel>
+      <FieldLabel
+        onClick={() => onSelectWho("PERSON")}
+        className={cn(FIELD_CHOICE_CLASS_NAME, "border-border bg-card")}
+        style={activeRowStyle(MODULE_ACCENT, who === "PERSON")}
+      >
+        <FieldMedia icon={UserIcon} />
+        <FieldContent>
+          <FieldTitle className="text-sm">Una persona</FieldTitle>
+          <FieldDescription className="text-xs text-muted-foreground">
+            Familiar o amigo
+          </FieldDescription>
+        </FieldContent>
+      </FieldLabel>
       {who === "PERSON" ? (
         <Controller
           control={control}
           name="lenderName"
           render={({ field }) => (
-            <FormTextField
-              icon={UserIcon}
-              label="Prestamista"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.lenderName?.message}
-              placeholder="Juan Pérez"
-            />
+            <Field
+              data-invalid={errors.lenderName ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-lender"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Prestamista
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <UserIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-lender"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder="Juan Pérez"
+                  aria-invalid={errors.lenderName ? true : undefined}
+                />
+              </InputGroup>
+              {errors.lenderName?.message ? (
+                <FieldError>{errors.lenderName.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
       ) : null}
@@ -197,9 +245,9 @@ export function LoanWizardInstitutionStep({
         />
         {error ? <FieldError>{error}</FieldError> : null}
       </Field>
-      <FinanceHelpText>
+      <FieldDescription className="text-xs">
         El nombre del prestamista se toma del banco.
-      </FinanceHelpText>
+      </FieldDescription>
     </SummarySection>
   )
 }
@@ -252,38 +300,90 @@ export function LoanWizardDetailsStep({
           control={control}
           name="freq"
           render={({ field }) => (
-            <SegmentedControl
-              label="Frecuencia"
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value as FinanceInstallmentFreq)
-              }
-              options={FREQ_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Frecuencia</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Frecuencia"
+              >
+                {FREQ_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller
           control={control}
           name="periods"
           render={({ field }) => (
-            <SegmentedControl
-              label="Plazo"
-              value={field.value}
-              onChange={field.onChange}
-              options={TERM_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Plazo</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Plazo"
+              >
+                {TERM_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller
           control={control}
           name="known"
           render={({ field }) => (
-            <SegmentedControl
-              label="Conoces"
-              value={field.value}
-              onChange={field.onChange}
-              options={KNOWN_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Conoces</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Conoces"
+              >
+                {KNOWN_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         {known === "RATE" ? (
@@ -291,15 +391,33 @@ export function LoanWizardDetailsStep({
             control={control}
             name="ratePercent"
             render={({ field }) => (
-              <FormTextField
-                icon={PercentIcon}
-                label="Tasa anual (%)"
-                value={field.value}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={errors.ratePercent?.message}
-                placeholder="14.5"
-              />
+              <Field
+                data-invalid={errors.ratePercent ? true : undefined}
+                className="gap-0.5"
+              >
+                <FieldLabel
+                  htmlFor="wizard-rate"
+                  className="pl-2 text-sm text-muted-foreground"
+                >
+                  Tasa anual (%)
+                </FieldLabel>
+                <InputGroup className="h-10 overflow-hidden px-1">
+                  <InputGroupAddon align="inline-start">
+                    <PercentIcon className="text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id="wizard-rate"
+                    value={field.value}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    onBlur={field.onBlur}
+                    placeholder="14.5"
+                    aria-invalid={errors.ratePercent ? true : undefined}
+                  />
+                </InputGroup>
+                {errors.ratePercent?.message ? (
+                  <FieldError>{errors.ratePercent.message}</FieldError>
+                ) : null}
+              </Field>
             )}
           />
         ) : (
@@ -330,15 +448,33 @@ export function LoanWizardDetailsStep({
           control={control}
           name="name"
           render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Nombre (opcional)"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.name?.message}
-              placeholder="Carro"
-            />
+            <Field
+              data-invalid={errors.name ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-name"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Nombre (opcional)
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <NotebookPenIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-name"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder="Carro"
+                  aria-invalid={errors.name ? true : undefined}
+                />
+              </InputGroup>
+              {errors.name?.message ? (
+                <FieldError>{errors.name.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
         <Controller
@@ -389,10 +525,10 @@ export function LoanWizardDetailsStep({
             </Field>
           )}
         />
-        <FinanceHelpText>
+        <FieldDescription className="text-xs">
           Si eliges dónde entró el dinero, el saldo de esa cuenta sube y no
           cuenta como ingreso.
-        </FinanceHelpText>
+        </FieldDescription>
       </SummarySection>
 
       <SummarySection title="Calendario" icon={CalendarIcon}>
@@ -412,14 +548,30 @@ export function LoanWizardDetailsStep({
           control={control}
           name="rateType"
           render={({ field }) => (
-            <SegmentedControl
-              label="Tipo de tasa"
-              value={field.value}
-              onChange={(value) =>
-                field.onChange(value as "FIXED" | "VARIABLE")
-              }
-              options={RATE_TYPE_OPTIONS}
-            />
+            <Field className="gap-1">
+              <FieldLabel>Tipo de tasa</FieldLabel>
+              <ToggleGroup
+                value={[field.value]}
+                onValueChange={(next) => {
+                  if (next.length > 0) {
+                    field.onChange(next[0])
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                aria-label="Tipo de tasa"
+              >
+                {RATE_TYPE_OPTIONS.map((option) => (
+                  <ToggleGroupItem
+                    key={option.value}
+                    value={option.value}
+                    className="rounded-full"
+                  >
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
           )}
         />
         <Controller
@@ -530,14 +682,32 @@ export function LoanWizardReviewStep({
           control={control}
           name="notes"
           render={({ field }) => (
-            <FormTextField
-              icon={NotebookPenIcon}
-              label="Notas"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.notes?.message}
-            />
+            <Field
+              data-invalid={errors.notes ? true : undefined}
+              className="gap-0.5"
+            >
+              <FieldLabel
+                htmlFor="wizard-notes"
+                className="pl-2 text-sm text-muted-foreground"
+              >
+                Notas
+              </FieldLabel>
+              <InputGroup className="h-10 overflow-hidden px-1">
+                <InputGroupAddon align="inline-start">
+                  <NotebookPenIcon className="text-muted-foreground" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="wizard-notes"
+                  value={field.value}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  aria-invalid={errors.notes ? true : undefined}
+                />
+              </InputGroup>
+              {errors.notes?.message ? (
+                <FieldError>{errors.notes.message}</FieldError>
+              ) : null}
+            </Field>
           )}
         />
       </SummarySection>

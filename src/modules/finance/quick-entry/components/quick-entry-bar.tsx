@@ -1,7 +1,12 @@
 "use client"
 
 import { Button } from "@/src/shared/components/ui/button"
-import { FormTextField } from "@/src/shared/components/forms/form-text-field"
+import { Field } from "@/src/shared/components/ui/field"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/src/shared/components/ui/input-group"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { SparklesIcon } from "lucide-react"
 import { useState, type FormEvent } from "react"
@@ -50,14 +55,19 @@ export function QuickEntryBar() {
   return (
     <div className="flex flex-col gap-2 px-3 md:px-0">
       <form className="flex items-center gap-2" onSubmit={handleSubmit}>
-        <FormTextField
-          value={text}
-          onChange={setText}
-          placeholder="Registrar rápido: café 250 popular"
-          ariaLabel="Registrar rápido"
-          icon={SparklesIcon}
-          className="flex-1"
-        />
+        <Field className="flex-1">
+          <InputGroup className="h-10 flex-1 overflow-hidden px-1">
+            <InputGroupAddon align="inline-start">
+              <SparklesIcon className="text-muted-foreground" />
+            </InputGroupAddon>
+            <InputGroupInput
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+              placeholder="Registrar rápido: café 250 popular"
+              aria-label="Registrar rápido"
+            />
+          </InputGroup>
+        </Field>
         <Button
           type="submit"
           variant="secondary"

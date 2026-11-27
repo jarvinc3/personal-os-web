@@ -42,13 +42,23 @@ import {
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { encodeLedgerTarget } from "@/src/modules/finance/shared/lib/ledger-payloads"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
-import { DeleteRecordDialog } from "@/src/modules/finance/shared/components/delete-record-dialog"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
-import { ArchiveRecordDialog } from "@/src/modules/finance/shared/components/archive-record-dialog"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
 import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/src/shared/components/ui/alert-dialog"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   Tabs,
   TabsContent,
@@ -62,6 +72,7 @@ import {
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
+import { cn, PRESSABLE_CLASS } from "@/src/shared/lib/utils"
 import {
   ArchiveIcon,
   CreditCardIcon,
@@ -71,6 +82,7 @@ import {
   PencilIcon,
   ScaleIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
@@ -422,26 +434,93 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
           },
         ]}
       />
-      <DeleteRecordDialog
+      <AlertDialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
-        recordName={card.name}
-        pending={deleteCard.isPending}
-        consequences="Se eliminan sus movimientos y sus estados de cuenta. No se puede deshacer."
-        onConfirm={() => void onDeleteCard()}
-        archive={{
-          label: "¿Solo ocultarla? Archivar",
-          pending: archiveCard.isPending,
-          onArchive: () => void onArchiveCard(),
+        onOpenChange={(open) => {
+          if (!open && !deleteCard.isPending) {
+            setConfirmOpen(false)
+          }
         }}
-      />
-      <ArchiveRecordDialog
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Eliminar “{card.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminan sus movimientos y sus estados de cuenta. No se puede
+              deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={deleteCard.isPending || archiveCard.isPending}
+            className={cn("justify-start", PRESSABLE_CLASS)}
+            onClick={() => void onArchiveCard()}
+          >
+            <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+            ¿Solo ocultarla? Archivar
+          </Button>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCard.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteCard.isPending}
+              onClick={() => void onDeleteCard()}
+            >
+              {deleteCard.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <Trash2Icon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {deleteCard.isPending ? "Eliminando..." : "Eliminar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
         open={archiveConfirmOpen}
-        onOpenChange={setArchiveConfirmOpen}
-        recordName={card.name}
-        pending={archiveCard.isPending}
-        onConfirm={() => void onArchiveCard()}
-      />
+        onOpenChange={(open) => {
+          if (!open && !archiveCard.isPending) {
+            setArchiveConfirmOpen(false)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia className="bg-muted text-muted-foreground">
+              <ArchiveIcon aria-hidden="true" />
+            </AlertDialogMedia>
+            <AlertDialogTitle>¿Archivar “{card.name}”?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Deja de aparecer en las listas. Puedes restaurarlo desde la
+              papelera de reciclaje o con Deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={archiveCard.isPending}>
+              <XIcon className="size-4 shrink-0" aria-hidden="true" />
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={archiveCard.isPending}
+              onClick={() => void onArchiveCard()}
+            >
+              {archiveCard.isPending ? (
+                <Spinner data-icon="inline-start" />
+              ) : (
+                <ArchiveIcon className="size-4 shrink-0" aria-hidden="true" />
+              )}
+              {archiveCard.isPending ? "Archivando..." : "Archivar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <CardBalanceSheet
         open={openCardBalanceSheet}
         onOpenChange={setOpenCardBalanceSheet}

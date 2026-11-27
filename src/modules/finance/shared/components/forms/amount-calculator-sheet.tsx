@@ -11,10 +11,17 @@ import {
 } from "@/src/modules/finance/shared/lib/amount-calculator"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useFormatLocale } from "@/src/modules/settings/hooks/use-format-locale"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
 import { cn } from "@/src/shared/lib/utils"
-import { CheckIcon, DeleteIcon } from "lucide-react"
+import { CheckIcon, DeleteIcon, XIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 type AmountCalculatorSheetProps = {
@@ -87,7 +94,7 @@ export function AmountCalculatorSheet({
   const confirmed = state.justEvaluated
 
   return (
-    <BottomSheet
+    <Drawer
       open={open}
       onOpenChange={(next) => {
         if (!next) {
@@ -95,36 +102,53 @@ export function AmountCalculatorSheet({
         }
         onOpenChange(next)
       }}
-      title="Cantidad"
     >
-      <div className="flex flex-col items-end gap-1 px-1">
-        <p className="max-w-full text-right text-3xl leading-tight font-semibold wrap-break-word tabular-nums">
-          {calculatorHeadline(state)}
-        </p>
-        <p className="text-sm text-muted-foreground tabular-nums">{preview}</p>
-      </div>
-      <div className="grid grid-cols-4 gap-2">
-        {KEY_ROWS.slice(0, 3).map((row) =>
-          row.map((key) => (
-            <CalcKey key={key} calculatorKey={key} onPress={press} />
-          ))
-        )}
-        {KEY_ROWS[3]?.map((key) => (
-          <CalcKey key={key} calculatorKey={key} onPress={press} />
-        ))}
-        <Button
-          type="button"
-          aria-label={confirmed ? "Usar resultado" : "="}
-          className="row-span-2 h-auto rounded-2xl bg-blue-500 text-2xl text-white hover:bg-blue-500/90"
-          onClick={() => press("=")}
-        >
-          {confirmed ? <CheckIcon className="size-7" /> : "="}
-        </Button>
-        {KEY_ROWS[4]?.map((key) => (
-          <CalcKey key={key} calculatorKey={key} onPress={press} />
-        ))}
-      </div>
-    </BottomSheet>
+      <DrawerContent>
+        <SheetHeader title="Cantidad" />
+        <SheetBody>
+          <div className="flex flex-col items-end gap-1 px-1">
+            <p className="max-w-full text-right text-3xl leading-tight font-semibold wrap-break-word tabular-nums">
+              {calculatorHeadline(state)}
+            </p>
+            <p className="text-sm text-muted-foreground tabular-nums">
+              {preview}
+            </p>
+          </div>
+          <div className="grid grid-cols-4 gap-2">
+            {KEY_ROWS.slice(0, 3).map((row) =>
+              row.map((key) => (
+                <CalcKey key={key} calculatorKey={key} onPress={press} />
+              ))
+            )}
+            {KEY_ROWS[3]?.map((key) => (
+              <CalcKey key={key} calculatorKey={key} onPress={press} />
+            ))}
+            <Button
+              type="button"
+              aria-label={confirmed ? "Usar resultado" : "="}
+              className="row-span-2 h-auto rounded-2xl bg-blue-500 text-2xl text-white hover:bg-blue-500/90"
+              onClick={() => press("=")}
+            >
+              {confirmed ? <CheckIcon className="size-7" /> : "="}
+            </Button>
+            {KEY_ROWS[4]?.map((key) => (
+              <CalcKey key={key} calculatorKey={key} onPress={press} />
+            ))}
+          </div>
+        </SheetBody>
+        <DrawerFooter className={SHEET_FOOTER_CLASS}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => onOpenChange(false)}
+          >
+            <XIcon className="size-4 shrink-0" aria-hidden="true" />
+            Cancelar
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

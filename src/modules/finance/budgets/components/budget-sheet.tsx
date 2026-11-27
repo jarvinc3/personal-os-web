@@ -1,14 +1,14 @@
 "use client"
 
-import { SegmentedControl } from "@/src/shared/components/forms/segmented-control"
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/src/shared/components/ui/toggle-group"
 import {
   FinanceDateField,
   formatFinanceDateLabel,
 } from "@/src/modules/finance/shared/components/forms/date-field"
-import {
-  FinanceHelpText,
-  FinanceSuggestionRow,
-} from "@/src/modules/finance/shared/components/forms/form-blocks"
+import { FinanceSuggestionRow } from "@/src/modules/finance/shared/components/forms/form-blocks"
 import { FinanceMoneyField } from "@/src/modules/finance/shared/components/forms/money-field"
 import { CategoryMultiTrigger } from "@/src/modules/finance/shared/components/pickers/category-multi-trigger"
 import { CategoryPickerSheet } from "@/src/modules/finance/shared/components/pickers/category-picker-sheet"
@@ -32,8 +32,6 @@ import { previousMonthsBounds } from "@/src/modules/finance/shared/lib/month-win
 import { visibleTransactionTotals } from "@/src/modules/finance/shared/lib/transactions-query"
 import type {
   FinanceBudget,
-  FinanceBudgetPeriod,
-  FinanceBudgetRollover,
   FinanceCategory,
 } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -43,18 +41,30 @@ import {
   FINANCE_BUDGET_ROLLOVERS,
 } from "@/src/modules/finance/shared/types/entities"
 import { usePicker } from "@/src/shared/hooks/use-picker"
-import { BottomSheet } from "@/src/shared/components/sheets/bottom-sheet"
+import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
+import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
+import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { SheetHelpAction } from "@/src/modules/help"
 import { Button } from "@/src/shared/components/ui/button"
-import { Field, FieldError, FieldLabel } from "@/src/shared/components/ui/field"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+} from "@/src/shared/components/ui/drawer"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/src/shared/components/ui/field"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Switch } from "@/src/shared/components/ui/switch"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { createSheetSubmit } from "@/src/shared/lib/sheet-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, PiggyBankIcon } from "lucide-react"
+import { CalendarIcon, PiggyBankIcon, XIcon } from "lucide-react"
 import { useEffect, useId, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import {
@@ -268,209 +278,277 @@ export function BudgetSheet({
 
   return (
     <>
-      <BottomSheet
-        open={open}
-        onOpenChange={requestOpenChange}
-        helpAction={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.budget} />}
-        pending={pending}
-        title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
-        description={
-          hasCategories
-            ? "El tope es por categorías y periodo. El gasto se calcula con los movimientos."
-            : "Crea la categoría desde el selector de categorías."
-        }
-        actions={{
-          submit: (
-            <Button
-              type="button"
-              disabled={isPending || categoryIds.length === 0}
-              className="flex-1"
-              onClick={onSubmit}
-            >
-              {isPending ? <Spinner data-icon="inline-start" /> : null}
-              Guardar
-            </Button>
-          ),
-        }}
-      >
-        <SummarySection title="Presupuesto" icon={PiggyBankIcon}>
-          <Field className="gap-1">
-            <FieldLabel className="text-sm text-muted-foreground">
-              Categorías
-            </FieldLabel>
-            <CategoryMultiTrigger
-              categories={selectedCategories}
-              onClick={() => openPicker("category")}
-              onRemove={(categoryId) =>
-                setValue(
-                  "categoryIds",
-                  removeCategoryId(categoryIds, categoryId),
-                  { shouldValidate: true }
-                )
-              }
-            />
-            {errors.categoryIds?.message ? (
-              <FieldError>{errors.categoryIds.message}</FieldError>
-            ) : null}
-          </Field>
-          <Controller
-            control={control}
-            name="amountLimit"
-            render={({ field }) => (
-              <FinanceMoneyField
-                calculatorKey="budget-amount"
-                label="Tope"
-                amount={field.value}
-                onAmountChange={field.onChange}
-                onAmountCommit={(next) => {
-                  field.onChange(next)
-                  void trigger("amountLimit")
-                }}
-                onAmountBlur={field.onBlur}
-                amountError={errors.amountLimit?.message}
-                currency={baseCurrency}
-              />
-            )}
+      <Drawer open={open} onOpenChange={requestOpenChange}>
+        <DrawerContent>
+          <SheetHeader
+            title={isEdit ? "Editar presupuesto" : "Nuevo presupuesto"}
+            description={
+              hasCategories
+                ? "El tope es por categorías y periodo. El gasto se calcula con los movimientos."
+                : "Crea la categoría desde el selector de categorías."
+            }
+            pending={pending}
+            actions={<SheetHelpAction sheetKey={FINANCE_SHEET_KEYS.budget} />}
           />
-          {averageMonthlySpend ? (
-            <FinanceSuggestionRow
-              actionLabel="Usar"
-              onAction={() =>
-                setValue(
-                  "amountLimit",
-                  String(Math.round(averageMonthlySpend)),
-                  { shouldValidate: true }
-                )
-              }
-            >
-              {`Gastas ~${formatFinanceMoney(averageMonthlySpend, display)}/mes · promedio 3 meses`}
-            </FinanceSuggestionRow>
+          <SheetBody pending={pending}>
+            <SummarySection title="Presupuesto" icon={PiggyBankIcon}>
+              <Field className="gap-1">
+                <FieldLabel className="text-sm text-muted-foreground">
+                  Categorías
+                </FieldLabel>
+                <CategoryMultiTrigger
+                  categories={selectedCategories}
+                  onClick={() => openPicker("category")}
+                  onRemove={(categoryId) =>
+                    setValue(
+                      "categoryIds",
+                      removeCategoryId(categoryIds, categoryId),
+                      { shouldValidate: true }
+                    )
+                  }
+                />
+                {errors.categoryIds?.message ? (
+                  <FieldError>{errors.categoryIds.message}</FieldError>
+                ) : null}
+              </Field>
+              <Controller
+                control={control}
+                name="amountLimit"
+                render={({ field }) => (
+                  <FinanceMoneyField
+                    calculatorKey="budget-amount"
+                    label="Tope"
+                    amount={field.value}
+                    onAmountChange={field.onChange}
+                    onAmountCommit={(next) => {
+                      field.onChange(next)
+                      void trigger("amountLimit")
+                    }}
+                    onAmountBlur={field.onBlur}
+                    amountError={errors.amountLimit?.message}
+                    currency={baseCurrency}
+                  />
+                )}
+              />
+              {averageMonthlySpend ? (
+                <FinanceSuggestionRow
+                  actionLabel="Usar"
+                  onAction={() =>
+                    setValue(
+                      "amountLimit",
+                      String(Math.round(averageMonthlySpend)),
+                      { shouldValidate: true }
+                    )
+                  }
+                >
+                  {`Gastas ~${formatFinanceMoney(averageMonthlySpend, display)}/mes · promedio 3 meses`}
+                </FinanceSuggestionRow>
+              ) : null}
+              <Controller
+                control={control}
+                name="alertThresholdPct"
+                render={({ field }) => (
+                  <Field
+                    data-invalid={errors.alertThresholdPct ? true : undefined}
+                    className="gap-1"
+                  >
+                    <FieldLabel>Avisarme al</FieldLabel>
+                    <ToggleGroup
+                      value={[field.value]}
+                      onValueChange={(next) => {
+                        if (next.length > 0) {
+                          field.onChange(next[0])
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      aria-label="Avisarme al"
+                    >
+                      {THRESHOLD_OPTIONS.map((option) => (
+                        <ToggleGroupItem
+                          key={option.value}
+                          value={option.value}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                    {errors.alertThresholdPct?.message ? (
+                      <FieldError>
+                        {errors.alertThresholdPct.message}
+                      </FieldError>
+                    ) : null}
+                  </Field>
+                )}
+              />
+            </SummarySection>
+
+            <SummarySection title="Periodo" icon={CalendarIcon}>
+              <Controller
+                control={control}
+                name="periodType"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel>Tipo</FieldLabel>
+                    <ToggleGroup
+                      value={[field.value]}
+                      onValueChange={(next) => {
+                        if (next.length > 0) {
+                          field.onChange(next[0])
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      aria-label="Tipo"
+                    >
+                      {PERIOD_OPTIONS.map((option) => (
+                        <ToggleGroupItem
+                          key={option.value}
+                          value={option.value}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </Field>
+                )}
+              />
+              {isCustom ? (
+                <>
+                  <Controller
+                    control={control}
+                    name="periodStart"
+                    render={({ field }) => (
+                      <FinanceDateField
+                        label="Desde"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="periodEnd"
+                    render={({ field }) => (
+                      <FinanceDateField
+                        label="Hasta"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </>
+              ) : (
+                <FieldDescription className="text-xs">
+                  {formatFinanceDateLabel(periodStart, display.locale)} —{" "}
+                  {formatFinanceDateLabel(periodEnd, display.locale)}
+                </FieldDescription>
+              )}
+            </SummarySection>
+
+            <SummarySection title="Opciones" icon={PiggyBankIcon}>
+              <Controller
+                control={control}
+                name="includeChildren"
+                render={({ field }) => (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                    <FieldLabel htmlFor={includeChildrenId} className="text-sm">
+                      Incluir subcategorías
+                    </FieldLabel>
+                    <Switch
+                      id={includeChildrenId}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="recurring"
+                render={({ field }) => (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
+                    <FieldLabel htmlFor={recurringId} className="text-sm">
+                      Repetir cada periodo
+                    </FieldLabel>
+                    <Switch
+                      id={recurringId}
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </div>
+                )}
+              />
+              <Controller
+                control={control}
+                name="rollover"
+                render={({ field }) => (
+                  <Field className="gap-1">
+                    <FieldLabel>Arrastre</FieldLabel>
+                    <ToggleGroup
+                      value={[field.value]}
+                      onValueChange={(next) => {
+                        if (next.length > 0) {
+                          field.onChange(next[0])
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      aria-label="Arrastre"
+                    >
+                      {ROLLOVER_OPTIONS.map((option) => (
+                        <ToggleGroupItem
+                          key={option.value}
+                          value={option.value}
+                          className="rounded-full"
+                        >
+                          {option.label}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </Field>
+                )}
+              />
+            </SummarySection>
+          </SheetBody>
+          {!pending ? (
+            <DrawerFooter className={SHEET_FOOTER_CLASS}>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => requestOpenChange(false)}
+              >
+                <XIcon className="size-4 shrink-0" aria-hidden="true" />
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={isPending || categoryIds.length === 0}
+                className="flex-1"
+                onClick={onSubmit}
+              >
+                {isPending ? <Spinner data-icon="inline-start" /> : null}
+                Guardar
+              </Button>
+            </DrawerFooter>
           ) : null}
-          <Controller
-            control={control}
-            name="alertThresholdPct"
-            render={({ field }) => (
-              <SegmentedControl
-                label="Avisarme al"
-                value={field.value}
-                onChange={field.onChange}
-                options={THRESHOLD_OPTIONS}
-                error={errors.alertThresholdPct?.message}
-              />
-            )}
-          />
-        </SummarySection>
-
-        <SummarySection title="Periodo" icon={CalendarIcon}>
-          <Controller
-            control={control}
-            name="periodType"
-            render={({ field }) => (
-              <SegmentedControl
-                label="Tipo"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceBudgetPeriod)
-                }
-                options={PERIOD_OPTIONS}
-              />
-            )}
-          />
-          {isCustom ? (
-            <>
-              <Controller
-                control={control}
-                name="periodStart"
-                render={({ field }) => (
-                  <FinanceDateField
-                    label="Desde"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="periodEnd"
-                render={({ field }) => (
-                  <FinanceDateField
-                    label="Hasta"
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </>
-          ) : (
-            <FinanceHelpText>
-              {formatFinanceDateLabel(periodStart, display.locale)} —{" "}
-              {formatFinanceDateLabel(periodEnd, display.locale)}
-            </FinanceHelpText>
-          )}
-        </SummarySection>
-
-        <SummarySection title="Opciones" icon={PiggyBankIcon}>
-          <Controller
-            control={control}
-            name="includeChildren"
-            render={({ field }) => (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
-                <FieldLabel htmlFor={includeChildrenId} className="text-sm">
-                  Incluir subcategorías
-                </FieldLabel>
-                <Switch
-                  id={includeChildrenId}
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            )}
-          />
-          <Controller
-            control={control}
-            name="recurring"
-            render={({ field }) => (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card px-3 py-2.5">
-                <FieldLabel htmlFor={recurringId} className="text-sm">
-                  Repetir cada periodo
-                </FieldLabel>
-                <Switch
-                  id={recurringId}
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            )}
-          />
-          <Controller
-            control={control}
-            name="rollover"
-            render={({ field }) => (
-              <SegmentedControl
-                label="Arrastre"
-                value={field.value}
-                onChange={(value) =>
-                  field.onChange(value as FinanceBudgetRollover)
-                }
-                options={ROLLOVER_OPTIONS}
-              />
-            )}
-          />
-        </SummarySection>
-      </BottomSheet>
-
-      <CategoryPickerSheet
-        open={picker === "category"}
-        onOpenChange={closeCategoryPicker}
-        categories={categories}
-        categoryType="EXPENSE"
-        multiple
-        value={categoryIds}
-        onChange={(next) =>
-          setValue("categoryIds", next, { shouldValidate: true })
-        }
-        onCreate={addBudgetCategory}
-      />
+        </DrawerContent>
+        <CategoryPickerSheet
+          open={picker === "category"}
+          onOpenChange={closeCategoryPicker}
+          categories={categories}
+          categoryType="EXPENSE"
+          multiple
+          value={categoryIds}
+          onChange={(next) =>
+            setValue("categoryIds", next, { shouldValidate: true })
+          }
+          onCreate={addBudgetCategory}
+        />
+      </Drawer>
 
       {discardChangesDialog}
     </>

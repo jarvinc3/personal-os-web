@@ -172,29 +172,6 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
     ],
   },
   {
-    id: "card-skeleton",
-    name: "CardSkeleton",
-    category: "estados",
-    kind: "domain",
-    description: "Esqueleto de una card con la altura de su variante.",
-    whenToUse: "Mientras llegan las cards de una pila o un carrusel.",
-    whenNotToUse: "Una lista de filas: ListSkeleton.",
-    importPath: "@/src/shared/components/feedback/list-skeleton",
-    snippet: `import { CardSkeleton } from "@/src/shared/components/feedback/list-skeleton"
-
-<CardSkeleton height={28} />`,
-    subcomponents: [],
-    anatomy: [{ name: "CardSkeleton" }],
-    variants: [{ name: "height", values: "16, 28, 40 (unidades del layout)" }],
-    props: [
-      {
-        name: "height",
-        type: "number",
-        description: "Altura de la card que reemplaza.",
-      },
-    ],
-  },
-  {
     id: "loading-view",
     name: "LoadingView",
     category: "estados",
@@ -279,38 +256,6 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
         name: "className",
         type: "string",
         description: "Ajuste de tamaño cuando el control no lo impone.",
-      },
-    ],
-  },
-  {
-    id: "module-coming-soon",
-    name: "ModuleComingSoon",
-    category: "estados",
-    kind: "domain",
-    description:
-      "Estado de un módulo activo cuyas pantallas todavía no existen, con acceso a Ajustes.",
-    whenToUse:
-      "La ruta de un módulo que aún no tiene sus vistas y que el usuario puede configurar en Ajustes.",
-    whenNotToUse:
-      "Un vacío por falta de datos: Empty. Un módulo apagado del todo.",
-    importPath: "@/src/shared/components/feedback/module-coming-soon",
-    snippet: `import { ModuleComingSoon } from "@/src/shared/components/feedback/module-coming-soon"
-
-<ModuleComingSoon slug="agenda" />`,
-    subcomponents: [],
-    anatomy: [{ name: "ModuleComingSoon" }],
-    variants: [
-      {
-        name: "slug",
-        values: "módulo del registro, que aporta icono, color y etiqueta",
-      },
-    ],
-    props: [
-      {
-        name: "slug",
-        type: "ModuleSlug",
-        description:
-          "Módulo al que le faltan las pantallas; de ahí salen el icono, el color y el nombre.",
       },
     ],
   },

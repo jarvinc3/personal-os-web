@@ -9,7 +9,10 @@ import { Controller, type Control } from "react-hook-form"
 import type { FinanceModuleFormValues } from "@/src/modules/finance/settings/lib/finance-module-form"
 import { AccountChoiceList } from "./account-choice-list"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
-import type { FinanceAccount } from "@/src/modules/finance/shared/types/entities"
+import type {
+  FinanceAccount,
+  FinanceInstitution,
+} from "@/src/modules/finance/shared/types/entities"
 
 const MODULE_ACCENT = getModule("finance").accent
 
@@ -20,12 +23,14 @@ const AMOUNT_ENTRY_OPTIONS = [
 
 type MovementDefaultsSectionProps = {
   control: Control<FinanceModuleFormValues>
+  institutions: FinanceInstitution[]
   accounts: FinanceAccount[]
   display: FinanceMoneyDisplay
 }
 
 export function MovementDefaultsSection({
   control,
+  institutions,
   accounts,
   display,
 }: MovementDefaultsSectionProps) {
@@ -38,6 +43,8 @@ export function MovementDefaultsSection({
             name="defaultAccountId"
             render={({ field }) => (
               <AccountChoiceList
+                pickerKey="default-account"
+                institutions={institutions}
                 accounts={accounts}
                 display={display}
                 selectedId={field.value}

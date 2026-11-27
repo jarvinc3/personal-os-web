@@ -1,6 +1,5 @@
 "use client"
 
-import { NotificationEmptyState } from "@/src/modules/notifications/components/notification-empty-state"
 import { NotificationFilters } from "@/src/modules/notifications/components/notification-filters"
 import { NotificationGroupList } from "@/src/modules/notifications/components/notification-group-list"
 import { NotificationHeaderMenu } from "@/src/modules/notifications/components/notification-header-menu"
@@ -8,10 +7,19 @@ import { NotificationLoadMore } from "@/src/modules/notifications/components/not
 import { NotificationPreferencesSheet } from "@/src/modules/notifications/components/notification-preferences-sheet"
 import { NotificationsBlockedState } from "@/src/modules/notifications/components/notifications-blocked-state"
 import { useNotificationsScreen } from "@/src/modules/notifications/hooks/use-notifications-screen"
+import { resolveNotificationEmptyCopy } from "@/src/modules/notifications/lib/notification-empty-copy"
 import { resolveNotificationsScreenState } from "@/src/modules/notifications/lib/notifications-screen-state"
 import { NotificationsGate } from "@/src/modules/notifications/notifications-gate"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/src/shared/components/ui/empty"
 import { getModule } from "@/src/shared/constants/module-registry"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { BellOff } from "lucide-react"
 
 export function NotificationsScreen() {
   return (
@@ -96,6 +104,11 @@ function NotificationsScreenBody() {
     )
   }
 
+  const emptyCopy = resolveNotificationEmptyCopy({
+    readFilter,
+    moduleLabel: moduleFilter ? getModule(moduleFilter).label : null,
+  })
+
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-4 p-4 pb-16 md:px-6">
       <NotificationFilters
@@ -109,10 +122,15 @@ function NotificationsScreenBody() {
       />
 
       {sections.length === 0 ? (
-        <NotificationEmptyState
-          readFilter={readFilter}
-          moduleLabel={moduleFilter ? getModule(moduleFilter).label : null}
-        />
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <BellOff />
+            </EmptyMedia>
+            <EmptyTitle>{emptyCopy.title}</EmptyTitle>
+            <EmptyDescription>{emptyCopy.description}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <NotificationGroupList
           sections={sections}
