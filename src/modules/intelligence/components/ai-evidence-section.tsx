@@ -56,7 +56,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/src/shared/components/ui/toggle-group"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -71,6 +70,15 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import {
@@ -363,18 +371,31 @@ export function AiEvidenceSection({
               className="flex items-center gap-2 rounded-lg border px-2"
             >
               <div className="min-w-0 flex-1">
-                <SummaryItem
+                <Item
                   key={run.id}
-                  title={`${analysisRunModeLabel(run.mode)} · ${analysisRunStatusLabel(run.status)}`}
-                  description={`Proceso ${run.pipelineVersion} · ${run.observationSequence} observaciones · ${run.verificationSequence} verificaciones`}
-                  icon={Clock3}
-                  value={
-                    run.completedAt
-                      ? formatDateTime(run.completedAt, formatLocale)
-                      : "En curso"
-                  }
-                  isLast={index === runsQuery.data!.length - 1}
-                />
+                  variant="plain"
+                  className={cn(
+                    !(index === runsQuery.data!.length - 1) &&
+                      "border-b border-border/60"
+                  )}
+                >
+                  <ItemMedia variant="icon">
+                    <Clock3 />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{`${analysisRunModeLabel(run.mode)} · ${analysisRunStatusLabel(run.status)}`}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {`Proceso ${run.pipelineVersion} · ${run.observationSequence} observaciones · ${run.verificationSequence} verificaciones`}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {run.completedAt
+                        ? formatDateTime(run.completedAt, formatLocale)
+                        : "En curso"}
+                    </span>
+                  </ItemActions>
+                </Item>
                 {run.mode === "EVALUATE" &&
                 run.metrics &&
                 typeof run.metrics === "object" ? (

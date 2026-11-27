@@ -1,7 +1,6 @@
 "use client"
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import type { FinanceReceivable } from "@/src/modules/finance/shared/types/entities"
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/src/modules/finance/receivables"
 import type { useReceivableShareMode } from "@/src/modules/finance/planning/hooks/use-receivable-share-mode"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyContent,
@@ -45,7 +45,13 @@ export function PlanningReceivablesTab({
       )}
       <AsyncRegion
         pending={pending}
-        pendingFallback={<ListSkeleton />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={receivables.length === 0}
         emptyFallback={
           <Empty className="py-8">

@@ -2,15 +2,23 @@
 
 import { HelpPage } from "@/src/modules/help/components/layout/help-page"
 import { HELP_ACCENT } from "@/src/modules/help/constants/help-ui"
+import { Card } from "@/src/shared/components/ui/card"
+import { cn } from "@/src/shared/lib/utils"
 import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   BookOpenIcon,
+  ChevronRightIcon,
   MessageCircleQuestionIcon,
   RouteIcon,
 } from "lucide-react"
@@ -47,20 +55,51 @@ export function HelpScreen() {
         de la app.
       </p>
 
-      <SettingsSection title="Contenido">
-        {HELP_SECTIONS.map((section, index) => (
-          <SettingsRow
-            key={section.href}
-            label={section.label}
-            description={section.description}
-            icon={section.icon}
-            accentColor={HELP_ACCENT}
-            disabled={isPending}
-            onPress={() => navigate(section.href)}
-            isLast={index === HELP_SECTIONS.length - 1}
-          />
-        ))}
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Contenido
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            {HELP_SECTIONS.map(({ href, label, description, icon: Icon }) => (
+              <Item
+                key={href}
+                variant="plain"
+                className={cn(
+                  "min-h-[52px] px-3 py-3",
+                  isPending && "opacity-50"
+                )}
+                aria-disabled={isPending || undefined}
+                render={
+                  <button
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => navigate(href)}
+                  />
+                }
+              >
+                <ItemMedia
+                  className="size-9 rounded-md"
+                  style={{ backgroundColor: `${HELP_ACCENT}20` }}
+                >
+                  <Icon className="size-4.5" style={{ color: HELP_ACCENT }} />
+                </ItemMedia>
+                <ItemContent className="gap-0.5">
+                  <ItemTitle className="text-sm font-normal md:text-base">
+                    {label}
+                  </ItemTitle>
+                  <ItemDescription className="text-xs">
+                    {description}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                </ItemActions>
+              </Item>
+            ))}
+          </ItemGroup>
+        </Card>
+      </section>
     </HelpPage>
   )
 }

@@ -5,7 +5,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { AccountProductRow } from "@/src/modules/finance/shared/components/product-rows"
 import { SavingsGoalContributionSheet } from "@/src/modules/finance/savings-goals/components/savings-goal-contribution-sheet"
@@ -32,7 +31,6 @@ import {
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { amountRatioPct } from "@/src/modules/finance/shared/lib/planning-lists"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -46,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -54,12 +53,19 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -173,15 +179,17 @@ function SavingsGoalDetailScreenBody({
     [setOptionsOpen]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeSavingsGoals)
+
   usePageHeader(
     {
       variant: "secondary",
       title: goal?.name ?? "Meta",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
     },
-    [router, goal?.name, accent, headerActions]
+    [handleBack, goal?.name, accent, headerActions]
   )
 
   const deleteGoal = useDeleteSavingsGoal()
@@ -228,7 +236,11 @@ function SavingsGoalDetailScreenBody({
   }
 
   if (goalsQuery.isPending && !goal) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!goal) {
@@ -290,20 +302,36 @@ function SavingsGoalDetailScreenBody({
               variant="compact"
             />
           ) : (
-            <SummaryItem
-              title="Cuenta asociada"
-              icon={WalletIcon}
-              value="Sin cuenta"
-              isLast={false}
-            />
+            <Item variant="plain" className={"border-b border-border/60"}>
+              <ItemMedia variant="icon">
+                <WalletIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Cuenta asociada"}</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {"Sin cuenta"}
+                </span>
+              </ItemActions>
+            </Item>
           )}
-          <SummaryItem
-            title="Apartado"
-            icon={PiggyBankIcon}
-            description="Reservado para la meta; sigue dentro del saldo de la cuenta."
-            value={formatFinanceMoney(goal.currentAmount, money)}
-            isLast
-          />
+          <Item variant="plain">
+            <ItemMedia variant="icon">
+              <PiggyBankIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Apartado"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {"Reservado para la meta; sigue dentro del saldo de la cuenta."}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {formatFinanceMoney(goal.currentAmount, money)}
+              </span>
+            </ItemActions>
+          </Item>
         </SummarySection>
       </div>
 
@@ -336,7 +364,13 @@ function SavingsGoalDetailScreenBody({
 
         <AsyncRegion
           pending={contributionsQuery.isPending}
-          pendingFallback={<ListSkeleton rows={4} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={!contributionsQuery.isError && contributions.length === 0}
           emptyFallback={
             <Empty className="py-10">
@@ -356,23 +390,37 @@ function SavingsGoalDetailScreenBody({
           {contributions.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
               {contributions.map((contribution, index) => (
-                <SummaryItem
+                <Item
                   key={contribution.id}
-                  title={formatFinanceMoney(contribution.amount, money)}
-                  description={[
-                    contribution.kind === "WITHDRAWAL" ? "Retiro" : "Aporte",
-                    formatCalendarDate(
-                      contribution.contributedAt,
-                      display.locale
-                    ),
-                    contribution.kind === "WITHDRAWAL"
-                      ? accountName(contribution.destinationAccountId)
-                      : null,
-                    contribution.notes ?? "",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  trailing={
+                  variant="plain"
+                  className={cn(
+                    index !== contributions.length - 1 &&
+                      "border-b border-border/60"
+                  )}
+                >
+                  <ItemContent>
+                    <ItemTitle>
+                      {formatFinanceMoney(contribution.amount, money)}
+                    </ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {[
+                        contribution.kind === "WITHDRAWAL"
+                          ? "Retiro"
+                          : "Aporte",
+                        formatCalendarDate(
+                          contribution.contributedAt,
+                          display.locale
+                        ),
+                        contribution.kind === "WITHDRAWAL"
+                          ? accountName(contribution.destinationAccountId)
+                          : null,
+                        contribution.notes ?? "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -384,9 +432,8 @@ function SavingsGoalDetailScreenBody({
                     >
                       <MoreVerticalIcon className="size-4" />
                     </Button>
-                  }
-                  isLast={index === contributions.length - 1}
-                />
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

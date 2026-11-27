@@ -12,10 +12,15 @@ import {
   type EmailUsageSummary,
   type UsageProgress,
 } from "@/src/modules/intelligence"
+import { Card } from "@/src/shared/components/ui/card"
 import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   ALERT_TONE_CLASS_NAME,
   Alert,
@@ -55,33 +60,41 @@ export function UsageCaps({ caps, now, locale }: UsageCapsProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <SettingsSection
-        title="Topes"
-        description="Los topes diarios se reinician a las 00:00 UTC."
-      >
-        <UsageCapRow
-          label="Carga inicial"
-          description={`Quedan ${formatUsageCount(initial.remaining, locale)} de ${formatUsageCount(caps.initial.limit, locale)} clasificaciones.`}
-          progress={initial}
-          locale={locale}
-          arcClassName="stroke-primary"
-        />
-        <UsageCapRow
-          label="Tope diario"
-          description={`Usaste ${formatUsageCount(daily.used, locale)} de ${formatUsageCount(caps.daily.limitTokens, locale)} tokens; quedan ${formatUsageCount(daily.remaining, locale)}.`}
-          progress={daily}
-          locale={locale}
-          arcClassName="stroke-primary"
-        />
-        <UsageCapRow
-          label="Costo global"
-          description={`${formatUsageCost(cost.used, locale)} de ${formatUsageCost(caps.globalCost.limitUsd, locale)}. Se reinicia el ${resetLabel}.`}
-          progress={cost}
-          locale={locale}
-          arcClassName={COST_ARC_BY_STATUS[caps.globalCost.status]}
-          isLast
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <div className="flex min-w-0 flex-col gap-0.5 px-1">
+          <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Topes
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Los topes diarios se reinician a las 00:00 UTC.
+          </p>
+        </div>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            <UsageCapRow
+              label="Carga inicial"
+              description={`Quedan ${formatUsageCount(initial.remaining, locale)} de ${formatUsageCount(caps.initial.limit, locale)} clasificaciones.`}
+              progress={initial}
+              locale={locale}
+              arcClassName="stroke-primary"
+            />
+            <UsageCapRow
+              label="Tope diario"
+              description={`Usaste ${formatUsageCount(daily.used, locale)} de ${formatUsageCount(caps.daily.limitTokens, locale)} tokens; quedan ${formatUsageCount(daily.remaining, locale)}.`}
+              progress={daily}
+              locale={locale}
+              arcClassName="stroke-primary"
+            />
+            <UsageCapRow
+              label="Costo global"
+              description={`${formatUsageCost(cost.used, locale)} de ${formatUsageCost(caps.globalCost.limitUsd, locale)}. Se reinicia el ${resetLabel}.`}
+              progress={cost}
+              locale={locale}
+              arcClassName={COST_ARC_BY_STATUS[caps.globalCost.status]}
+            />
+          </ItemGroup>
+        </Card>
+      </section>
 
       <UsageCostNotice
         status={caps.globalCost.status}
@@ -99,7 +112,6 @@ type UsageCapRowProps = {
   progress: UsageProgress
   locale: string
   arcClassName: string
-  isLast?: boolean
 }
 
 function UsageCapRow({
@@ -108,14 +120,16 @@ function UsageCapRow({
   progress,
   locale,
   arcClassName,
-  isLast = false,
 }: UsageCapRowProps) {
   return (
-    <SettingsRow
-      label={label}
-      description={description}
-      isLast={isLast}
-      trailing={
+    <Item variant="plain" className="min-h-[52px] px-3 py-3">
+      <ItemContent className="gap-0.5">
+        <ItemTitle className="text-sm font-normal md:text-base">
+          {label}
+        </ItemTitle>
+        <ItemDescription className="text-xs">{description}</ItemDescription>
+      </ItemContent>
+      <ItemActions>
         <ProgressRing
           value={progress.percent}
           size={RING_SIZE}
@@ -126,8 +140,8 @@ function UsageCapRow({
             {formatUsagePercent(progress.percent, locale)}
           </span>
         </ProgressRing>
-      }
-    />
+      </ItemActions>
+    </Item>
   )
 }
 

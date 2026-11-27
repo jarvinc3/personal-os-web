@@ -18,7 +18,14 @@ import type {
   AiReviewGroupVerificationInput,
   AiReviewGroupVerificationResult,
 } from "@/src/modules/intelligence/types/intelligence.types"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { InfiniteListErrorFooter } from "@/src/shared/components/feedback/infinite-list-error-footer"
 import { Badge } from "@/src/shared/components/ui/badge"
@@ -36,6 +43,7 @@ import { appToast } from "@/src/shared/lib/app-toast"
 import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
 import {
   AlertCircle,
+  ChevronRightIcon,
   Layers3,
   Mail,
   RotateCcw,
@@ -249,15 +257,32 @@ function ReviewGroupRow({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card/50">
-      <SummaryItem
-        className="rounded-none border-0 bg-transparent"
-        title={group.fromAddress}
-        wrapTitle
-        description={countLabel(group.total, "correo", "correos")}
-        icon={Layers3}
-        onPress={canBatch ? onTag : undefined}
-        showChevron={canBatch}
-        trailing={
+      <div className="flex w-full items-stretch">
+        <Item
+          variant="plain"
+          className="min-w-0 flex-1"
+          render={
+            canBatch ? <button type="button" onClick={onTag} /> : undefined
+          }
+        >
+          <ItemMedia variant="icon">
+            <Layers3 />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle className="line-clamp-2 break-words">
+              {group.fromAddress}
+            </ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {countLabel(group.total, "correo", "correos")}
+            </ItemDescription>
+          </ItemContent>
+          {canBatch ? (
+            <ItemActions>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            </ItemActions>
+          ) : null}
+        </Item>
+        <div className="flex shrink-0 items-center pr-2">
           <div className="flex flex-col items-end gap-2">
             <div className="flex flex-wrap justify-end gap-1">
               <Badge variant="secondary">
@@ -284,8 +309,8 @@ function ReviewGroupRow({
               </span>
             )}
           </div>
-        }
-      />
+        </div>
+      </div>
       {samples.length > 0 ? (
         <ReviewGroupSamples samples={samples} onOpenMessage={onOpenMessage} />
       ) : null}

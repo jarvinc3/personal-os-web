@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useAccounts } from "@/src/modules/finance/shared/hooks/use-accounts"
 import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useCategories } from "@/src/modules/finance/shared/hooks/use-categories"
@@ -22,8 +21,8 @@ import {
 import { groupSubscriptions } from "@/src/modules/finance/subscriptions/lib/subscription-view"
 import type { FinanceSubscriptionGroupBy } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import {
   Empty,
@@ -90,11 +89,11 @@ export function SubscriptionsList({
   const groups = groupSubscriptions(items, groupBy)
 
   return (
-    <SettingsSection
-      title="Mis suscripciones"
-      bare
-      className="gap-3"
-      headerTrailing={
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-row items-center justify-between gap-2 px-1">
+        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Mis suscripciones
+        </h2>
         <div className="flex items-center gap-1">
           <span className="text-sm font-normal text-muted-foreground tabular-nums">
             {items.length}
@@ -127,8 +126,7 @@ export function SubscriptionsList({
             ) : null}
           </Button>
         </div>
-      }
-    >
+      </div>
       {chips.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {chips.map((chip) => (
@@ -156,7 +154,13 @@ export function SubscriptionsList({
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<ListSkeleton rows={4} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -214,6 +218,6 @@ export function SubscriptionsList({
         isFetchingNextPage={listQuery.isFetchingNextPage}
         onLoadMore={() => void listQuery.fetchNextPage()}
       />
-    </SettingsSection>
+    </section>
   )
 }

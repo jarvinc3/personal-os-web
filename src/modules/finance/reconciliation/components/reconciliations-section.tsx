@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import type { ReconciliationTarget } from "@/src/modules/finance/shared/hooks/use-reconciliations"
 import {
@@ -26,11 +25,19 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { ScaleIcon, Trash2Icon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 type ReconciliationsSectionProps = {
   enabled: boolean
@@ -63,11 +70,10 @@ export function ReconciliationsSection({
   }
 
   return (
-    <SettingsSection
-      title="Conciliaciones"
-      bare
-      className="gap-3 rounded-3xl bg-background"
-    >
+    <section className="flex flex-col gap-3 rounded-3xl bg-background">
+      <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+        Conciliaciones
+      </h2>
       {query.isError ? (
         <ErrorState
           message={financeErrorMessage(query.error)}
@@ -77,7 +83,13 @@ export function ReconciliationsSection({
       ) : null}
       <AsyncRegion
         pending={query.isPending && !query.data}
-        pendingFallback={<ListSkeleton />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -96,32 +108,46 @@ export function ReconciliationsSection({
       >
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
           {items.map((item, index) => (
-            <SummaryItem
+            <Item
               key={item.id}
-              title={formatFinanceMoney(item.realBalance, {
-                ...display,
-                currency: item.currency,
-              })}
-              description={`${formatCalendarDate(item.asOfDate, display.locale)} · ${
-                item.adjustments.length === 0
-                  ? "Sin ajustes"
-                  : item.adjustments
-                      .map(
-                        (adjustment) =>
-                          FINANCE_RECONCILIATION_KIND_LABEL[adjustment.kind]
-                      )
-                      .join(", ")
-              }`}
-              icon={ScaleIcon}
-              value={formatFinanceMoney(item.difference, {
-                ...display,
-                currency: item.currency,
-                leadingSign: true,
-              })}
-              isLast={index === items.length - 1}
-              className="px-3"
-              trailing={
-                index === 0 ? (
+              variant="plain"
+              className={cn(
+                "px-3",
+                index !== items.length - 1 && "border-b border-border/60"
+              )}
+            >
+              <ItemMedia variant="icon">
+                <ScaleIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>
+                  {formatFinanceMoney(item.realBalance, {
+                    ...display,
+                    currency: item.currency,
+                  })}
+                </ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {`${formatCalendarDate(item.asOfDate, display.locale)} · ${
+                    item.adjustments.length === 0
+                      ? "Sin ajustes"
+                      : item.adjustments
+                          .map(
+                            (adjustment) =>
+                              FINANCE_RECONCILIATION_KIND_LABEL[adjustment.kind]
+                          )
+                          .join(", ")
+                  }`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatFinanceMoney(item.difference, {
+                    ...display,
+                    currency: item.currency,
+                    leadingSign: true,
+                  })}
+                </span>
+                {index === 0 ? (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -131,9 +157,9 @@ export function ReconciliationsSection({
                   >
                     <Trash2Icon className="size-4" />
                   </Button>
-                ) : undefined
-              }
-            />
+                ) : null}
+              </ItemActions>
+            </Item>
           ))}
         </div>
         <InfiniteListSentinel
@@ -142,6 +168,6 @@ export function ReconciliationsSection({
           onLoadMore={() => void query.fetchNextPage()}
         />
       </AsyncRegion>
-    </SettingsSection>
+    </section>
   )
 }

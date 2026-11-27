@@ -12,7 +12,7 @@ export default async function FinanceStatementImportPage({
 }: FinanceStatementImportPageProps) {
   const { importId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <StatementImportScreen importId={importId} />
     </Suspense>
   )

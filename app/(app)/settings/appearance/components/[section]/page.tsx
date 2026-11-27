@@ -19,7 +19,7 @@ export default async function ComponentGallerySectionPage({
   }
 
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ComponentSectionGalleryScreen sectionId={section} />
     </Suspense>
   )

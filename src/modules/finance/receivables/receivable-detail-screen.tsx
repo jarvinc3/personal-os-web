@@ -4,7 +4,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { ReceivablePaymentSheet } from "@/src/modules/finance/receivables/components/receivable-payment-sheet"
 import { ReceivableSheet } from "@/src/modules/finance/receivables/components/receivable-sheet"
@@ -35,7 +34,6 @@ import {
   FINANCE_RECEIVABLE_STATUS_VARIANT,
 } from "@/src/modules/finance/shared/types/entities"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -50,6 +48,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -57,10 +56,18 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -207,19 +214,25 @@ function ReceivableDetailScreenBody({
     [setOptionsOpen]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeReceivables)
+
   usePageHeader(
     {
       variant: "secondary",
       title: receivable?.debtorName ?? "Cobro",
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: ACCENT_FALLBACK_COLOR,
     },
-    [router, receivable?.debtorName, headerActions]
+    [handleBack, receivable?.debtorName, headerActions]
   )
 
   if (receivablesQuery.isPending && !receivable) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!receivable) {
@@ -293,7 +306,13 @@ function ReceivableDetailScreenBody({
 
         <AsyncRegion
           pending={paymentsQuery.isPending}
-          pendingFallback={<ListSkeleton rows={4} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={!paymentsQuery.isError && payments.length === 0}
           emptyFallback={
             <Empty className="py-10">
@@ -313,24 +332,34 @@ function ReceivableDetailScreenBody({
           {payments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
               {payments.map((payment, index) => (
-                <SummaryItem
+                <Item
                   key={payment.id}
-                  title={formatFinanceMoney(payment.amount, money)}
-                  description={[
-                    formatCalendarDate(payment.paidAt, display.locale),
-                    payment.account?.name ?? "Cuenta eliminada",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                  trailing={
-                    payment.transactionId ? (
+                  variant="plain"
+                  className={cn(
+                    index !== payments.length - 1 && "border-b border-border/60"
+                  )}
+                >
+                  <ItemContent>
+                    <ItemTitle>
+                      {formatFinanceMoney(payment.amount, money)}
+                    </ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {[
+                        formatCalendarDate(payment.paidAt, display.locale),
+                        payment.account?.name ?? "Cuenta eliminada",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    {payment.transactionId ? (
                       <Badge variant="secondary">Ingreso</Badge>
                     ) : (
                       <Badge variant="secondary">Saldo inicial</Badge>
-                    )
-                  }
-                  isLast={index === payments.length - 1}
-                />
+                    )}
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

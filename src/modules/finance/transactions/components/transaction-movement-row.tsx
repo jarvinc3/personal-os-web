@@ -29,16 +29,25 @@ import {
   type FinanceTransaction,
 } from "@/src/modules/finance/shared/types/entities"
 import { Badge } from "@/src/shared/components/ui/badge"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import Link from "next/link"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { cn } from "@/src/shared/lib/utils"
 import {
   ArrowDownLeftIcon,
   ArrowLeftRightIcon,
   ArrowUpRightIcon,
+  ChevronRightIcon,
   ScaleIcon,
 } from "lucide-react"
 import type { ReactNode } from "react"
-import Link from "next/link"
 
 type TransactionMovementRowProps = {
   transaction: FinanceTransaction
@@ -182,28 +191,55 @@ export function MovementRow({
   href,
   onPress,
 }: MovementRowProps) {
-  const row = {
-    accentColor,
-    tintRow,
-    title,
-    description,
-    leading,
-    value,
-    className,
-    trailing,
-    showChevron,
-    isLast,
-  }
-
-  if (onPress) {
-    return <SummaryItem {...row} onPress={onPress} />
-  }
-
-  if (href) {
-    return <SummaryItem {...row} href={href} />
-  }
-
-  return <SummaryItem {...row} />
+  const interactive = Boolean(onPress || href)
+  const chevronVisible = showChevron ?? Boolean(onPress)
+  return (
+    <Item
+      variant={interactive ? "default" : "plain"}
+      className={cn(
+        className,
+        !interactive && !isLast && "border-b border-border/60"
+      )}
+      style={
+        tintRow && accentColor
+          ? {
+              backgroundColor: `color-mix(in srgb, ${accentColor} 32%, transparent)`,
+            }
+          : undefined
+      }
+      render={
+        onPress ? (
+          <button type="button" onClick={onPress} />
+        ) : href ? (
+          <Link href={href} />
+        ) : undefined
+      }
+    >
+      {leading ? (
+        <ItemMedia className="h-10 w-max min-w-10 rounded-full px-1">
+          {leading}
+        </ItemMedia>
+      ) : null}
+      <ItemContent>
+        <ItemTitle>{title}</ItemTitle>
+        {description ? (
+          <ItemDescription className="truncate text-xs">
+            {description}
+          </ItemDescription>
+        ) : null}
+      </ItemContent>
+      {value || trailing || chevronVisible || href ? (
+        <ItemActions>
+          {value}
+          {trailing}
+          {chevronVisible ? (
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+          ) : null}
+          {href ? <LinkPendingOverlay /> : null}
+        </ItemActions>
+      ) : null}
+    </Item>
+  )
 }
 
 export function TransactionMovementRow({

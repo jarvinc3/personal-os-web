@@ -45,7 +45,6 @@ import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
 import { useTabsBehavior } from "@/src/shared/hooks/use-tabs-behavior"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
 import { InstrumentHistorySheet } from "@/src/modules/finance/shared/components/instrument-history-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -69,6 +68,7 @@ import {
   APP_ROUTES,
   financeTransactionNewHref,
 } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -207,17 +207,17 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
     }
   }
 
+  const handleBack = useBackTo(
+    card
+      ? APP_ROUTES.app.financeInstitution(card.institutionId)
+      : APP_ROUTES.app.financeProducts
+  )
+
   usePageHeader(
     {
       variant: "secondary",
       title: card?.institutionName || card?.name || "Tarjeta",
-      onBack: () => {
-        router.push(
-          card
-            ? APP_ROUTES.app.financeInstitution(card.institutionId)
-            : APP_ROUTES.app.financeProducts
-        )
-      },
+      onBack: handleBack,
       actions: (
         <>
           <Button
@@ -240,11 +240,16 @@ function CardDetailScreenBody({ cardId }: CardDetailScreenProps) {
       card?.color,
       card?.institutionId,
       setOpenOptionsSheet,
+      handleBack,
     ]
   )
 
   if (cardsQuery.isPending && !card) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!card) {

@@ -1,8 +1,7 @@
 "use client"
 
 import { HandCoinsIcon } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { LoanEditForm } from "@/src/modules/finance/loans/components/loan-edit-form"
@@ -16,9 +15,10 @@ import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-financ
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { useLoans } from "@/src/modules/finance/shared/hooks/use-loans"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function LoanCreateScreen() {
   return (
@@ -29,19 +29,12 @@ export function LoanCreateScreen() {
 }
 
 function LoanCreateScreenBody() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { config, formatLocale } = useFinanceEnabled()
   const defaultInstitutionId = searchParams.get("institutionId") ?? CATALOG_NONE
   const prefill = loanWizardPrefill(searchParams)
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financePlanning)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financePlanning)
 
   usePageHeader(
     {
@@ -81,7 +74,6 @@ export function LoanEditScreen({ loanId }: LoanEditScreenProps) {
 }
 
 function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const loansQuery = useLoans(isEnabled)
   const institutionsQuery = useInstitutions(isEnabled)
@@ -89,13 +81,7 @@ function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
   const loan =
     (loansQuery.data ?? []).find((item) => item.id === loanId) ?? null
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeLoan(loanId))
-  }, [router, loanId])
+  const handleBack = useBackTo(APP_ROUTES.app.financeLoan(loanId))
 
   usePageHeader(
     {
@@ -107,7 +93,11 @@ function LoanEditScreenBody({ loanId }: LoanEditScreenProps) {
   )
 
   if (loansQuery.isPending && !loan) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (loansQuery.error) {

@@ -4,7 +4,7 @@ import { Suspense } from "react"
 
 export default function FinanceSettingsPage() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <FinanceModuleSettingsScreen />
     </Suspense>
   )

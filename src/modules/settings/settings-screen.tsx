@@ -6,15 +6,22 @@ import { SETTINGS_REGISTRY } from "@/src/modules/settings/constants/settings-met
 import { useProfile } from "@/src/modules/settings/hooks/use-profile"
 import { SettingsGate } from "@/src/modules/settings/settings-gate"
 import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
-import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/src/shared/components/ui/avatar"
 import { Badge } from "@/src/shared/components/ui/badge"
+import { Card } from "@/src/shared/components/ui/card"
+import { cn } from "@/src/shared/lib/utils"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import {
   APP_ROUTES,
@@ -26,6 +33,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import {
   Bell,
+  ChevronRightIcon,
+  ExternalLink,
   Gauge,
   Globe,
   LayoutGrid,
@@ -105,6 +114,9 @@ function openLandingPage() {
   window.open(landingUrl(), "_blank", "noopener,noreferrer")
 }
 
+const HelpCenterIcon = SETTINGS_REGISTRY.help.rows.center.icon
+const LandingPageIcon = SETTINGS_REGISTRY.marketing.rows.landingPage.icon
+
 export function SettingsScreen() {
   return (
     <SettingsGate>
@@ -159,54 +171,162 @@ function SettingsScreenBody() {
         </div>
       </div>
 
-      <SettingsSection title="Ajustes">
-        {SETTINGS_MENU.map((item, index) => (
-          <SettingsRow
-            key={item.href}
-            label={item.label}
-            description={item.description}
-            icon={item.icon}
-            accentColor={item.accent}
-            disabled={isPending}
-            onPress={() => navigate(item.href)}
-            isLast={index === SETTINGS_MENU.length - 1}
-          />
-        ))}
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Ajustes
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0 divide-y divide-border/60">
+            {SETTINGS_MENU.map(
+              ({ href, label, description, icon: Icon, accent }) => (
+                <Item
+                  key={href}
+                  variant="plain"
+                  className={cn(
+                    "min-h-[52px] px-3 py-3",
+                    isPending && "opacity-50"
+                  )}
+                  aria-disabled={isPending || undefined}
+                  render={
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => navigate(href)}
+                    />
+                  }
+                >
+                  <ItemMedia
+                    className="size-9 rounded-md"
+                    style={{ backgroundColor: `${accent}20` }}
+                  >
+                    <Icon className="size-4.5" style={{ color: accent }} />
+                  </ItemMedia>
+                  <ItemContent className="gap-0.5">
+                    <ItemTitle className="text-sm font-normal md:text-base">
+                      {label}
+                    </ItemTitle>
+                    <ItemDescription className="text-xs">
+                      {description}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                  </ItemActions>
+                </Item>
+              )
+            )}
+          </ItemGroup>
+        </Card>
+      </section>
 
-      <SettingsSection title="Ayuda">
-        <SettingsRow
-          label="Centro de ayuda"
-          description="Glosario, guías y preguntas frecuentes."
-          accentColor={SETTINGS_REGISTRY.help.accent}
-          disabled={isPending}
-          onPress={() => navigate(APP_ROUTES.app.help)}
-          isLast
-          {...SETTINGS_REGISTRY.help.rows.center}
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Ayuda
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0">
+            <Item
+              variant="plain"
+              className={cn(
+                "min-h-[52px] px-3 py-3",
+                isPending && "opacity-50"
+              )}
+              aria-disabled={isPending || undefined}
+              render={
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => navigate(APP_ROUTES.app.help)}
+                />
+              }
+            >
+              <ItemMedia
+                className="size-9 rounded-md"
+                style={{
+                  backgroundColor: `${SETTINGS_REGISTRY.help.accent}20`,
+                }}
+              >
+                <HelpCenterIcon
+                  className="size-4.5"
+                  style={{ color: SETTINGS_REGISTRY.help.accent }}
+                />
+              </ItemMedia>
+              <ItemContent className="gap-0.5">
+                <ItemTitle className="text-sm font-normal md:text-base">
+                  Centro de ayuda
+                </ItemTitle>
+                <ItemDescription className="text-xs">
+                  Glosario, guías y preguntas frecuentes.
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </Card>
+      </section>
 
-      <SettingsSection title="Información">
-        <SettingsRow
-          label="Landing page"
-          link
-          onPress={openLandingPage}
-          isLast
-          accentColor={SETTINGS_REGISTRY.marketing.accent}
-          {...SETTINGS_REGISTRY.marketing.rows.landingPage}
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Información
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0">
+            <Item
+              variant="plain"
+              className="min-h-[52px] px-3 py-3"
+              render={<button type="button" onClick={openLandingPage} />}
+            >
+              <ItemMedia
+                className="size-9 rounded-md"
+                style={{
+                  backgroundColor: `${SETTINGS_REGISTRY.marketing.accent}20`,
+                }}
+              >
+                <LandingPageIcon
+                  className="size-4.5"
+                  style={{ color: SETTINGS_REGISTRY.marketing.accent }}
+                />
+              </ItemMedia>
+              <ItemContent className="gap-0.5">
+                <ItemTitle className="text-sm font-normal md:text-base">
+                  Landing page
+                </ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <ExternalLink className="size-4.5 text-muted-foreground" />
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </Card>
+      </section>
 
-      <SettingsSection title="Sesión">
-        <SettingsRow
-          label="Cerrar sesión"
-          destructive
-          onPress={() => logoutMutation.mutate()}
-          showChevron={false}
-          trailing={<LogOut className="size-4 text-destructive" />}
-          isLast
-        />
-      </SettingsSection>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Sesión
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <ItemGroup className="gap-0">
+            <Item
+              variant="plain"
+              className="min-h-[52px] px-3 py-3"
+              render={
+                <button type="button" onClick={() => logoutMutation.mutate()} />
+              }
+            >
+              <ItemContent className="gap-0.5">
+                <ItemTitle className="text-sm font-normal text-destructive md:text-base">
+                  Cerrar sesión
+                </ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <LogOut className="size-4 text-destructive" />
+              </ItemActions>
+            </Item>
+          </ItemGroup>
+        </Card>
+      </section>
 
       <div className="flex flex-col items-center justify-center gap-1 pb-6">
         <p className="text-xs text-muted-foreground">

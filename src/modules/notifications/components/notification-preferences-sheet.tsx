@@ -8,7 +8,6 @@ import { EditQuietHoursSheet, useProfile } from "@/src/modules/settings"
 import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { Button, buttonVariants } from "@/src/shared/components/ui/button"
 import {
@@ -16,6 +15,7 @@ import {
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
+import { ItemGroup } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
 import { SettingsIcon, XIcon } from "lucide-react"
@@ -47,18 +47,23 @@ export function NotificationPreferencesSheet({
             description="Ajusta canales y horario silencioso."
           />
           <SheetBody>
-            <SettingsSection title="Canales" bare>
-              <NotificationChannelSettings
-                channels={preferences.notifications.channels}
-                onPreferenceToggle={onPreferenceToggle}
-              />
-              <NotificationQuietHoursSettings
-                quietHours={preferences.notifications.quietHours}
-                onPreferenceToggle={onPreferenceToggle}
-                onQuietHoursOpenChange={onQuietHoursOpenChange}
-              />
-              <DevicePushSettingsRow isLast />
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Canales
+              </h2>
+              <ItemGroup className="gap-0 divide-y divide-border/60">
+                <NotificationChannelSettings
+                  channels={preferences.notifications.channels}
+                  onPreferenceToggle={onPreferenceToggle}
+                />
+                <NotificationQuietHoursSettings
+                  quietHours={preferences.notifications.quietHours}
+                  onPreferenceToggle={onPreferenceToggle}
+                  onQuietHoursOpenChange={onQuietHoursOpenChange}
+                />
+                <DevicePushSettingsRow />
+              </ItemGroup>
+            </section>
 
             <Link
               href={APP_ROUTES.app.settings}

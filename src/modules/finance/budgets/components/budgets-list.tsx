@@ -23,10 +23,10 @@ import {
 } from "@/src/shared/components/ui/empty"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { ChartPieIcon, PlusIcon } from "lucide-react"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 
@@ -80,7 +80,13 @@ export function FinanceBudgetsList({
       <div className="flex flex-col gap-2">
         <AsyncRegion
           pending={listQuery.isPending && !listQuery.data}
-          pendingFallback={<ListSkeleton />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={items.length === 0}
           emptyFallback={
             <Empty className="py-8">

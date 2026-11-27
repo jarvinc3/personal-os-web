@@ -12,7 +12,7 @@ export default async function FinanceReceivableDetailPage({
 }: FinanceReceivableDetailPageProps) {
   const { receivableId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <ReceivableDetailScreen receivableId={receivableId} />
     </Suspense>
   )

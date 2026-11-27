@@ -38,6 +38,11 @@ export const avisosDocs: readonly GalleryComponentMeta[] = [
     variants: [
       { name: "variant", values: "default, destructive" },
       { name: "tono", values: "ALERT_TONE_CLASS_NAME.warning, .info" },
+      {
+        name: "lavado",
+        values:
+          "ALERT_SOFT_TONE_CLASS_NAME.warning, .destructive, .info, .success",
+      },
     ],
     props: [
       {
@@ -49,50 +54,6 @@ export const avisosDocs: readonly GalleryComponentMeta[] = [
         name: "className",
         type: "string",
         description: "Tono warning o info con las clases compartidas.",
-      },
-    ],
-  },
-  {
-    id: "notice-card",
-    name: "NoticeCard",
-    category: "avisos",
-    kind: "domain",
-    description:
-      "Aviso con tono que acompaña a la card de una entidad, con una salida a la derecha.",
-    whenToUse:
-      "Un descuadre, un cargo rechazado o un dato que necesita una acción junto a una entidad.",
-    whenNotToUse:
-      "Un aviso general de un flujo: Alert. Un toast de una mutación: appToast.",
-    importPath: "@/src/modules/finance/shared/components/notice-card",
-    snippet: `import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
-
-<NoticeCard
-  icon={TriangleAlertIcon}
-  title="Descuadre de saldo"
-  description="El saldo del banco no coincide con el de la app."
-  tone="warning"
-/>`,
-    subcomponents: [],
-    anatomy: [{ name: "NoticeCard" }],
-    variants: [
-      { name: "tone", values: "warning, danger, info" },
-      { name: "trailing", values: "acción a la derecha" },
-    ],
-    props: [
-      {
-        name: "tone",
-        type: '"warning" | "danger" | "info"',
-        description: "Color y peso del aviso.",
-      },
-      {
-        name: "icon",
-        type: "LucideIcon",
-        description: "Icono del tono.",
-      },
-      {
-        name: "trailing",
-        type: "ReactNode",
-        description: "Acción para resolver el aviso.",
       },
     ],
   },

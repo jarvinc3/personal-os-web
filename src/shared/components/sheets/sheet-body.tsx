@@ -12,7 +12,7 @@ export function SheetBody({ pending = false, children }: SheetBodyProps) {
   return (
     <div
       data-base-ui-swipe-ignore=""
-      className="scrollbar-hide flex flex-col gap-4 overflow-y-auto p-4"
+      className="scrollbar-hide flex flex-1 flex-col gap-4 overflow-y-auto p-4"
     >
       {pending ? (
         <div className="flex justify-center py-12">

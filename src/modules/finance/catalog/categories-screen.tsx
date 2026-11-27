@@ -4,9 +4,8 @@ import { FinanceCategoriesSection } from "@/src/modules/finance/catalog/componen
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
-import { useRouter } from "next/navigation"
-import { useCallback } from "react"
 
 export function CategoriesScreen() {
   return (
@@ -17,12 +16,9 @@ export function CategoriesScreen() {
 }
 
 function CategoriesScreenBody() {
-  const router = useRouter()
   const { isEnabled } = useFinanceEnabled()
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {

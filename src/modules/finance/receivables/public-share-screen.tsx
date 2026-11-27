@@ -12,13 +12,11 @@ import { formatSharePendingTotals } from "@/src/modules/finance/receivables/lib/
 import { ReceivableCard } from "@/src/modules/finance/receivables/components/receivable-card"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { DEFAULT_LOCALE } from "@/src/modules/settings/lib/locale-options"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import { usePublicReceivableShare } from "@/src/modules/finance/shared/hooks/use-receivable-shares"
 import { AppLogo } from "@/src/shared/components/shell/app-logo"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Empty,
   EmptyDescription,
@@ -26,6 +24,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 import {
   ACCENT_FALLBACK_COLOR,
   accentSurfaceGradient,
@@ -58,7 +57,11 @@ export function PublicReceivableShareScreen({
   const share = shareQuery.data
 
   if (shareQuery.isPending) {
-    return <LoadingView variant="screen" />
+    return (
+      <div className="flex min-h-screen w-full flex-1 items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!share) {
@@ -132,15 +135,15 @@ export function PublicReceivableShareScreen({
         }))}
       />
 
-      <SettingsSection
-        title="Detalle"
-        bare
-        headerTrailing={
+      <section className="flex flex-col gap-2">
+        <div className="flex flex-row items-center justify-between gap-2 px-1">
+          <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Detalle
+          </h2>
           <span className="text-sm text-muted-foreground">
             {publicShareCountCaption(share.items.length)}
           </span>
-        }
-      >
+        </div>
         {share.items.length === 0 ? (
           <Empty className="py-10">
             <EmptyHeader>
@@ -165,7 +168,7 @@ export function PublicReceivableShareScreen({
             ))}
           </div>
         )}
-      </SettingsSection>
+      </section>
 
       <div className="flex flex-col items-center gap-2 text-center text-xs text-muted-foreground">
         <p>Toca un cobro para ver su detalle</p>

@@ -6,7 +6,6 @@ import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceProgressHero } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import { LoanSurfaceMark } from "@/src/modules/finance/loans/components/loan-progress-card"
 import { LoanAmortizationSheet } from "@/src/modules/finance/loans/components/amortization-sheet"
@@ -47,7 +46,6 @@ import {
   type FinanceLoanInstallment,
 } from "@/src/modules/finance/shared/types/entities"
 import { RecordOptionsSheet } from "@/src/modules/finance/shared/components/record-options-sheet"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -62,6 +60,7 @@ import {
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyContent,
@@ -71,12 +70,18 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -238,19 +243,25 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
     [setOpenOptionsSheet]
   )
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeLoans)
+
   usePageHeader(
     {
       variant: "secondary",
       title: loanTitle,
-      onBack: () => router.back(),
+      onBack: handleBack,
       actions: headerActions,
       accentColor: accent,
     },
-    [router, loan?.id, loanTitle, accent, headerActions]
+    [handleBack, loan?.id, loanTitle, accent, headerActions]
   )
 
   if (loansQuery.isPending && !loan) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!loan) {
@@ -324,12 +335,19 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
       <div className="mx-4 mt-3">
         <SummarySection title="Préstamo" icon={LandmarkIcon}>
-          <SummaryItem
-            title="Prestamista"
-            icon={LandmarkIcon}
-            value={institution?.name ?? loan.lenderName}
-            isLast={false}
-          />
+          <Item variant="plain" className={"border-b border-border/60"}>
+            <ItemMedia variant="icon">
+              <LandmarkIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Prestamista"}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {institution?.name ?? loan.lenderName}
+              </span>
+            </ItemActions>
+          </Item>
           {paymentAccount ? (
             <AccountProductRow
               account={paymentAccount}
@@ -337,12 +355,19 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               variant="compact"
             />
           ) : (
-            <SummaryItem
-              title="Se paga desde"
-              icon={WalletIcon}
-              value={loan.account?.name ?? "Sin cuenta de pago"}
-              isLast={false}
-            />
+            <Item variant="plain" className={"border-b border-border/60"}>
+              <ItemMedia variant="icon">
+                <WalletIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Se paga desde"}</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {loan.account?.name ?? "Sin cuenta de pago"}
+                </span>
+              </ItemActions>
+            </Item>
           )}
           {disbursementAccount ? (
             <AccountProductRow
@@ -351,17 +376,24 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
               variant="compact"
             />
           ) : (
-            <SummaryItem
-              title="Desembolso"
-              icon={HandCoinsIcon}
-              value={loan.disbursementAccount?.name ?? "Sin cuenta"}
-              description={
-                loan.disbursementAccount
-                  ? undefined
-                  : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."
-              }
-              isLast
-            />
+            <Item variant="plain">
+              <ItemMedia variant="icon">
+                <HandCoinsIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Desembolso"}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {loan.disbursementAccount
+                    ? undefined
+                    : "El dinero no entró a ninguna cuenta, así que la deuda resta del patrimonio sin un saldo que la compense."}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {loan.disbursementAccount?.name ?? "Sin cuenta"}
+                </span>
+              </ItemActions>
+            </Item>
           )}
         </SummarySection>
       </div>
@@ -387,7 +419,13 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
 
         <AsyncRegion
           pending={installmentsQuery.isPending}
-          pendingFallback={<ListSkeleton rows={5} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 5 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={!installmentsQuery.isError && installments.length === 0}
           emptyFallback={
             <Empty className="py-10">
@@ -415,15 +453,31 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
         >
           {installments.length > 0 ? (
             <div className="rounded-2xl border border-border bg-card">
-              {installments.map((installment, index) => (
-                <SummaryItem
+              {installments.map((installment) => (
+                <Item
                   key={installment.id}
-                  title={`Cuota ${installment.installmentNo}`}
-                  description={`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
-                  wrapDescription
-                  value={formatFinanceMoney(installment.amount, money)}
-                  onPress={() => installmentSheet.setOpen(true, installment.id)}
-                  trailing={
+                  className="px-3"
+                  render={
+                    <button
+                      type="button"
+                      onClick={() =>
+                        installmentSheet.setOpen(true, installment.id)
+                      }
+                    />
+                  }
+                >
+                  <ItemContent>
+                    <ItemTitle>
+                      {`Cuota ${installment.installmentNo}`}
+                    </ItemTitle>
+                    <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                      {`Vence ${formatCalendarDate(installment.dueDate, display.locale)} · Capital ${formatFinanceMoney(installment.principal, money)} · Interés ${formatFinanceMoney(installment.interest, money)}`}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <span className="text-sm font-semibold tabular-nums">
+                      {formatFinanceMoney(installment.amount, money)}
+                    </span>
                     <Badge
                       variant={INSTALLMENT_STATUS_VARIANT[installment.status]}
                     >
@@ -433,9 +487,8 @@ function LoanDetailScreenBody({ loanId }: LoanDetailScreenProps) {
                         ]
                       }
                     </Badge>
-                  }
-                  isLast={index === installments.length - 1}
-                />
+                  </ItemActions>
+                </Item>
               ))}
             </div>
           ) : null}

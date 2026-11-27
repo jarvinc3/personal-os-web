@@ -4,6 +4,15 @@ import { SheetBody } from "@/src/shared/components/sheets/sheet-body"
 import { SheetHeader } from "@/src/shared/components/sheets/sheet-header"
 import { SHEET_FOOTER_CLASS } from "@/src/shared/components/sheets/sheet-layout"
 import { Button } from "@/src/shared/components/ui/button"
+import { cn } from "@/src/shared/lib/utils"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   Drawer,
   DrawerContent,
@@ -21,7 +30,6 @@ import {
   type KeepAwakeHistoryEntry,
   type SessionEndReason,
 } from "@/src/modules/keep-awake/lib/session-history"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import {
   ClockIcon,
   Copy,
@@ -116,14 +124,30 @@ export function KeepAwakeHistorySheet({
               const Icon = historyReasonIcon(entry.endReason)
               const color = historyReasonColor(entry.endReason)
               return (
-                <SummaryItem
+                <Item
                   key={entry.id}
-                  title={formatElapsed(entry.durationSeconds)}
-                  description={`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
-                  leading={<Icon className="size-5" style={{ color }} />}
-                  accentColor={color}
-                  isLast={index === visible.length - 1}
-                  trailing={
+                  variant="plain"
+                  className={cn(
+                    index !== visible.length - 1 && "border-b border-border/60"
+                  )}
+                >
+                  <ItemMedia
+                    className="h-10 w-max min-w-10 rounded-full px-1"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`,
+                    }}
+                  >
+                    <Icon className="size-5" style={{ color }} />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>
+                      {formatElapsed(entry.durationSeconds)}
+                    </ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {`${formatRange(entry, locale)} · ${historyEndReasonLabel(entry.endReason)}`}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
                     <Button
                       type="button"
                       variant="ghost"
@@ -148,8 +172,8 @@ export function KeepAwakeHistorySheet({
                     >
                       <Copy className="size-4" aria-hidden />
                     </Button>
-                  }
-                />
+                  </ItemActions>
+                </Item>
               )
             })}
           </div>

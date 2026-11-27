@@ -29,10 +29,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { cn } from "@/src/shared/lib/utils"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import {
   ACCENT_FALLBACK_COLOR,
   accentSurfaceGradient,
@@ -122,18 +128,26 @@ export function PublicShareDetailSheet({
 
           <SummarySection title="Resumen" icon={WalletIcon}>
             {rows.map((row, index) => (
-              <SummaryItem
+              <Item
                 key={row.label}
-                title={row.label}
-                value={
-                  row.tone === "success" ? (
-                    <span className="text-success">{row.value}</span>
-                  ) : (
-                    row.value
-                  )
-                }
-                isLast={index === rows.length - 1}
-              />
+                variant="plain"
+                className={cn(
+                  !(index === rows.length - 1) && "border-b border-border/60"
+                )}
+              >
+                <ItemContent>
+                  <ItemTitle>{row.label}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {row.tone === "success" ? (
+                      <span className="text-success">{row.value}</span>
+                    ) : (
+                      row.value
+                    )}
+                  </span>
+                </ItemActions>
+              </Item>
             ))}
           </SummarySection>
 
@@ -158,15 +172,26 @@ export function PublicShareDetailSheet({
               </Empty>
             ) : (
               payments.map((payment, index) => (
-                <SummaryItem
+                <Item
                   key={payment.key}
-                  title={payment.amountLabel}
-                  description={payment.dateLabel}
-                  leading={<CheckIcon className="size-5 text-success" />}
-                  leadingClassName="bg-success/15"
-                  trailing={<Badge variant="secondary">Pago</Badge>}
-                  isLast={index === payments.length - 1}
-                />
+                  variant="plain"
+                  className={cn(
+                    index !== payments.length - 1 && "border-b border-border/60"
+                  )}
+                >
+                  <ItemMedia className="size-10 rounded-full bg-success/15">
+                    <CheckIcon className="size-5 text-success" />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{payment.amountLabel}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {payment.dateLabel}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions>
+                    <Badge variant="secondary">Pago</Badge>
+                  </ItemActions>
+                </Item>
               ))
             )}
           </SummarySection>

@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   useInstrumentHistory,
   type InstrumentHistoryTarget,
@@ -30,13 +29,22 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Button } from "@/src/shared/components/ui/button"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Drawer,
   DrawerContent,
   DrawerFooter,
 } from "@/src/shared/components/ui/drawer"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
 import { HistoryIcon, Settings2Icon, XIcon } from "lucide-react"
 import { instantToZonedWallTime } from "@/src/shared/lib/zoned-time"
 import { useUserTimeZone } from "@/src/modules/settings/hooks/use-user-time-zone"
@@ -78,7 +86,13 @@ export function InstrumentHistorySheet({
 
           <AsyncRegion
             pending={historyQuery.isPending && !historyQuery.data}
-            pendingFallback={<ListSkeleton />}
+            pendingFallback={
+              <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+                {Array.from({ length: 3 }, (_, index) => (
+                  <Skeleton key={index} className="h-12 w-full rounded-xl" />
+                ))}
+              </div>
+            }
             empty={items.length === 0}
             emptyFallback={
               <Empty className="py-8">
@@ -105,18 +119,33 @@ export function InstrumentHistorySheet({
                         currency: item.currency ?? display.currency,
                       })
                 return (
-                  <SummaryItem
+                  <Item
                     key={item.id}
-                    title={instrumentHistoryLabel(item)}
-                    description={formatFinanceDateTimeLabel(
-                      instantToZonedWallTime(item.at, timeZone),
-                      display.locale
+                    variant="plain"
+                    className={cn(
+                      "px-3",
+                      !(index === items.length - 1) &&
+                        "border-b border-border/60"
                     )}
-                    icon={Settings2Icon}
-                    value={transition ?? amount ?? undefined}
-                    isLast={index === items.length - 1}
-                    className="px-3"
-                  />
+                  >
+                    <ItemMedia variant="icon">
+                      <Settings2Icon />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{instrumentHistoryLabel(item)}</ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {formatFinanceDateTimeLabel(
+                          instantToZonedWallTime(item.at, timeZone),
+                          display.locale
+                        )}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <span className="text-sm font-semibold tabular-nums">
+                        {transition ?? amount ?? undefined}
+                      </span>
+                    </ItemActions>
+                  </Item>
                 )
               })}
             </div>

@@ -2,7 +2,6 @@
 
 import { CreditCardIcon } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { CardFormScreen } from "@/src/modules/finance/cards/components/card-form-screen"
@@ -14,9 +13,10 @@ import { useCards } from "@/src/modules/finance/shared/hooks/use-cards"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function CardCreateScreen() {
   return (
@@ -27,19 +27,12 @@ export function CardCreateScreen() {
 }
 
 function CardCreateScreenBody() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const institutionsQuery = useInstitutions(isEnabled)
   const accountsQuery = useAccounts(isEnabled)
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     { variant: "secondary", title: "Nueva tarjeta", onBack: handleBack },
@@ -84,13 +77,7 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
   const card =
     (cardsQuery.data ?? []).find((item) => item.id === cardId) ?? null
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     { variant: "secondary", title: "Editar tarjeta", onBack: handleBack },
@@ -98,7 +85,11 @@ function CardEditScreenBody({ cardId }: CardEditScreenProps) {
   )
 
   if (cardsQuery.isPending && !card) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (cardsQuery.error) {

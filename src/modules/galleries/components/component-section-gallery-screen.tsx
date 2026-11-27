@@ -1,7 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 import {
   galleryMatchesInCategory,
@@ -16,6 +15,7 @@ import {
 } from "@/src/modules/galleries/components/sections"
 import { ItemGroup } from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 
 /** Fichas de una categoría de la galería, con su propio buscador (#417, #597). */
@@ -24,7 +24,6 @@ export function ComponentSectionGalleryScreen({
 }: {
   sectionId: ComponentGallerySectionId
 }) {
-  const router = useRouter()
   const [search, setSearch] = useState("")
   const section = componentGallerySection(sectionId)
   const categoryMatches = galleryMatchesInCategory(sectionId)
@@ -32,9 +31,7 @@ export function ComponentSectionGalleryScreen({
   const searching = search.trim().length > 0
   const Icon = section.icon
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearanceComponents)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.settingsAppearanceComponents)
 
   const subtitle = searching
     ? `${matches.length} de ${categoryMatches.length} fichas`
@@ -52,7 +49,9 @@ export function ComponentSectionGalleryScreen({
 
   return (
     <div className="mx-auto flex max-w-2xl min-w-0 flex-col gap-4 p-4 pb-16 md:px-6">
-      <p className="text-sm text-muted-foreground">{section.description}</p>
+      <p className="sr-only text-sm text-muted-foreground">
+        {section.description}
+      </p>
       <GallerySearchField
         value={search}
         onValueChange={setSearch}

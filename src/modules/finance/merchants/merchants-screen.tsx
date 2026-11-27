@@ -3,7 +3,6 @@
 import { MerchantCard } from "@/src/modules/finance/merchants/components/merchant-card"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useMerchants } from "@/src/modules/finance/shared/hooks/use-merchants"
@@ -13,12 +12,14 @@ import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-quer
 import { hasSuggestedCategory } from "@/src/modules/finance/merchants/lib/merchant-duplicates"
 import { merchantMonthParams } from "@/src/modules/finance/merchants/lib/merchant-query"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   Empty,
@@ -30,8 +31,7 @@ import {
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { SearchIcon, StoreIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 export function MerchantsScreen() {
   return (
@@ -42,13 +42,10 @@ export function MerchantsScreen() {
 }
 
 function MerchantsScreenBody() {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [search, setSearch] = useState("")
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {
@@ -106,7 +103,13 @@ function MerchantsScreenBody() {
 
       <AsyncRegion
         pending={listQuery.isPending && !listQuery.data}
-        pendingFallback={<ListSkeleton />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={items.length === 0}
         emptyFallback={
           <Empty className="py-8">

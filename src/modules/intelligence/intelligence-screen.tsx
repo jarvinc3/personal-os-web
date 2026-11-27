@@ -53,10 +53,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/src/shared/components/ui/tabs"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { Field, FieldLabel } from "@/src/shared/components/ui/field"
 import {
@@ -87,21 +84,22 @@ import {
   BrainCircuit,
   CalendarDays,
   CheckCircle2,
+  ChevronRightIcon,
   Clock3,
+  FileText,
   Inbox,
   ListFilter,
   LoaderCircle,
   Mail,
   MoreHorizontal,
+  RefreshCw,
   Search,
-  FileText,
+  ShieldCheck,
+  Trash2,
+  Unplug,
   Wifi,
   WifiOff,
-  RefreshCw,
-  ShieldCheck,
-  Unplug,
   X,
-  Trash2,
   type LucideIcon,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -145,6 +143,16 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/src/shared/components/ui/alert"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
 
 const MESSAGE_STATUS_OPTIONS = [
   {
@@ -609,33 +617,66 @@ function IntelligenceScreenBody() {
       </SummarySection>
 
       <SummarySection title="Conocimiento" icon={BrainCircuit}>
-        <SummaryItem
-          title="Explorar conocimiento"
-          description="Consulta, exporta y borra lo que la IA aprendió de tus correos."
-          icon={BrainCircuit}
-          href={APP_ROUTES.app.intelligenceKnowledge}
-          showChevron
-          isLast
-        />
+        <Item
+          variant="default"
+          render={<Link href={APP_ROUTES.app.intelligenceKnowledge} />}
+        >
+          <ItemMedia variant="icon">
+            <BrainCircuit />
+          </ItemMedia>
+          <ItemContent>
+            <ItemTitle>{"Explorar conocimiento"}</ItemTitle>
+            <ItemDescription className="truncate text-xs">
+              {
+                "Consulta, exporta y borra lo que la IA aprendió de tus correos."
+              }
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+            <LinkPendingOverlay />
+          </ItemActions>
+        </Item>
       </SummarySection>
 
       {dashboard.role === "ADMIN" ? (
         <SummarySection title="Administración" icon={ShieldCheck}>
-          <SummaryItem
-            title="Administrar roles"
-            description="Consulta y cambia los roles de Inteligencia."
-            icon={ShieldCheck}
-            href={APP_ROUTES.app.intelligenceAdminRoles}
-            showChevron
-          />
-          <SummaryItem
-            title="Cola de conocimiento"
-            description="Revisa y revierte el conocimiento global."
-            icon={BrainCircuit}
-            href={APP_ROUTES.app.intelligenceAdminKnowledge}
-            showChevron
-            isLast
-          />
+          <Item
+            variant="default"
+            render={<Link href={APP_ROUTES.app.intelligenceAdminRoles} />}
+          >
+            <ItemMedia variant="icon">
+              <ShieldCheck />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Administrar roles"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {"Consulta y cambia los roles de Inteligencia."}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+              <LinkPendingOverlay />
+            </ItemActions>
+          </Item>
+          <Item
+            variant="default"
+            render={<Link href={APP_ROUTES.app.intelligenceAdminKnowledge} />}
+          >
+            <ItemMedia variant="icon">
+              <BrainCircuit />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Cola de conocimiento"}</ItemTitle>
+              <ItemDescription className="truncate text-xs">
+                {"Revisa y revierte el conocimiento global."}
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions>
+              <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+              <LinkPendingOverlay />
+            </ItemActions>
+          </Item>
         </SummarySection>
       ) : null}
 
@@ -830,15 +871,31 @@ function IntelligenceScreenBody() {
                   </Empty>
                 ) : null}
                 {messages.map((message) => (
-                  <SummaryItem
+                  <Item
                     key={message.id}
-                    title={message.subject}
-                    wrapTitle
-                    description={`${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)}`}
-                    icon={Mail}
-                    onPress={() => setMessageSheetOpen(true, message.id)}
-                    showChevron
-                  />
+                    variant="default"
+                    render={
+                      <button
+                        type="button"
+                        onClick={() => setMessageSheetOpen(true, message.id)}
+                      />
+                    }
+                  >
+                    <ItemMedia variant="icon">
+                      <Mail />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle className="line-clamp-2 break-words">
+                        {message.subject}
+                      </ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {`${message.fromAddress} · ${formatDateTime(message.receivedAt, formatLocale)}`}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+                    </ItemActions>
+                  </Item>
                 ))}
                 <InfiniteListSentinel
                   hasNextPage={Boolean(hasNextPage) && !messagesQuery.error}
@@ -1124,25 +1181,32 @@ function IntelligenceMessageDetail({
                 subtitle="Qué pasó con este correo, en una línea."
                 icon={ShieldCheck}
               >
-                <SummaryItem
-                  title="Clasificación automática"
-                  description={
-                    lastClassification
-                      ? `${classificationTypeLabel(lastClassification.payload)} · ${classificationRouteLabel(lastClassification.payload)}`
-                      : "Todavía no tiene clasificación automática."
-                  }
-                  icon={BrainCircuit}
-                />
-                <SummaryItem
-                  title="Revisión de una persona"
-                  description={
-                    lastVerification
-                      ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt, formatLocale)}`
-                      : "Todavía sin revisión de una persona."
-                  }
-                  icon={CheckCircle2}
-                  isLast
-                />
+                <Item variant="plain" className={"border-b border-border/60"}>
+                  <ItemMedia variant="icon">
+                    <BrainCircuit />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{"Clasificación automática"}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {lastClassification
+                        ? `${classificationTypeLabel(lastClassification.payload)} · ${classificationRouteLabel(lastClassification.payload)}`
+                        : "Todavía no tiene clasificación automática."}
+                    </ItemDescription>
+                  </ItemContent>
+                </Item>
+                <Item variant="plain">
+                  <ItemMedia variant="icon">
+                    <CheckCircle2 />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{"Revisión de una persona"}</ItemTitle>
+                    <ItemDescription className="truncate text-xs">
+                      {lastVerification
+                        ? `${verificationVerdictLabel(lastVerification.verdict)} por ${verifierActorLabel(lastVerification.verifierRole)} · ${formatDateTime(lastVerification.createdAt, formatLocale)}`
+                        : "Todavía sin revisión de una persona."}
+                    </ItemDescription>
+                  </ItemContent>
+                </Item>
               </SummarySection>
               <SummarySection
                 title="Detalles técnicos"
@@ -1172,12 +1236,21 @@ function IntelligenceMessageDetail({
                 subtitle="Propuesta para revisión; no crea movimientos en Finanzas."
               >
                 {classificationObservations.map((item) => (
-                  <SummaryItem
+                  <Item
                     key={`classification-${item.sequence}`}
-                    title={`Ruta ${classificationRouteLabel(item.payload)} · ${classificationTypeLabel(item.payload)}`}
-                    description={describeClassification(item.payload)}
-                    icon={BrainCircuit}
-                  />
+                    variant="plain"
+                    className={"border-b border-border/60"}
+                  >
+                    <ItemMedia variant="icon">
+                      <BrainCircuit />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{`Ruta ${classificationRouteLabel(item.payload)} · ${classificationTypeLabel(item.payload)}`}</ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {describeClassification(item.payload)}
+                      </ItemDescription>
+                    </ItemContent>
+                  </Item>
                 ))}
                 {!classificationObservations.length ? (
                   <p className="px-2 text-sm text-muted-foreground">
@@ -1191,27 +1264,47 @@ function IntelligenceMessageDetail({
                 subtitle="Registros que no se editan ni se borran, ligados al correo original."
               >
                 {data.provenance.observations.map((observation) => (
-                  <SummaryItem
+                  <Item
                     key={`observation-${observation.sequence}`}
-                    title={`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}
-                    description={`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
-                    icon={BrainCircuit}
-                  />
+                    variant="plain"
+                    className={"border-b border-border/60"}
+                  >
+                    <ItemMedia variant="icon">
+                      <BrainCircuit />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{`Observación ${observation.sequence} · ${observationTypeLabel(observation.knowledgeType)}`}</ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {`${knowledgeScopeLabel(observation.proposedScope)} · ${observation.knowledgeKey}`}
+                      </ItemDescription>
+                    </ItemContent>
+                  </Item>
                 ))}
                 {data.provenance.verifications.map((verification, index) => (
-                  <SummaryItem
+                  <Item
                     key={`verification-${verification.sequence}`}
-                    title={`Verificación ${verification.sequence}`}
-                    description={describeVerification({
-                      verdict: verification.verdict,
-                      verifierRole: verification.verifierRole,
-                      isGroundTruth: verification.isGroundTruth,
-                      notes: verification.notes,
-                      correctedPayload: verification.correctedPayload,
-                    })}
-                    icon={CheckCircle2}
-                    isLast={index === data.provenance.verifications.length - 1}
-                  />
+                    variant="plain"
+                    className={cn(
+                      !(index === data.provenance.verifications.length - 1) &&
+                        "border-b border-border/60"
+                    )}
+                  >
+                    <ItemMedia variant="icon">
+                      <CheckCircle2 />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{`Verificación ${verification.sequence}`}</ItemTitle>
+                      <ItemDescription className="truncate text-xs">
+                        {describeVerification({
+                          verdict: verification.verdict,
+                          verifierRole: verification.verifierRole,
+                          isGroundTruth: verification.isGroundTruth,
+                          notes: verification.notes,
+                          correctedPayload: verification.correctedPayload,
+                        })}
+                      </ItemDescription>
+                    </ItemContent>
+                  </Item>
                 ))}
                 {!data.provenance.observations.length &&
                 !data.provenance.verifications.length ? (

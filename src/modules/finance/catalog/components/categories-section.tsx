@@ -7,7 +7,6 @@ import {
 import { CategorySheet } from "@/src/modules/finance/catalog/components/category-sheet"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet-keys"
 import {
   useCategories,
@@ -56,6 +55,7 @@ import {
 } from "lucide-react"
 import { Reorder, useDragControls } from "framer-motion"
 import { useMemo, useState, type PointerEvent, type ReactNode } from "react"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 type CategoriesSectionProps = {
   enabled: boolean
@@ -328,7 +328,13 @@ export function FinanceCategoriesSection({
           ) : null}
           <AsyncRegion
             pending={categoriesQuery.isPending}
-            pendingFallback={<ListSkeleton />}
+            pendingFallback={
+              <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+                {Array.from({ length: 3 }, (_, index) => (
+                  <Skeleton key={index} className="h-12 w-full rounded-xl" />
+                ))}
+              </div>
+            }
             empty={groups.length === 0}
             emptyFallback={
               <Empty>

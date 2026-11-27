@@ -18,7 +18,6 @@ import {
 import { translateFinanceError } from "@/src/modules/finance/shared/lib/finance-error-messages"
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import type { FinanceMoneyDisplay } from "@/src/modules/finance/shared/lib/money"
 import {
   signedStatementLineAmount,
@@ -34,7 +33,6 @@ import {
   fromStatementImportExtra,
   StatementMovementRow,
 } from "@/src/modules/finance/transactions"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import {
   Alert,
   AlertDescription,
@@ -42,8 +40,16 @@ import {
 } from "@/src/shared/components/ui/alert"
 import { Button } from "@/src/shared/components/ui/button"
 import { Checkbox } from "@/src/shared/components/ui/checkbox"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import { Spinner } from "@/src/shared/components/ui/spinner"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { appToast } from "@/src/shared/lib/app-toast"
 import { CheckCircleIcon, FileWarningIcon, XIcon } from "lucide-react"
@@ -87,13 +93,21 @@ function Group({
   children: React.ReactNode
 }) {
   return (
-    <SettingsSection title={title} description={description} bare>
+    <section className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-0.5 px-1">
+        <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {title}
+        </h2>
+        {description ? (
+          <p className="text-xs text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
       {children ?? (
         <p className="rounded-2xl border border-dashed border-border p-4 text-sm text-muted-foreground">
           {emptyLabel}
         </p>
       )}
-    </SettingsSection>
+    </section>
   )
 }
 
@@ -165,11 +179,13 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
     locale: formatLocale,
   }
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
+
   usePageHeader(
     {
       variant: "secondary",
       title: "Estado de cuenta",
-      onBack: () => router.push(APP_ROUTES.app.financeProducts),
+      onBack: handleBack,
     },
     [router]
   )
@@ -209,7 +225,11 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
   }
 
   if (query.isPending && !statement) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!statement) {
@@ -313,13 +333,22 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
         {matched.length === 0 ? null : (
           <div className="rounded-2xl border border-border bg-card">
             {matched.map((line) => (
-              <SummaryItem
+              <Item
                 key={line.id}
-                title={line.description}
-                description={formatCalendarDate(line.date, display.locale)}
-                value={lineDisplay(display, line)}
-                trailing={
-                  applied ? undefined : (
+                variant="plain"
+                className="border-b border-border/60"
+              >
+                <ItemContent>
+                  <ItemTitle>{line.description}</ItemTitle>
+                  <ItemDescription className="truncate text-xs">
+                    {formatCalendarDate(line.date, display.locale)}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {lineDisplay(display, line)}
+                  </span>
+                  {applied ? null : (
                     <Checkbox
                       checked={line.decision === "MATCH"}
                       onCheckedChange={(value) =>
@@ -327,9 +356,9 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
                       }
                       aria-label={`Mantener ${line.description}`}
                     />
-                  )
-                }
-              />
+                  )}
+                </ItemActions>
+              </Item>
             ))}
           </div>
         )}
@@ -343,18 +372,27 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
         {missing.length === 0 ? null : (
           <div className="rounded-2xl border border-border bg-card">
             {missing.map((line) => (
-              <SummaryItem
+              <Item
                 key={line.id}
-                title={line.description}
-                description={[
-                  formatCalendarDate(line.date, display.locale),
-                  line.categoryName,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-                value={lineDisplay(display, line)}
-                trailing={
-                  applied ? undefined : (
+                variant="plain"
+                className="border-b border-border/60"
+              >
+                <ItemContent>
+                  <ItemTitle>{line.description}</ItemTitle>
+                  <ItemDescription className="truncate text-xs">
+                    {[
+                      formatCalendarDate(line.date, display.locale),
+                      line.categoryName,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {lineDisplay(display, line)}
+                  </span>
+                  {applied ? null : (
                     <Checkbox
                       checked={line.decision === "CREATE"}
                       onCheckedChange={(value) =>
@@ -362,9 +400,9 @@ function StatementImportScreenBody({ importId }: StatementImportScreenProps) {
                       }
                       aria-label={`Crear ${line.description}`}
                     />
-                  )
-                }
-              />
+                  )}
+                </ItemActions>
+              </Item>
             ))}
           </div>
         )}

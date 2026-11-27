@@ -6,10 +6,8 @@ import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { DetailHeader } from "@/src/modules/finance/shared/components/layout/progress-hero"
 import {
   SummaryGroup,
-  SummaryItem,
   SummarySection,
 } from "@/src/shared/components/data-display/summary"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Badge } from "@/src/shared/components/ui/badge"
 import { Button } from "@/src/shared/components/ui/button"
 import {
@@ -17,6 +15,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/src/shared/components/ui/collapsible"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 
 import type {
   GalleryDemoMap,
@@ -58,7 +63,21 @@ export const encabezadosDemos: GalleryDemoMap = {
     collapsible
     right={<Badge variant="secondary">6</Badge>}
   >
-    <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+    <Item
+      variant="plain"
+    >
+      <ItemMedia variant="icon">
+        <TagsIcon />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>{"Fijas"}</ItemTitle>
+      </ItemContent>
+      <ItemActions>
+        <span className="text-sm font-semibold tabular-nums">
+          {"3"}
+        </span>
+      </ItemActions>
+    </Item>
   </SummarySection>
 </div>
 `,
@@ -93,7 +112,19 @@ export const encabezadosDemos: GalleryDemoMap = {
             collapsible
             right={<Badge variant="secondary">6</Badge>}
           >
-            <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+            <Item variant="plain">
+              <ItemMedia variant="icon">
+                <TagsIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{"Fijas"}</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {"3"}
+                </span>
+              </ItemActions>
+            </Item>
           </SummarySection>
         </div>
       ),
@@ -101,18 +132,27 @@ export const encabezadosDemos: GalleryDemoMap = {
   ],
   "summary-group": [
     {
-      label: "Concepto con línea y descripción",
+      label: "Concepto entre líneas y descripción",
       code: `
 <SummaryGroup
   title="Saldo inicial"
   description="Antes de los movimientos de este mes"
 >
-  <SummaryItem
-    title="Movimientos del mes"
-    value="DOP $8,000.00"
-    icon={TagsIcon}
-    isLast
-  />
+  <Item
+    variant="plain"
+  >
+    <ItemMedia variant="icon">
+      <TagsIcon />
+    </ItemMedia>
+    <ItemContent>
+      <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+    </ItemContent>
+    <ItemActions>
+      <span className="text-sm font-semibold tabular-nums">
+        {"DOP $8,000.00"}
+      </span>
+    </ItemActions>
+  </Item>
 </SummaryGroup>
 `,
       node: (
@@ -120,64 +160,20 @@ export const encabezadosDemos: GalleryDemoMap = {
           title="Saldo inicial"
           description="Antes de los movimientos de este mes"
         >
-          <SummaryItem
-            title="Movimientos del mes"
-            value="DOP $8,000.00"
-            icon={TagsIcon}
-            isLast
-          />
+          <Item variant="plain">
+            <ItemMedia variant="icon">
+              <TagsIcon />
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-semibold tabular-nums">
+                {"DOP $8,000.00"}
+              </span>
+            </ItemActions>
+          </Item>
         </SummaryGroup>
-      ),
-    },
-  ],
-  "settings-section": [
-    {
-      label: "Con etiqueta, descripción y acción",
-      code: `
-<SettingsSection
-  title="Datos"
-  description="Exporta o elimina tu información"
-  headerTrailing={
-    <Button
-      size="icon-sm"
-      variant="ghost"
-      aria-label="Ver todo"
-      onClick={() => simulatedTap("Ver todo")}
-    >
-      <PlusIcon />
-    </Button>
-  }
->
-  <SummaryItem
-    title="Exportar mis datos"
-    value="JSON"
-    icon={FileTextIcon}
-    isLast
-  />
-</SettingsSection>
-`,
-      node: (
-        <SettingsSection
-          title="Datos"
-          description="Exporta o elimina tu información"
-          headerTrailing={
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              aria-label="Ver todo"
-              onClick={() => simulatedTap("Ver todo")}
-            >
-              <PlusIcon />
-            </Button>
-          }
-        >
-          <SummaryItem
-            title="Exportar mis datos"
-            value="JSON"
-            icon={FileTextIcon}
-            isLast
-          />
-        </SettingsSection>
       ),
     },
   ],
@@ -314,7 +310,19 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
               defaultOpen
               right={<Badge variant="secondary">6</Badge>}
             >
-              <SummaryItem title="Fijas" value="3" icon={TagsIcon} isLast />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Fijas"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"3"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummarySection>
           </div>
         ),
@@ -348,12 +356,19 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
         node: (
           <div className="w-full max-w-sm">
             <SummaryGroup title="Saldo inicial">
-              <SummaryItem
-                title="Movimientos del mes"
-                value="DOP $8,000.00"
-                icon={TagsIcon}
-                isLast
-              />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"DOP $8,000.00"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummaryGroup>
           </div>
         ),
@@ -366,81 +381,21 @@ export const encabezadosVariantDemos: GalleryVariantDemoMap = {
               title="Saldo inicial"
               description="Antes de los movimientos de este mes"
             >
-              <SummaryItem
-                title="Movimientos del mes"
-                value="DOP $8,000.00"
-                icon={TagsIcon}
-                isLast
-              />
+              <Item variant="plain">
+                <ItemMedia variant="icon">
+                  <TagsIcon />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{"Movimientos del mes"}</ItemTitle>
+                </ItemContent>
+                <ItemActions>
+                  <span className="text-sm font-semibold tabular-nums">
+                    {"DOP $8,000.00"}
+                  </span>
+                </ItemActions>
+              </Item>
             </SummaryGroup>
           </div>
-        ),
-      },
-    ],
-  },
-  "settings-section": {
-    bare: [
-      {
-        label: "false (card propia)",
-        node: (
-          <SettingsSection
-            title="Datos"
-            description="Exporta o elimina tu información"
-            className="w-full max-w-sm"
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
-        ),
-      },
-      {
-        label: "true (sin card)",
-        node: (
-          <SettingsSection
-            title="Datos"
-            bare
-            className="w-full max-w-sm rounded-2xl border border-border p-2"
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
-        ),
-      },
-    ],
-    headerTrailing: [
-      {
-        label: "acción a la derecha del título",
-        node: (
-          <SettingsSection
-            title="Datos"
-            description="Exporta o elimina tu información"
-            className="w-full max-w-sm"
-            headerTrailing={
-              <Button
-                size="icon-sm"
-                variant="ghost"
-                aria-label="Ver todo"
-                onClick={() => simulatedTap("Ver todo")}
-              >
-                <PlusIcon />
-              </Button>
-            }
-          >
-            <SummaryItem
-              title="Exportar mis datos"
-              value="JSON"
-              icon={FileTextIcon}
-              isLast
-            />
-          </SettingsSection>
         ),
       },
     ],

@@ -14,13 +14,13 @@ import {
   groupHelpTerms,
   hasHelpSearch,
 } from "@/src/modules/help/lib/help-search"
+import { Card } from "@/src/shared/components/ui/card"
 import { Field } from "@/src/shared/components/ui/field"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/src/shared/components/ui/input-group"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import {
   Empty,
   EmptyDescription,
@@ -108,18 +108,23 @@ export function GlossaryScreen() {
         </Empty>
       ) : (
         groups.map((group) => (
-          <SettingsSection key={group.category} title={group.label}>
-            <div className="flex flex-col divide-y divide-border/60">
-              {group.terms.map((term) => (
-                <GlossaryEntry
-                  key={term.slug}
-                  term={term}
-                  highlighted={term.slug === activeTerm?.slug}
-                  onTermPress={() => setSearch("")}
-                />
-              ))}
-            </div>
-          </SettingsSection>
+          <section key={group.category} className="flex flex-col gap-2">
+            <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              {group.label}
+            </h2>
+            <Card className="gap-0 bg-card p-1">
+              <div className="flex flex-col divide-y divide-border/60">
+                {group.terms.map((term) => (
+                  <GlossaryEntry
+                    key={term.slug}
+                    term={term}
+                    highlighted={term.slug === activeTerm?.slug}
+                    onTermPress={() => setSearch("")}
+                  />
+                ))}
+              </div>
+            </Card>
+          </section>
         ))
       )}
     </HelpPage>

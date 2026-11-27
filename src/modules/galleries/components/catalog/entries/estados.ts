@@ -147,56 +147,6 @@ export const estadosDocs: readonly GalleryComponentMeta[] = [
     ],
   },
   {
-    id: "list-skeleton",
-    name: "ListSkeleton",
-    category: "estados",
-    kind: "domain",
-    description:
-      "Esqueleto de filas de una lista, con el alto de la fila real.",
-    whenToUse: "La primera carga de una lista de Finanzas.",
-    whenNotToUse:
-      "La carga de cards o de un gráfico: el esqueleto de esa vista.",
-    importPath: "@/src/shared/components/feedback/list-skeleton",
-    snippet: `import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
-
-<ListSkeleton rows={3} />`,
-    subcomponents: [],
-    anatomy: [{ name: "ListSkeleton" }],
-    variants: [{ name: "rows", values: "número de filas a dibujar" }],
-    props: [
-      {
-        name: "rows",
-        type: "number",
-        description: "Cantidad de filas de ejemplo.",
-      },
-    ],
-  },
-  {
-    id: "loading-view",
-    name: "LoadingView",
-    category: "estados",
-    kind: "domain",
-    description:
-      "Carga de una página o de una sección que todavía no tiene forma.",
-    whenToUse:
-      "Cuando la página aún no sabe si el registro existe ni cuántas filas habrá.",
-    whenNotToUse: "Una sección cuya forma ya se conoce: su esqueleto.",
-    importPath: "@/src/shared/components/feedback/loading-view",
-    snippet: `import { LoadingView } from "@/src/shared/components/feedback/loading-view"
-
-<LoadingView variant="inline" />`,
-    subcomponents: [],
-    anatomy: [{ name: "LoadingView" }],
-    variants: [{ name: "variant", values: "screen, inline" }],
-    props: [
-      {
-        name: "variant",
-        type: '"screen" | "inline"',
-        description: "Carga de pantalla completa o dentro de un bloque.",
-      },
-    ],
-  },
-  {
     id: "error-state",
     name: "ErrorState",
     category: "estados",

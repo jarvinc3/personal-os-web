@@ -7,10 +7,10 @@ import {
   XIcon,
 } from "lucide-react"
 
-import { NoticeCard } from "@/src/modules/finance/shared/components/notice-card"
 import { showUndoToast } from "@/src/modules/finance/shared/components/undo-toast"
 import { Button } from "@/src/shared/components/ui/button"
 import {
+  ALERT_SOFT_TONE_CLASS_NAME,
   ALERT_TONE_CLASS_NAME,
   Alert,
   AlertAction,
@@ -110,75 +110,6 @@ export const avisosDemos: GalleryDemoMap = {
               </Button>
             </AlertAction>
           </Alert>
-        </div>
-      ),
-    },
-  ],
-  "notice-card": [
-    {
-      label: "warning, danger e info",
-      code: `
-<div className="flex w-full flex-col gap-2">
-  <NoticeCard
-    icon={TriangleAlertIcon}
-    title="Descuadre de saldo"
-    description="El saldo del banco no coincide con el de la app."
-    tone="warning"
-    trailing={
-      <Button
-        size="icon-xs"
-        variant="outline"
-        aria-label="Revisar descuadre"
-        onClick={() => appToast.info({ text1: "Revisar descuadre" })}
-      >
-        <BellIcon />
-      </Button>
-    }
-  />
-  <NoticeCard
-    icon={CircleAlertIcon}
-    title="Cargo rechazado"
-    description="La tarjeta rechazó el último cobro de la suscripción."
-    tone="danger"
-  />
-  <NoticeCard
-    icon={InfoIcon}
-    title="Pago procesado"
-    description="El movimiento ya aparece en tu cuenta."
-    tone="info"
-  />
-</div>
-`,
-      node: (
-        <div className="flex w-full flex-col gap-2">
-          <NoticeCard
-            icon={TriangleAlertIcon}
-            title="Descuadre de saldo"
-            description="El saldo del banco no coincide con el de la app."
-            tone="warning"
-            trailing={
-              <Button
-                size="icon-xs"
-                variant="outline"
-                aria-label="Revisar descuadre"
-                onClick={() => appToast.info({ text1: "Revisar descuadre" })}
-              >
-                <BellIcon />
-              </Button>
-            }
-          />
-          <NoticeCard
-            icon={CircleAlertIcon}
-            title="Cargo rechazado"
-            description="La tarjeta rechazó el último cobro de la suscripción."
-            tone="danger"
-          />
-          <NoticeCard
-            icon={InfoIcon}
-            title="Pago procesado"
-            description="El movimiento ya aparece en tu cuenta."
-            tone="info"
-          />
         </div>
       ),
     },
@@ -361,58 +292,29 @@ export const avisosVariantDemos: GalleryVariantDemoMap = {
         ),
       },
     ],
-  },
-  "notice-card": {
-    tone: [
+    lavado: [
       {
         label: "warning",
         node: (
-          <NoticeCard
-            icon={TriangleAlertIcon}
-            title="Descuadre de saldo"
-            description="El saldo del banco no coincide con el de la app."
-            tone="warning"
-          />
+          <Alert className={ALERT_SOFT_TONE_CLASS_NAME.warning}>
+            <TriangleAlertIcon />
+            <AlertTitle>Descuadre de saldo</AlertTitle>
+            <AlertDescription>
+              El saldo del banco no coincide con el de la app.
+            </AlertDescription>
+          </Alert>
         ),
       },
       {
-        label: "danger",
+        label: "destructive",
         node: (
-          <NoticeCard
-            icon={CircleAlertIcon}
-            title="Cargo rechazado"
-            description="La tarjeta rechazó el último cobro."
-            tone="danger"
-          />
-        ),
-      },
-      {
-        label: "info",
-        node: (
-          <NoticeCard
-            icon={InfoIcon}
-            title="Pago procesado"
-            description="El movimiento ya aparece en tu cuenta."
-            tone="info"
-          />
-        ),
-      },
-    ],
-    trailing: [
-      {
-        label: "acción a la derecha",
-        node: (
-          <NoticeCard
-            icon={TriangleAlertIcon}
-            title="Descuadre de saldo"
-            description="El saldo del banco no coincide con el de la app."
-            tone="warning"
-            trailing={
-              <Button size="icon-xs" variant="outline" aria-label="Revisar">
-                <BellIcon />
-              </Button>
-            }
-          />
+          <Alert className={ALERT_SOFT_TONE_CLASS_NAME.destructive}>
+            <CircleAlertIcon />
+            <AlertTitle>Cargo rechazado</AlertTitle>
+            <AlertDescription>
+              La tarjeta rechazó el último cobro de la suscripción.
+            </AlertDescription>
+          </Alert>
         ),
       },
     ],

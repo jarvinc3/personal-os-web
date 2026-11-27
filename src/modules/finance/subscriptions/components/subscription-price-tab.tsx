@@ -3,7 +3,6 @@
 import { formatCalendarDate } from "@/src/modules/finance/shared/lib/ledger-form"
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { useSubscriptionPayments } from "@/src/modules/finance/shared/hooks/use-subscriptions"
 import { financeErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
@@ -18,11 +17,9 @@ import {
 import { SubscriptionPriceChart } from "@/src/modules/finance/subscriptions/components/subscription-price-chart"
 import { useMemo } from "react"
 import { LineChartIcon } from "lucide-react"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { Badge } from "@/src/shared/components/ui/badge"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 import {
   Empty,
   EmptyDescription,
@@ -30,6 +27,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
 
 type SubscriptionPriceTabProps = {
   subscription: FinanceSubscription
@@ -80,7 +85,13 @@ export function SubscriptionPriceTab({
       ) : null}
       <AsyncRegion
         pending={paymentsQuery.isPending && !paymentsQuery.data}
-        pendingFallback={<ListSkeleton rows={3} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={priceHistory.series.length === 0}
         emptyFallback={
           <Empty className="py-8">
@@ -110,25 +121,36 @@ export function SubscriptionPriceTab({
         <SubscriptionPriceChart series={priceHistory.series} display={money} />
         <div className="flex flex-col">
           {priceHistory.changes.map((change, index) => (
-            <SummaryItem
+            <Item
               key={change.date}
-              title={formatCalendarDate(change.date, money.locale)}
-              description={
-                change.previousAmount === null
-                  ? "Inicio"
-                  : `Detectado en el cobro${
-                      change.percent === null
-                        ? ""
-                        : ` · ${change.percent > 0 ? "+" : ""}${change.percent}%`
-                    }`
-              }
-              value={
-                change.previousAmount === null
-                  ? formatFinanceMoney(change.amount, money)
-                  : `${formatFinanceMoney(change.previousAmount, money)} → ${formatFinanceMoney(change.amount, money)}`
-              }
-              isLast={index === priceHistory.changes.length - 1}
-            />
+              variant="plain"
+              className={cn(
+                !(index === priceHistory.changes.length - 1) &&
+                  "border-b border-border/60"
+              )}
+            >
+              <ItemContent>
+                <ItemTitle>
+                  {formatCalendarDate(change.date, money.locale)}
+                </ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {change.previousAmount === null
+                    ? "Inicio"
+                    : `Detectado en el cobro${
+                        change.percent === null
+                          ? ""
+                          : ` · ${change.percent > 0 ? "+" : ""}${change.percent}%`
+                      }`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {change.previousAmount === null
+                    ? formatFinanceMoney(change.amount, money)
+                    : `${formatFinanceMoney(change.previousAmount, money)} → ${formatFinanceMoney(change.amount, money)}`}
+                </span>
+              </ItemActions>
+            </Item>
           ))}
         </div>
       </AsyncRegion>

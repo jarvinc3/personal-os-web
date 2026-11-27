@@ -26,8 +26,16 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { cn } from "@/src/shared/lib/utils"
+import { Card } from "@/src/shared/components/ui/card"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
 import { infiniteListItems } from "@/src/modules/finance/shared/lib/finance-query-options"
 import { resolveInfiniteListErrorState } from "@/src/shared/lib/infinite-list-error"
@@ -177,20 +185,30 @@ export function RecycleBinView() {
 
   function renderArchived(record: FinanceArchivedRecord, isLast: boolean) {
     const branded = isBrandedRecordType(record.type)
+    const RecordIcon = archivedIcon(record.type)
     return (
-      <SummaryItem
+      <Item
         key={`${record.type}-${record.id}`}
-        title={record.label}
-        description={ARCHIVED_TYPE_LABEL[record.type]}
-        icon={archivedIcon(record.type)}
-        leading={
-          branded ? (
+        variant="plain"
+        className={cn("px-3", !isLast && "border-b border-border/60")}
+      >
+        {branded ? (
+          <ItemMedia className="h-10 w-max min-w-10 rounded-full px-1">
             <BrandLogo name={record.label} logoUrl={record.logoUrl} size={36} />
-          ) : undefined
-        }
-        isLast={isLast}
-        className="px-3"
-        trailing={
+          </ItemMedia>
+        ) : null}
+        {!branded && RecordIcon ? (
+          <ItemMedia variant="icon">
+            <RecordIcon />
+          </ItemMedia>
+        ) : null}
+        <ItemContent>
+          <ItemTitle>{record.label}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {ARCHIVED_TYPE_LABEL[record.type]}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
           <Button
             type="button"
             variant="outline"
@@ -201,8 +219,8 @@ export function RecycleBinView() {
             <RotateCcwIcon className="size-4 shrink-0" />
             Restaurar
           </Button>
-        }
-      />
+        </ItemActions>
+      </Item>
     )
   }
 
@@ -210,26 +228,36 @@ export function RecycleBinView() {
     const typeLabel = DELETED_TYPE_LABEL[record.type]
     const slowRestore = record.sizeBytes > LARGE_SNAPSHOT_BYTES
     const branded = isBrandedRecordType(record.type)
+    const RecordIcon = deletedIcon(record.type)
     return (
-      <SummaryItem
+      <Item
         key={`${record.type}-${record.id}`}
-        title={record.label ?? typeLabel}
-        description={`${typeLabel} · ${formatCalendarDate(record.deletedAt, formatLocale)}${
-          slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
-        }`}
-        icon={deletedIcon(record.type)}
-        leading={
-          branded ? (
+        variant="plain"
+        className={cn("px-3", !isLast && "border-b border-border/60")}
+      >
+        {branded ? (
+          <ItemMedia className="h-10 w-max min-w-10 rounded-full px-1">
             <BrandLogo
               name={record.label ?? typeLabel}
               logoUrl={record.logoUrl}
               size={36}
             />
-          ) : undefined
-        }
-        isLast={isLast}
-        className="px-3"
-        trailing={
+          </ItemMedia>
+        ) : null}
+        {!branded && RecordIcon ? (
+          <ItemMedia variant="icon">
+            <RecordIcon />
+          </ItemMedia>
+        ) : null}
+        <ItemContent>
+          <ItemTitle>{record.label ?? typeLabel}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {`${typeLabel} · ${formatCalendarDate(record.deletedAt, formatLocale)}${
+              slowRestore ? " · Muchos datos, restaurar puede tardar" : ""
+            }`}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
           <Button
             type="button"
             variant="outline"
@@ -240,8 +268,8 @@ export function RecycleBinView() {
             <RotateCcwIcon className="size-4 shrink-0" />
             Restaurar
           </Button>
-        }
-      />
+        </ItemActions>
+      </Item>
     )
   }
 
@@ -296,11 +324,16 @@ export function RecycleBinView() {
               description="Las cuentas, tarjetas o préstamos que archives aparecen aquí."
             />
           ) : (
-            <SettingsSection title="Archivados">
-              {archived.map((record, index) =>
-                renderArchived(record, index === archived.length - 1)
-              )}
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Archivados
+              </h2>
+              <Card className="gap-0 bg-card p-1">
+                {archived.map((record, index) =>
+                  renderArchived(record, index === archived.length - 1)
+                )}
+              </Card>
+            </section>
           )}
         </TabsContent>
 
@@ -311,11 +344,16 @@ export function RecycleBinView() {
               description="Los registros que borres aparecen aquí mientras se puedan recuperar."
             />
           ) : (
-            <SettingsSection title="Eliminados">
-              {deleted.map((record, index) =>
-                renderDeleted(record, index === deleted.length - 1)
-              )}
-            </SettingsSection>
+            <section className="flex flex-col gap-2">
+              <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Eliminados
+              </h2>
+              <Card className="gap-0 bg-card p-1">
+                {deleted.map((record, index) =>
+                  renderDeleted(record, index === deleted.length - 1)
+                )}
+              </Card>
+            </section>
           )}
           {recycleBinErrorState === "inline" ? (
             <InfiniteListErrorFooter

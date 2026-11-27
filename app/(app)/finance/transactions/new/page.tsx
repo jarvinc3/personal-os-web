@@ -21,7 +21,7 @@ export default async function FinanceTransactionNewPage({
   }
 
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <TransactionCreateScreen />
     </Suspense>
   )

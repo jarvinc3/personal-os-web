@@ -12,7 +12,7 @@ export default async function FinanceSubscriptionDetailPage({
 }: FinanceSubscriptionDetailPageProps) {
   const { subscriptionId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <SubscriptionDetailScreen subscriptionId={subscriptionId} />
     </Suspense>
   )

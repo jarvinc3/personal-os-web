@@ -28,10 +28,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { cn } from "@/src/shared/lib/utils"
@@ -105,24 +110,34 @@ function ReversalLeg({ leg, roleLabel, display, isLast }: ReversalLegProps) {
   const side = movementSideMoney(leg)
   const sign = displayedMovementSign(leg)
   return (
-    <SummaryItem
-      title={roleLabel}
-      description={`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate, display.locale)} · ${reversalSourceLabel(leg.source)}`}
-      value={
-        <span
-          className={cn(isInactive && "text-muted-foreground line-through")}
-        >
-          <Money
-            value={side.amount}
-            display={{ ...display, currency: side.currency }}
-            sign={sign ?? undefined}
-            tone="auto"
-          />
+    <Item
+      variant="default"
+      render={<Link href={APP_ROUTES.app.financeTransaction(leg.id)} />}
+    >
+      <ItemContent>
+        <ItemTitle>{roleLabel}</ItemTitle>
+        <ItemDescription className="truncate text-xs">
+          {`${detail} · ${formatFinanceDateTimeLabel(leg.transactionDate, display.locale)} · ${reversalSourceLabel(leg.source)}`}
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
+        <span className="text-sm font-semibold tabular-nums">
+          {
+            <span
+              className={cn(isInactive && "text-muted-foreground line-through")}
+            >
+              <Money
+                value={side.amount}
+                display={{ ...display, currency: side.currency }}
+                sign={sign ?? undefined}
+                tone="auto"
+              />
+            </span>
+          }
         </span>
-      }
-      href={APP_ROUTES.app.financeTransaction(leg.id)}
-      isLast={isLast}
-    />
+        <LinkPendingOverlay />
+      </ItemActions>
+    </Item>
   )
 }
 
@@ -144,30 +159,46 @@ function ScheduledCommitments({
         subtitle="No alteran los totales hasta que se pagan"
         icon={CalendarClockIcon}
       >
-        {commitments.map((commitment, index) => (
-          <SummaryItem
-            key={commitment.id}
-            title={commitment.name}
-            wrapDescription
-            description={`${commitment.kind === "LOAN" ? "Cuota de préstamo" : "Suscripción"} · ${formatCalendarDate(commitment.date, display.locale)}${commitment.hasPaymentMethod ? "" : " · Sin método de pago"}`}
-            icon={commitment.kind === "LOAN" ? HandCoinsIcon : RepeatIcon}
-            value={
-              <span className="flex flex-col items-end gap-1">
-                <Money
-                  value={commitment.amount}
-                  display={{ ...display, currency: commitment.currency }}
+        {commitments.map((commitment) => {
+          const CommitmentIcon =
+            commitment.kind === "LOAN" ? HandCoinsIcon : RepeatIcon
+          return (
+            <Item
+              key={commitment.id}
+              render={
+                <Link
+                  href={
+                    commitment.kind === "LOAN"
+                      ? APP_ROUTES.app.financeLoan(commitment.referenceId)
+                      : APP_ROUTES.app.financeSubscription(
+                          commitment.referenceId
+                        )
+                  }
                 />
-                <Badge variant="warning">Programado</Badge>
-              </span>
-            }
-            href={
-              commitment.kind === "LOAN"
-                ? APP_ROUTES.app.financeLoan(commitment.referenceId)
-                : APP_ROUTES.app.financeSubscription(commitment.referenceId)
-            }
-            isLast={index === commitments.length - 1}
-          />
-        ))}
+              }
+            >
+              <ItemMedia variant="icon">
+                <CommitmentIcon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{commitment.name}</ItemTitle>
+                <ItemDescription className="line-clamp-none text-xs break-words whitespace-normal">
+                  {`${commitment.kind === "LOAN" ? "Cuota de préstamo" : "Suscripción"} · ${formatCalendarDate(commitment.date, display.locale)}${commitment.hasPaymentMethod ? "" : " · Sin método de pago"}`}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="flex flex-col items-end gap-1">
+                  <Money
+                    value={commitment.amount}
+                    display={{ ...display, currency: commitment.currency }}
+                  />
+                  <Badge variant="warning">Programado</Badge>
+                </span>
+                <LinkPendingOverlay />
+              </ItemActions>
+            </Item>
+          )
+        })}
       </SummarySection>
     </div>
   )

@@ -2,7 +2,6 @@
 
 import { AsyncRegion } from "@/src/modules/finance/shared/components/layout/async-region"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { BrandLogo } from "@/src/modules/finance/shared/components/brand-logo"
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
@@ -41,11 +40,13 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { cn } from "@/src/shared/lib/utils"
 import { CalendarDaysIcon, CalendarOffIcon, TagsIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 const WEEKDAY_INITIALS = ["L", "M", "X", "J", "V", "S", "D"] as const
 const MONTH_CALENDAR_RADIUS = 6
@@ -60,7 +61,6 @@ export function SubscriptionsCalendarScreen() {
 }
 
 function SubscriptionsCalendarBody() {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const [today] = useState(() => new Date())
   const [month, setMonth] = useState<MonthKey>(monthKeyFromDate(today))
@@ -73,10 +73,12 @@ function SubscriptionsCalendarBody() {
     locale: formatLocale,
   }
 
+  const handleBack = useBackTo(APP_ROUTES.app.financeSubscriptions)
+
   usePageHeader({
     variant: "secondary",
     title: "Calendario",
-    onBack: () => router.back(),
+    onBack: handleBack,
   })
 
   const parsedMonth = useMemo(() => parseMonthKey(month), [month])
@@ -165,7 +167,13 @@ function SubscriptionsCalendarBody() {
         ) : null}
         <AsyncRegion
           pending={chargesReady}
-          pendingFallback={<ListSkeleton rows={6} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 6 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={false}
           emptyFallback={null}
         >
@@ -280,7 +288,13 @@ function SubscriptionsCalendarBody() {
         ) : null}
         <AsyncRegion
           pending={breakdownQuery.isPending && !breakdownQuery.data}
-          pendingFallback={<ListSkeleton rows={3} />}
+          pendingFallback={
+            <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl" />
+              ))}
+            </div>
+          }
           empty={slices.length === 0}
           emptyFallback={
             <Empty className="py-6">

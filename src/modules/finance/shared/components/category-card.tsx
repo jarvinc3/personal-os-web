@@ -1,6 +1,13 @@
 "use client"
 
-import { SummaryItem } from "@/src/shared/components/data-display/summary"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { cn } from "@/src/shared/lib/utils"
 import { LockIcon, TagsIcon, UserIcon } from "lucide-react"
 import type { ReactNode } from "react"
@@ -108,43 +115,100 @@ export function CategoryCard({
       </span>
     )
   }
+  const interactive = Boolean(onPress) && !disabled
+  const mediaContent =
+    leading ??
+    (emoji ? (
+      <span className="text-lg leading-none" aria-hidden>
+        {emoji}
+      </span>
+    ) : null)
+  const mediaStyle = color
+    ? { backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)` }
+    : undefined
+  const rowStyle = color
+    ? { backgroundColor: `color-mix(in srgb, ${color} 32%, transparent)` }
+    : undefined
+  // Un trailing con su propio control no puede quedar dentro del botón de la fila.
+  const outsideTrailing = interactive ? trailing : undefined
+  const insideTrailing = outsideTrailing ? undefined : trailing
+
+  const row = (
+    <Item
+      variant={interactive ? "default" : "plain"}
+      className={cn(
+        "pr-4",
+        empty && "bg-background",
+        className,
+        !interactive && !isLast && "border-b border-border/60",
+        disabled && "opacity-50",
+        outsideTrailing && "min-w-0 flex-1"
+      )}
+      style={outsideTrailing ? undefined : rowStyle}
+      aria-disabled={disabled || undefined}
+      render={
+        interactive ? <button type="button" onClick={onPress} /> : undefined
+      }
+    >
+      {mediaContent ? (
+        <ItemMedia
+          className={cn(
+            "h-10 w-max min-w-10 rounded-full px-1",
+            empty && "bg-card"
+          )}
+          style={mediaStyle}
+        >
+          {mediaContent}
+        </ItemMedia>
+      ) : (
+        <ItemMedia
+          variant="icon"
+          className={cn(empty && "bg-card")}
+          style={mediaStyle}
+        >
+          <TagsIcon style={color ? { color } : undefined} />
+        </ItemMedia>
+      )}
+      <ItemContent>
+        <ItemTitle>{label}</ItemTitle>
+        {description ? (
+          <ItemDescription className="truncate text-xs">
+            {description}
+          </ItemDescription>
+        ) : null}
+      </ItemContent>
+      {variant !== "pick" || insideTrailing ? (
+        <ItemActions>
+          {variant === "pick" ? null : (
+            <span
+              role="img"
+              aria-label={isSystem ? "Sistema" : "Personal"}
+              className="flex text-muted-foreground"
+            >
+              {isSystem ? (
+                <LockIcon className="size-4" />
+              ) : (
+                <UserIcon className="size-4" />
+              )}
+            </span>
+          )}
+          {insideTrailing}
+        </ItemActions>
+      ) : null}
+    </Item>
+  )
+
+  if (!outsideTrailing) {
+    return row
+  }
+
   return (
-    <SummaryItem
-      title={name.trim() || "Nueva categoría"}
-      description={description}
-      accentColor={color || undefined}
-      tintRow={Boolean(color)}
-      leadingClassName={empty ? "bg-card" : undefined}
-      leading={
-        leading ??
-        (emoji ? (
-          <span className="text-lg leading-none" aria-hidden>
-            {emoji}
-          </span>
-        ) : undefined)
-      }
-      icon={emoji ? undefined : TagsIcon}
-      value={
-        variant === "pick" ? undefined : (
-          <span
-            role="img"
-            aria-label={isSystem ? "Sistema" : "Personal"}
-            className="flex text-muted-foreground"
-          >
-            {isSystem ? (
-              <LockIcon className="size-4" />
-            ) : (
-              <UserIcon className="size-4" />
-            )}
-          </span>
-        )
-      }
-      trailing={trailing}
-      isLast={isLast}
-      onPress={onPress}
-      disabled={disabled}
-      showChevron={false}
-      className={cn("pr-4", empty && "bg-background", className)}
-    />
+    <div
+      className="flex w-full items-stretch overflow-hidden rounded-2xl"
+      style={rowStyle}
+    >
+      {row}
+      <div className="flex shrink-0 items-center pr-2">{outsideTrailing}</div>
+    </div>
   )
 }

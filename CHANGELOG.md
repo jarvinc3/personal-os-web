@@ -10,7 +10,17 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/) y [Se
 
 - Next.js y `eslint-config-next` se actualizan a 16.4.6 para salir de la versión afectada por el aviso de seguridad publicado (#430).
 
+### Corregido
+
+- El botón de volver del encabezado ya no cae en una pantalla que el usuario no espera: en Ajustes vuelve a `/settings` y en galerías, listas y detalles regresa por historial con su padre como respaldo (`useBackTo`). Los controles de volver dejan de empujar una entrada nueva al historial.
+
 ### Cambiado
+
+- Las filas de `SummaryItem` componen `Item` con `ItemMedia`, `ItemContent`, `ItemTitle`, `ItemDescription` y `ItemActions`, y se retira `SummaryItem` con su ficha de galería. `SummarySection` se mantiene como chrome del bloque. `FinanceSuggestionRow` y los avisos de suscripciones componen `Alert`, que gana el tono lavado (`ALERT_SOFT_TONE_CLASS_NAME`), y se retira `NoticeCard`. Sin cambio de contrato (#419).
+
+- `SummaryGroup` compone `Marker` con la etiqueta centrada entre dos líneas. Las pantallas que esperan un registro eligen su carga: `Spinner` centrado en los detalles y las hojas, y un esqueleto con la forma de la vista en Patrimonio; `LoadingView` queda solo como fallback de Suspense de las rutas. `ErrorState` sigue componiendo `Empty` y `Button`. Sin cambio de contrato (#419).
+
+- Los ajustes, Notificaciones, Ayuda y las listas de Finanzas componen `Item` dentro de `Card` y `ItemGroup`, con las filas en arreglos de objetos: se retiran `SettingsRow` y `SettingsSection`. `Item` gana `variant="plain"` para las filas que van dentro de una card, y `MissingRecord` compone `Button` con `render` hacia `Link`. El esqueleto de lista se reparte con `Skeleton` en cada vista y se retira `ListSkeleton`. Sin cambio de contrato (#419).
 
 - Los ajustes y los formularios de Finanzas componen `Field` y `FieldDescription` directamente: se retiran `SwitchFieldRow`, `OptionRow`, `SelectField` y `FinanceHelpText`. `field.tsx` gana la variante de tarjeta y la pieza de icono de sus filas, y `SelectTrigger` gana el icono líder. Las filas de switch y las de elección resaltan con el fondo del acento de su módulo al 10 %, sin borde de color. El texto de ayuda de una fila ya no alterna su switch al pulsarlo (#419).
 

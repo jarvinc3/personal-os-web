@@ -1,24 +1,26 @@
 "use client"
 
-import { useCallback } from "react"
-import { useRouter } from "next/navigation"
-
 import { CARD_GALLERY_ENTITIES } from "@/src/modules/galleries/cards/entities"
 import { cardGalleryVariants } from "@/src/modules/galleries/cards/variants/registry"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
+import { ChevronRightIcon, LayoutGridIcon } from "lucide-react"
 import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
-import { LayoutGridIcon } from "lucide-react"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
+import { LinkPendingOverlay } from "@/src/shared/components/shell/navigation-pending"
+import Link from "next/link"
 
 /** Lista de entidades de la galería /settings/appearance/cards (#272). */
 export function CardGalleryScreen() {
-  const router = useRouter()
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.settingsAppearance)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.settingsAppearance)
 
   usePageHeader(
     {
@@ -38,27 +40,47 @@ export function CardGalleryScreen() {
         real.
       </p>
       <SummarySection title="Entidades" icon={LayoutGridIcon}>
-        {CARD_GALLERY_ENTITIES.map((entity, index) => {
+        {CARD_GALLERY_ENTITIES.map((entity) => {
           const Icon = entity.icon
           const count = cardGalleryVariants(entity.slug).length
           return (
-            <SummaryItem
+            <Item
               key={entity.slug}
-              title={entity.name}
-              description={entity.description}
-              icon={Icon}
-              href={APP_ROUTES.app.settingsAppearanceCardEntity(entity.slug)}
-              value={
-                <span className="flex flex-col items-end">
-                  <span className="font-semibold tabular-nums">{count}</span>
-                  <span className="text-[10px] font-normal text-muted-foreground">
-                    variantes
-                  </span>
-                </span>
+              variant="default"
+              render={
+                <Link
+                  href={APP_ROUTES.app.settingsAppearanceCardEntity(
+                    entity.slug
+                  )}
+                />
               }
-              showChevron
-              isLast={index === CARD_GALLERY_ENTITIES.length - 1}
-            />
+            >
+              <ItemMedia variant="icon">
+                <Icon />
+              </ItemMedia>
+              <ItemContent>
+                <ItemTitle>{entity.name}</ItemTitle>
+                <ItemDescription className="truncate text-xs">
+                  {entity.description}
+                </ItemDescription>
+              </ItemContent>
+              <ItemActions>
+                <span className="text-sm font-semibold tabular-nums">
+                  {
+                    <span className="flex flex-col items-end">
+                      <span className="font-semibold tabular-nums">
+                        {count}
+                      </span>
+                      <span className="text-[10px] font-normal text-muted-foreground">
+                        variantes
+                      </span>
+                    </span>
+                  }
+                </span>
+                <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+                <LinkPendingOverlay />
+              </ItemActions>
+            </Item>
           )
         })}
       </SummarySection>

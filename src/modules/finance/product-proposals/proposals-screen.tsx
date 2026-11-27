@@ -33,7 +33,6 @@ import type {
 } from "@/src/modules/finance/shared/types/entities"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
 import { InfiniteListSentinel } from "@/src/shared/components/feedback/infinite-list-sentinel"
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,10 +44,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/src/shared/components/ui/alert-dialog"
-import {
-  SummaryItem,
-  SummarySection,
-} from "@/src/shared/components/data-display/summary"
+import { SummarySection } from "@/src/shared/components/data-display/summary"
 import {
   Alert,
   AlertDescription,
@@ -63,11 +59,22 @@ import {
   EmptyTitle,
 } from "@/src/shared/components/ui/empty"
 import { Spinner } from "@/src/shared/components/ui/spinner"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
 import {
+  ChevronRightIcon,
   InfoIcon,
   ListFilterIcon,
   MailSearchIcon,
@@ -76,7 +83,7 @@ import {
   XIcon,
 } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 /** Propuestas que se montan de entrada; el resto entra al bajar. */
 const PROPOSALS_PAGE_SIZE = 12
@@ -145,9 +152,7 @@ function ProductProposalsScreenBody() {
     locale: formatLocale,
   }
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {
@@ -238,15 +243,29 @@ function ProductProposalsScreenBody() {
         ) : null}
       </SummarySection>
 
-      <SummaryItem
-        title="Estado"
-        description="Filtra las propuestas"
-        value={PROPOSAL_STATUS_LABEL[status]}
-        icon={ListFilterIcon}
-        onPress={() => filtersSheet.setOpen(true)}
-        showChevron
-        className="px-3"
-      />
+      <Item
+        variant="default"
+        className={"px-3"}
+        render={
+          <button type="button" onClick={() => filtersSheet.setOpen(true)} />
+        }
+      >
+        <ItemMedia variant="icon">
+          <ListFilterIcon />
+        </ItemMedia>
+        <ItemContent>
+          <ItemTitle>{"Estado"}</ItemTitle>
+          <ItemDescription className="truncate text-xs">
+            {"Filtra las propuestas"}
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions>
+          <span className="text-sm font-semibold tabular-nums">
+            {PROPOSAL_STATUS_LABEL[status]}
+          </span>
+          <ChevronRightIcon className="size-4 shrink-0 text-muted-foreground" />
+        </ItemActions>
+      </Item>
 
       {proposalsQuery.isError && !unavailable ? (
         <ErrorState
@@ -258,7 +277,13 @@ function ProductProposalsScreenBody() {
 
       <AsyncRegion
         pending={proposalsQuery.isPending && !proposalsQuery.data}
-        pendingFallback={<ListSkeleton rows={3} />}
+        pendingFallback={
+          <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+            {Array.from({ length: 3 }, (_, index) => (
+              <Skeleton key={index} className="h-12 w-full rounded-xl" />
+            ))}
+          </div>
+        }
         empty={proposals.length === 0}
         emptyFallback={
           <Empty className="py-8">

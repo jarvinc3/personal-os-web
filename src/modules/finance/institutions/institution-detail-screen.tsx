@@ -48,7 +48,6 @@ import {
 } from "@/src/modules/finance/shared/lib/institution-stack"
 import { recalculationPayload } from "@/src/modules/finance/shared/lib/integrity"
 import { monthKeyFromDate } from "@/src/modules/finance/shared/lib/month-window"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { Button } from "@/src/shared/components/ui/button"
 import {
   AlertDialog,
@@ -63,6 +62,7 @@ import {
 } from "@/src/shared/components/ui/alert-dialog"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { useSheetParam } from "@/src/shared/hooks/use-sheet-params"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -180,9 +180,7 @@ function InstitutionDetailScreenBody({
   const accent = institution?.color ?? FALLBACK_COLOR
   const isCash = institution ? isCashInstitution(institution) : false
 
-  const handleBack = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   const onArchiveInstitution = useCallback(async () => {
     if (!institution) {
@@ -302,7 +300,11 @@ function InstitutionDetailScreenBody({
   )
 
   if (isLoading && !institution) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (!institution) {

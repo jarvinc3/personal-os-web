@@ -8,16 +8,24 @@ import {
 } from "@/src/modules/help/constants/guides"
 import { useHelpBack } from "@/src/modules/help/hooks/use-help-back"
 import { helpGuideHref } from "@/src/modules/help/lib/help-links"
+import { Card } from "@/src/shared/components/ui/card"
+import { cn } from "@/src/shared/lib/utils"
 import {
-  SettingsRow,
-  SettingsSection,
-} from "@/src/shared/components/settings/settings-section"
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/src/shared/components/ui/item"
 import { usePendingNavigation } from "@/src/shared/components/shell/navigation-pending"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import {
   BellIcon,
   BookOpenIcon,
+  ChevronRightIcon,
   CreditCardIcon,
   FileTextIcon,
   HandCoinsIcon,
@@ -67,24 +75,62 @@ export function GuidesScreen() {
       {HELP_GUIDE_GROUPS.map((group) => {
         const guides = HELP_GUIDES.filter((guide) => guide.group === group.id)
         return (
-          <SettingsSection
-            key={group.id}
-            title={group.title}
-            description={group.description}
-          >
-            {guides.map((guide, index) => (
-              <SettingsRow
-                key={guide.slug}
-                label={guide.title}
-                description={guide.summary}
-                icon={GUIDE_ICONS[guide.slug] ?? BookOpenIcon}
-                accentColor={HELP_ACCENT}
-                disabled={isPending}
-                onPress={() => navigate(helpGuideHref(guide.slug))}
-                isLast={index === guides.length - 1}
-              />
-            ))}
-          </SettingsSection>
+          <section key={group.id} className="flex flex-col gap-2">
+            <div className="flex min-w-0 flex-col gap-0.5 px-1">
+              <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                {group.title}
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {group.description}
+              </p>
+            </div>
+            <Card className="gap-0 bg-card p-1">
+              <ItemGroup className="gap-0 divide-y divide-border/60">
+                {guides.map((guide) => {
+                  const GuideIcon = GUIDE_ICONS[guide.slug] ?? BookOpenIcon
+                  return (
+                    <Item
+                      key={guide.slug}
+                      variant="plain"
+                      className={cn(
+                        "min-h-[52px] px-3 py-3",
+                        isPending && "opacity-50"
+                      )}
+                      aria-disabled={isPending || undefined}
+                      render={
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => navigate(helpGuideHref(guide.slug))}
+                        />
+                      }
+                    >
+                      <ItemMedia
+                        className="size-9 rounded-md"
+                        style={{ backgroundColor: `${HELP_ACCENT}20` }}
+                      >
+                        <GuideIcon
+                          className="size-4.5"
+                          style={{ color: HELP_ACCENT }}
+                        />
+                      </ItemMedia>
+                      <ItemContent className="gap-0.5">
+                        <ItemTitle className="text-sm font-normal md:text-base">
+                          {guide.title}
+                        </ItemTitle>
+                        <ItemDescription className="text-xs">
+                          {guide.summary}
+                        </ItemDescription>
+                      </ItemContent>
+                      <ItemActions>
+                        <ChevronRightIcon className="size-4.5 text-muted-foreground" />
+                      </ItemActions>
+                    </Item>
+                  )
+                })}
+              </ItemGroup>
+            </Card>
+          </section>
         )
       })}
     </HelpPage>

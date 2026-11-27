@@ -34,11 +34,11 @@ import {
 import type { FinanceInstitution } from "@/src/modules/finance/shared/types/entities"
 import { SummarySection } from "@/src/shared/components/data-display/summary"
 import { ErrorState } from "@/src/shared/components/feedback/error-state"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { MissingRecord } from "@/src/modules/finance/shared/components/layout/missing-record"
 import { Button } from "@/src/shared/components/ui/button"
 import { Spinner } from "@/src/shared/components/ui/spinner"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
 import { usePicker } from "@/src/shared/hooks/use-picker"
 import { appToast } from "@/src/shared/lib/app-toast"
@@ -51,8 +51,7 @@ import {
   MailSearchIcon,
   WalletIcon,
 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useCallback, useState } from "react"
+import { useState } from "react"
 
 type ProposalApprovalScreenProps = {
   proposalId: string
@@ -71,7 +70,6 @@ export function ProposalApprovalScreen({
 function ProposalApprovalScreenBody({
   proposalId,
 }: ProposalApprovalScreenProps) {
-  const router = useRouter()
   const { isEnabled, config, formatLocale } = useFinanceEnabled()
   const proposalsQuery = useEmailProductProposals(isEnabled, "PENDING")
   const institutionsQuery = useInstitutions(isEnabled)
@@ -117,9 +115,7 @@ function ProposalApprovalScreenBody({
     locale: formatLocale,
   }
 
-  const backToList = useCallback(() => {
-    router.push(APP_ROUTES.app.financeProductProposals)
-  }, [router])
+  const backToList = useBackTo(APP_ROUTES.app.financeProductProposals)
 
   usePageHeader(
     {
@@ -167,7 +163,11 @@ function ProposalApprovalScreenBody({
     (proposalsQuery.isPending && !proposalsQuery.data) ||
     (institutionsQuery.isPending && !institutionsQuery.data)
   ) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (proposalsQuery.error) {

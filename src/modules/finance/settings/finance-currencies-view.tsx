@@ -9,8 +9,8 @@ import { currencyDisplayName } from "@/src/modules/finance/shared/lib/currency-d
 import { normalizeTrackedCurrencies } from "@/src/modules/finance/shared/lib/finance-currency"
 import { formatFinanceMoney } from "@/src/modules/finance/shared/lib/money"
 import { useUserModuleConfig } from "@/src/modules/settings/hooks/use-user-module-config"
-import { SettingsSection } from "@/src/shared/components/settings/settings-section"
 import { Button } from "@/src/shared/components/ui/button"
+import { Card } from "@/src/shared/components/ui/card"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -130,32 +130,39 @@ export function FinanceCurrenciesView() {
 
   return (
     <>
-      <SettingsSection title="Moneda principal">
-        <div className="flex items-center gap-3 border-b border-border/60 p-3">
-          <CurrencyFlag code={baseCurrency} />
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="text-sm font-medium">{baseCurrency}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {currencyDisplayName(baseCurrency)}
-            </span>
+      <section className="flex flex-col gap-2">
+        <h2 className="px-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          Moneda principal
+        </h2>
+        <Card className="gap-0 bg-card p-1">
+          <div className="flex items-center gap-3 border-b border-border/60 p-3">
+            <CurrencyFlag code={baseCurrency} />
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="text-sm font-medium">{baseCurrency}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {currencyDisplayName(baseCurrency)}
+              </span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Cambiar moneda principal"
+              disabled={isSaving}
+              onClick={() => changeBaseCurrencySheet.setOpen(true)}
+            >
+              <PencilIcon className="size-4 shrink-0" />
+              Cambiar
+            </Button>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            aria-label="Cambiar moneda principal"
-            disabled={isSaving}
-            onClick={() => changeBaseCurrencySheet.setOpen(true)}
-          >
-            <PencilIcon className="size-4 shrink-0" />
-            Cambiar
-          </Button>
-        </div>
-      </SettingsSection>
+        </Card>
+      </section>
 
-      <SettingsSection
-        title="Otros"
-        headerTrailing={
+      <section className="flex flex-col gap-2">
+        <div className="flex flex-row items-center justify-between gap-2 px-1">
+          <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Otros
+          </h2>
           <Button
             type="button"
             variant="ghost"
@@ -167,61 +174,62 @@ export function FinanceCurrenciesView() {
             <PlusIcon className="size-4" />
             Agregar moneda
           </Button>
-        }
-      >
-        {trackedCurrencies.length === 0 ? (
-          <p className="p-3 text-sm text-muted-foreground">
-            No hay otras monedas.
-          </p>
-        ) : (
-          trackedCurrencies.map((code, index) => {
-            const rate = rateByCurrency.get(code)
-            return (
-              <div
-                key={code}
-                className={
-                  index === trackedCurrencies.length - 1
-                    ? "flex items-center gap-3 p-3"
-                    : "flex items-center gap-3 border-b border-border/60 p-3"
-                }
-              >
-                <CurrencyFlag code={code} />
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-sm">{`${code} - ${currencyDisplayName(code)}`}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {rate == null
-                      ? "—"
-                      : formatFinanceMoney(Number(rate), {
-                          currency: baseCurrency,
-                          showCents: true,
-                          compactNumbers: false,
-                          locale: formatLocale,
-                        })}
-                  </span>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Quitar ${code}`}
-                  disabled={isSaving}
-                  onClick={() => {
-                    setRemovalLabel(code)
-                    setPendingRemoveCurrency(code)
-                  }}
+        </div>
+        <Card className="gap-0 bg-card p-1">
+          {trackedCurrencies.length === 0 ? (
+            <p className="p-3 text-sm text-muted-foreground">
+              No hay otras monedas.
+            </p>
+          ) : (
+            trackedCurrencies.map((code, index) => {
+              const rate = rateByCurrency.get(code)
+              return (
+                <div
+                  key={code}
+                  className={
+                    index === trackedCurrencies.length - 1
+                      ? "flex items-center gap-3 p-3"
+                      : "flex items-center gap-3 border-b border-border/60 p-3"
+                  }
                 >
-                  <Trash2Icon className="size-4 text-destructive" />
-                </Button>
-              </div>
-            )
-          })
-        )}
-        {ratesQuery.isFetching && trackedCurrencies.length > 0 ? (
-          <div className="flex justify-center py-2">
-            <Spinner className="size-4" />
-          </div>
-        ) : null}
-      </SettingsSection>
+                  <CurrencyFlag code={code} />
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="text-sm">{`${code} - ${currencyDisplayName(code)}`}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {rate == null
+                        ? "—"
+                        : formatFinanceMoney(Number(rate), {
+                            currency: baseCurrency,
+                            showCents: true,
+                            compactNumbers: false,
+                            locale: formatLocale,
+                          })}
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Quitar ${code}`}
+                    disabled={isSaving}
+                    onClick={() => {
+                      setRemovalLabel(code)
+                      setPendingRemoveCurrency(code)
+                    }}
+                  >
+                    <Trash2Icon className="size-4 text-destructive" />
+                  </Button>
+                </div>
+              )
+            })
+          )}
+          {ratesQuery.isFetching && trackedCurrencies.length > 0 ? (
+            <div className="flex justify-center py-2">
+              <Spinner className="size-4" />
+            </div>
+          ) : null}
+        </Card>
+      </section>
 
       <CurrencyPickerSheet
         open={changeBaseCurrencySheet.open}

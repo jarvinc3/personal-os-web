@@ -2,7 +2,6 @@
 
 import { Building2Icon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useCallback } from "react"
 
 import { FinanceGate } from "@/src/modules/finance/finance-gate"
 import { InstitutionFormScreen } from "@/src/modules/finance/institutions/components/institution-form-screen"
@@ -12,9 +11,10 @@ import { FINANCE_SHEET_KEYS } from "@/src/modules/finance/shared/constants/sheet
 import { useFinanceEnabled } from "@/src/modules/finance/shared/hooks/use-finance-enabled"
 import { useInstitutions } from "@/src/modules/finance/shared/hooks/use-institutions"
 import { financeLoadErrorMessage } from "@/src/modules/finance/shared/lib/finance-error"
-import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 import { APP_ROUTES } from "@/src/shared/constants/app-routes"
+import { useBackTo } from "@/src/shared/hooks/use-back-to"
 import { usePageHeader } from "@/src/shared/hooks/use-page-header"
+import { Spinner } from "@/src/shared/components/ui/spinner"
 
 export function InstitutionCreateScreen() {
   return (
@@ -26,14 +26,7 @@ export function InstitutionCreateScreen() {
 
 function InstitutionCreateScreenBody() {
   const router = useRouter()
-
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeProducts)
-  }, [router])
+  const handleBack = useBackTo(APP_ROUTES.app.financeProducts)
 
   usePageHeader(
     {
@@ -85,20 +78,13 @@ export function InstitutionEditScreen({
 function InstitutionEditScreenBody({
   institutionId,
 }: InstitutionEditScreenProps) {
-  const router = useRouter()
   const { isEnabled } = useFinanceEnabled()
   const institutionsQuery = useInstitutions(isEnabled)
   const institution =
     (institutionsQuery.data ?? []).find((item) => item.id === institutionId) ??
     null
 
-  const handleBack = useCallback(() => {
-    if (window.history.length > 1) {
-      router.back()
-      return
-    }
-    router.push(APP_ROUTES.app.financeInstitution(institutionId))
-  }, [router, institutionId])
+  const handleBack = useBackTo(APP_ROUTES.app.financeInstitution(institutionId))
 
   usePageHeader(
     {
@@ -110,7 +96,11 @@ function InstitutionEditScreenBody({
   )
 
   if (institutionsQuery.isPending && !institution) {
-    return <LoadingView />
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-6" />
+      </div>
+    )
   }
 
   if (institutionsQuery.error) {

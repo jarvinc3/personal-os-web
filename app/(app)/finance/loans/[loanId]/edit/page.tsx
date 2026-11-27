@@ -12,7 +12,7 @@ export default async function FinanceLoanEditPage({
 }: FinanceLoanEditPageProps) {
   const { loanId } = await params
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <LoanEditScreen loanId={loanId} />
     </Suspense>
   )

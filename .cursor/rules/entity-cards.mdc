@@ -18,4 +18,4 @@ Una entidad de Finanzas se pinta con su card. No se dibuja una fila propia para 
 
 Tabla y usos: [docs/architecture/ui-components.md](../../docs/architecture/ui-components.md#cards-por-entidad). Referencia viva: `/settings/appearance/cards`.
 
-Incorrecto: un `SummaryItem` nuevo con el logo, el nombre y el monto de una entidad que ya tiene card.
+Incorrecto: una fila `Item` nueva con el logo, el nombre y el monto de una entidad que ya tiene card.

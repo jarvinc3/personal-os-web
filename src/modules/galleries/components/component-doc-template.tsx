@@ -67,9 +67,7 @@ function PreviewFrame({
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <div className="flex min-w-0 flex-col gap-3 rounded-xl border border-border/70 p-3">
-        {children}
-      </div>
+      <div className="flex min-w-0 flex-col gap-3">{children}</div>
     </div>
   )
 }

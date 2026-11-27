@@ -5,7 +5,7 @@ import { LoadingView } from "@/src/shared/components/feedback/loading-view"
 
 export default function FinanceInstitutionNewPage() {
   return (
-    <Suspense fallback={<LoadingView variant="screen" />}>
+    <Suspense fallback={<LoadingView />}>
       <InstitutionCreateScreen />
     </Suspense>
   )

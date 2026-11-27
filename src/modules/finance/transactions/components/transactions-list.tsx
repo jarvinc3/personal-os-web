@@ -1,6 +1,5 @@
 "use client"
 
-import { ListSkeleton } from "@/src/shared/components/feedback/list-skeleton"
 import { QuickEntryBar } from "@/src/modules/finance/quick-entry"
 import { MonthFlowSummary } from "@/src/modules/finance/shared/components/month-flow-summary"
 import { FinanceMonthPicker } from "@/src/modules/finance/transactions/components/month-picker"
@@ -67,6 +66,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { Skeleton } from "@/src/shared/components/ui/skeleton"
 
 type FinanceTransactionsListProps = {
   enabled: boolean
@@ -460,7 +460,11 @@ export function FinanceTransactionsList({
       ) : null}
 
       {timelineQuery.isPending && timelineQuery.items.length === 0 ? (
-        <ListSkeleton rows={4} />
+        <div className="flex flex-col gap-2 px-3 py-2" aria-hidden>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-12 w-full rounded-xl" />
+          ))}
+        </div>
       ) : null}
 
       <div ref={timelineRef} className="flex flex-col">
